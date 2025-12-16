@@ -81,18 +81,40 @@ function setupAdminMode() {
     document.getElementById('submit-groups-area').style.display = 'none';
     document.getElementById('btn-save-draft').style.display = 'none';
     
-    // Cargar config actual en inputs
+    // --- CAMBIOS SOLICITADOS PARA ADMIN ---
+    const tabs = document.querySelectorAll('.tab-btn');
+    
+    // 1. Cambiar nombre Tab 1
+    tabs[0].innerText = "INGRESO GRUPOS (OFICIAL)";
+    
+    // 2. Ocultar Tab "Resultados Oficiales" (Tab 2)
+    tabs[1].style.display = 'none'; 
+    
+    // 3. Cambiar nombre Tab 3
+    tabs[2].innerText = "INGRESO FASES FINALES (OFICIAL)";
+    
+    // 4. Ocultar botón Recargar
+    document.getElementById('btn-refresh').style.display = 'none';
+    
+    // Forzar ir a la pestaña 1 si estaba en la 2
+    if(document.getElementById('tab-real').classList.contains('active')) {
+        switchTab('groups');
+    }
+
+    // Cargar config inputs...
     document.getElementById('rule-exact').value = rules.exact;
     document.getElementById('rule-diff').value = rules.diff;
     document.getElementById('rule-winner').value = rules.winner;
     document.getElementById('check-groups').checked = phaseControl.groups;
-    document.getElementById('check-r32').checked = phaseControl.r32;
+    document.getElementById('check-r32').checked = phaseControl.r32; 
+    // ... asegúrese de tener todos los checks aquí ...
     document.getElementById('check-r16').checked = phaseControl.r16;
     document.getElementById('check-qf').checked = phaseControl.qf;
     document.getElementById('check-sf').checked = phaseControl.sf;
     document.getElementById('check-f').checked = phaseControl.f;
 
-    renderGroups(); renderBracket();
+    renderGroups(); 
+    renderBracket();
 }
 
 function setupUserMode(username) {
@@ -103,6 +125,13 @@ function setupUserMode(username) {
     document.getElementById('btn-save-admin').style.display = 'none';
     document.getElementById('user-status-bar').style.display = 'grid'; 
     document.getElementById('btn-save-draft').style.display = 'flex';
+    
+    // --- RESTAURAR VISTA PARA FAN ---
+    const tabs = document.querySelectorAll('.tab-btn');
+    tabs[0].innerText = "Mis Pronósticos"; // Restaurar nombre
+    tabs[1].style.display = 'inline-block'; // Mostrar pestaña oficial
+    tabs[2].innerText = "Fase Final";      // Restaurar nombre
+    document.getElementById('btn-refresh').style.display = 'flex'; // Mostrar recargar
     
     const key = `m26_data_${username}`;
     let saved = JSON.parse(localStorage.getItem(key));
@@ -157,6 +186,10 @@ function switchTab(tab) {
     document.getElementById('tab-'+tab).classList.add('active');
     event.target.classList.add('active');
     if(tab === 'bracket') renderBracket();
+    if(tab === 'real') {
+        renderRealResults();
+        renderRealBracket(); // <--- AGREGAR ESTA LÍNEA
+    }
 }
 
 /* =========================================================
@@ -327,6 +360,12 @@ function refreshData() {
     updateStatusUI();
     renderGroups();
     renderBracket();
+
+    // Si estamos en modo fan, refrescamos los oficiales
+    if(role === 'fan') {
+        renderRealResults();
+        renderRealBracket(); // <--- AGREGAR ESTA LÍNEA
+    }
     alert("¡Datos actualizados!");
 }
 
@@ -469,4 +508,125 @@ function unlockPlayer(name) {
             openUserManagement();
         }
     }
+}
+
+/* =========================================================
+   NUEVA FUNCION: RENDERIZADO DE RESULTADOS REALES
+   ========================================================= */
+function renderRealResults() {
+    const container = document.getElementById('real-container');
+    container.innerHTML = '';
+    
+    // Recorremos los grupos igual que antes
+    for(let g in GROUPS_CONFIG) {
+        const data = GROUPS_CONFIG[g];
+        let matchesHTML = '';
+        
+        // Tabla de posiciones REAL (solo con datos oficiales)
+        let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0 }));
+        
+        data.matches.forEach((m, idx) => {
+            let id = `${g}-${idx}`;
+            
+            // AQUI ESTA EL CAMBIO: Solo leemos officialRes
+            let oH = officialRes[`h-${id}`]; 
+            let oA = officialRes[`a-${id}`];
+            
+            // Si el admin no ha puesto nada, mostramos vacio
+            let valH = (oH !== undefined) ? oH : '';
+            let valA = (oA !== undefined) ? oA : '';
+
+            // Solo calculamos tabla si hay dato oficial
+            if(valH !== '' && valA !== '') {
+                updateStats(teamStats, m.t1, m.t2, parseInt(valH), parseInt(valA));
+            }
+            
+            // Inputs DESHABILITADOS (disabled) para que nadie edite aquí
+            matchesHTML += `
+            <div class="match-row">
+                <div class="team-name team-home">${data.teams[m.t1]}</div>
+                <div class="center-inputs">
+                    <div class="match-info">${m.info}</div>
+                    <div class="score-container">
+                        <input type="number" value="${valH}" disabled style="background:#222; color:#fff; border:1px solid #444;">
+                        <span style="color:#666">-</span>
+                        <input type="number" value="${valA}" disabled style="background:#222; color:#fff; border:1px solid #444;">
+                    </div>
+                </div>
+                <div class="team-name team-away">${data.teams[m.t2]}</div>
+            </div>`;
+        });
+
+        // Ordenar tabla real
+        teamStats.sort((a,b) => b.pts - a.pts || b.dif - a.dif);
+        let tableRows = teamStats.map((t,i) => `<tr class="${i<2?'qual-zone':''}">
+            <td class="pos-num">${i+1}</td><td>${t.name}</td><td>${t.pts}</td><td>${t.dif}</td>
+        </tr>`).join('');
+        
+        // Agregar tarjeta al grid (Note el título con [OFICIAL])
+        container.innerHTML += `
+        <div class="card" style="border-color:var(--neon-green);">
+            <div class="group-header" style="color:var(--neon-green);">GRUPO ${g} [OFICIAL]</div>
+            <div class="card-body">
+                ${matchesHTML}
+                <table><tr><th>#</th><th>EQ</th><th>PTS</th><th>DIF</th></tr>${tableRows}</table>
+            </div>
+        </div>`;
+    }
+}
+
+/* =========================================================
+   NUEVAS FUNCIONES: RENDERIZADO DE BRACKET REAL (OFICIAL)
+   (Pegar esto al final del archivo js/app.js)
+   ========================================================= */
+
+function renderRealBracket() {
+    const container = document.getElementById('real-bracket-container');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    // Calculamos los equipos simulados basados EXCLUSIVAMENTE en resultados oficiales
+    let officialSim = calculateSimulatedTeams(officialRes);
+    
+    let html = '';
+    // Aquí es donde la "Jefa" llama a la "Obrera" (renderRealRoundColumn)
+    html += renderRealRoundColumn('16avos', R32_MATCHUPS, officialSim);
+    html += renderRealRoundColumn('Octavos', R16_MATCHUPS, officialSim);
+    html += renderRealRoundColumn('Cuartos', QF_MATCHUPS, officialSim);
+    html += renderRealRoundColumn('Semis', SF_MATCHUPS, officialSim);
+    html += renderRealRoundColumn('Final', F_MATCHUPS, officialSim);
+    
+    container.innerHTML = html;
+}
+
+function renderRealRoundColumn(title, matchups, simTeams) {
+    let html = `<div class="round-column"><div class="round-header" style="border-color:var(--neon-green); color:var(--neon-green);"><span class="round-title">${title}</span></div>`;
+    
+    matchups.forEach(m => {
+        // Resolvemos nombres usando SOLO datos oficiales
+        let resolveName = (slot, code) => {
+            if (officialTeams[`${m.id}-${slot}`]) return officialTeams[`${m.id}-${slot}`];
+            if (simTeams[code]) return simTeams[code];
+            return code;
+        };
+
+        let nameH = resolveName('h', m.h);
+        let nameA = resolveName('a', m.a);
+        
+        let scH = officialRes[`k-${m.id}-h`] || ''; 
+        let scA = officialRes[`k-${m.id}-a`] || '';
+
+        html += `
+        <div class="bracket-match" style="border-color:var(--neon-green);">
+            <div class="bracket-row">
+                <span class="b-team" title="${nameH}">${nameH}</span>
+                <input type="number" class="bracket-input" value="${scH}" disabled style="background:#222; color:#fff; border:1px solid #444;">
+            </div>
+            <div class="bracket-row">
+                <span class="b-team" title="${nameA}">${nameA}</span>
+                <input type="number" class="bracket-input" value="${scA}" disabled style="background:#222; color:#fff; border:1px solid #444;">
+            </div>
+        </div>`;
+    });
+    return html + `</div>`;
 }
