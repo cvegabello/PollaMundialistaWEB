@@ -74,40 +74,43 @@ function handleLogin() {
 function setupAdminMode() {
     role = 'admin';
     document.getElementById('admin-status-bar').style.display = 'block';
-    document.getElementById('admin-panel').style.display = 'block';
+    // Nota: El panel admin ya no se muestra/oculta aquí, vive en su propia pestaña
     document.getElementById('admin-bracket-tools').style.display = 'block';
     document.getElementById('btn-save-admin').style.display = 'flex';
     document.getElementById('user-status-bar').style.display = 'none';
     document.getElementById('submit-groups-area').style.display = 'none';
     document.getElementById('btn-save-draft').style.display = 'none';
     
-    // --- CAMBIOS SOLICITADOS PARA ADMIN ---
-    const tabs = document.querySelectorAll('.tab-btn');
+    // --- GESTIÓN DE BOTONES ADMIN ---
+    // 1. Ocultar el grupo "Mis Pronósticos" (El Admin no juega)
+    document.getElementById('nav-group-fan').style.display = 'none';
+
+    // 2. Reutilizar botones y mostrar Configuración
+    const btnReal = document.getElementById('btn-tab-real');
+    const btnSettings = document.getElementById('btn-tab-settings');
+    const navStandalone = document.querySelector('.nav-standalone');
+
+    // Limpiamos y creamos botones estilo Admin
+    // Truco: Vamos a inyectar HTML nuevo en la zona de botones para el Admin
+    // para que quede: [Ingreso Grupos] [Ingreso Finales] [Configuración]
     
-    // 1. Cambiar nombre Tab 1
-    tabs[0].innerText = "INGRESO GRUPOS (OFICIAL)";
+    const adminNavHTML = `
+        <button id="btn-tab-groups" class="tab-btn active" onclick="switchTab('groups')">INGRESO GRUPOS (OFICIAL)</button>
+        <button id="btn-tab-bracket" class="tab-btn" onclick="switchTab('bracket')">INGRESO FINALES (OFICIAL)</button>
+        <button id="btn-tab-settings" class="tab-btn" onclick="switchTab('settings')">CONFIGURACIÓN</button>
+    `;
     
-    // 2. Ocultar Tab "Resultados Oficiales" (Tab 2)
-    tabs[1].style.display = 'none'; 
-    
-    // 3. Cambiar nombre Tab 3
-    tabs[2].innerText = "INGRESO FASES FINALES (OFICIAL)";
-    
-    // 4. Ocultar botón Recargar
+    // Reemplazamos toda la zona de navegacion por la del admin
+    document.querySelector('.tabs-area').innerHTML = `<div class="nav-standalone">${adminNavHTML}</div>`;
+
     document.getElementById('btn-refresh').style.display = 'none';
     
-    // Forzar ir a la pestaña 1 si estaba en la 2
-    if(document.getElementById('tab-real').classList.contains('active')) {
-        switchTab('groups');
-    }
-
     // Cargar config inputs...
     document.getElementById('rule-exact').value = rules.exact;
     document.getElementById('rule-diff').value = rules.diff;
     document.getElementById('rule-winner').value = rules.winner;
     document.getElementById('check-groups').checked = phaseControl.groups;
-    document.getElementById('check-r32').checked = phaseControl.r32; 
-    // ... asegúrese de tener todos los checks aquí ...
+    document.getElementById('check-r32').checked = phaseControl.r32;
     document.getElementById('check-r16').checked = phaseControl.r16;
     document.getElementById('check-qf').checked = phaseControl.qf;
     document.getElementById('check-sf').checked = phaseControl.sf;
@@ -120,18 +123,24 @@ function setupAdminMode() {
 function setupUserMode(username) {
     role = 'fan';
     document.getElementById('admin-status-bar').style.display = 'none';
-    document.getElementById('admin-panel').style.display = 'none';
     document.getElementById('admin-bracket-tools').style.display = 'none';
     document.getElementById('btn-save-admin').style.display = 'none';
     document.getElementById('user-status-bar').style.display = 'grid'; 
     document.getElementById('btn-save-draft').style.display = 'flex';
+    document.getElementById('btn-refresh').style.display = 'flex';
+
+    // --- RESTAURAR VISTA FAN (Por si venimos de un logout de admin) ---
+    // Simplemente recargamos el HTML original de los tabs si es necesario, 
+    // pero como la página carga limpia, basta con asegurar visibilidad.
     
-    // --- RESTAURAR VISTA PARA FAN ---
-    const tabs = document.querySelectorAll('.tab-btn');
-    tabs[0].innerText = "Mis Pronósticos"; // Restaurar nombre
-    tabs[1].style.display = 'inline-block'; // Mostrar pestaña oficial
-    tabs[2].innerText = "Fase Final";      // Restaurar nombre
-    document.getElementById('btn-refresh').style.display = 'flex'; // Mostrar recargar
+    // Si recargamos la página, el HTML está intacto.
+    // Solo ocultamos el botón de settings
+    document.getElementById('nav-group-fan').style.display = 'block';
+    document.getElementById('btn-tab-settings').classList.add('hidden');
+    
+    // Asegurar nombres originales
+    document.getElementById('btn-tab-groups').innerText = "Fase de Grupos";
+    document.getElementById('btn-tab-bracket').innerText = "Fase Final";
     
     const key = `m26_data_${username}`;
     let saved = JSON.parse(localStorage.getItem(key));
@@ -183,12 +192,19 @@ function updateStatusUI() {
 function switchTab(tab) {
     document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
     document.getElementById('tab-'+tab).classList.add('active');
-    event.target.classList.add('active');
+    
+    // Identificar qué botón se presionó para activarlo visualmente
+    let btnId = 'btn-tab-' + tab;
+    if(document.getElementById(btnId)) {
+        document.getElementById(btnId).classList.add('active');
+    }
+    
     if(tab === 'bracket') renderBracket();
     if(tab === 'real') {
         renderRealResults();
-        renderRealBracket(); // <--- AGREGAR ESTA LÍNEA
+        renderRealBracket();
     }
 }
 

@@ -48,39 +48,58 @@
         </div>
     </header>
 
-    <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('groups')">Mis Pronósticos</button>
-        <button class="tab-btn" onclick="switchTab('real')">Resultados Oficiales</button> 
-        <button class="tab-btn" onclick="switchTab('bracket')">Fase Final</button>
+    <div class="tabs-area">
+        
+        <div id="nav-group-fan" class="nav-group">
+            <span class="nav-label">MIS PRONÓSTICOS</span>
+            <div class="nav-row">
+                <button id="btn-tab-groups" class="tab-btn active" onclick="switchTab('groups')">Fase de Grupos</button>
+                <button id="btn-tab-bracket" class="tab-btn" onclick="switchTab('bracket')">Fase Final</button>
+            </div>
+        </div>
+
+        <div class="nav-standalone">
+            <button id="btn-tab-real" class="tab-btn" onclick="switchTab('real')">Resultados Oficiales</button>
+            <button id="btn-tab-settings" class="tab-btn hidden" onclick="switchTab('settings')">Configuración</button>
+        </div>
+
     </div>
 
     <div id="tab-groups" class="section active">
-        <div id="admin-panel" class="admin-panel">
-            <h4>⚙️ CONFIGURACIÓN & PUNTOS</h4>
-            <div class="rules-grid">
-                <div><label>Exacto</label><input type="number" id="rule-exact" onchange="saveAdminData()"></div>
-                <div><label>Diferencia</label><input type="number" id="rule-diff" onchange="saveAdminData()"></div>
-                <div><label>Ganador</label><input type="number" id="rule-winner" onchange="saveAdminData()"></div>
-            </div>
-            <h4>🎛️ CONTROL DE FASES (Habilitar envío)</h4>
-            <div class="phase-grid">
-                <label class="phase-item"><input type="checkbox" id="check-groups" onchange="saveAdminData()"> Grupos</label>
-                <label class="phase-item"><input type="checkbox" id="check-r32" onchange="saveAdminData()"> 16avos</label>
-                <label class="phase-item"><input type="checkbox" id="check-r16" onchange="saveAdminData()"> 8vos</label>
-                <label class="phase-item"><input type="checkbox" id="check-qf" onchange="saveAdminData()"> Cuartos</label>
-                <label class="phase-item"><input type="checkbox" id="check-sf" onchange="saveAdminData()"> Semis</label>
-                <label class="phase-item"><input type="checkbox" id="check-f" onchange="saveAdminData()"> Final</label>
-            </div>
-            <br>
-            <button style="padding:10px 20px; background:rgba(0,0,0,0.5); color:white; border:1px solid #555; border-radius:5px;" onclick="openUserManagement()">👥 Gestionar Usuarios</button>
-        </div>
-
         <div id="submit-groups-area" class="hidden">
             <span id="groups-msg" style="display:block; margin-bottom:10px; font-weight:bold;">Fase en Borrador.</span>
             <button id="btn-submit-groups" class="btn-big-submit" onclick="submitPhase('groups')">ENVIAR OFICIALMENTE</button>
         </div>
-
         <div id="groups-container" class="groups-grid"></div>
+    </div>
+
+    <div id="tab-settings" class="section">
+        <div id="admin-panel" class="admin-panel card-modern"> <h4 style="text-align:center; color:var(--neon-blue);">⚙️ CONFIGURACIÓN & REGLAS</h4>
+            
+            <div style="margin-bottom: 20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:20px;">
+                <label style="display:block; color:var(--neon-gold); margin-bottom:10px;">Sistema de Puntos</label>
+                <div class="rules-grid">
+                    <div><label>Exacto</label><input type="number" id="rule-exact" onchange="saveAdminData()"></div>
+                    <div><label>Diferencia</label><input type="number" id="rule-diff" onchange="saveAdminData()"></div>
+                    <div><label>Ganador</label><input type="number" id="rule-winner" onchange="saveAdminData()"></div>
+                </div>
+            </div>
+
+            <div>
+                <label style="display:block; color:var(--neon-pink); margin-bottom:10px;">Habilitar Fases (Check para abrir)</label>
+                <div class="phase-grid">
+                    <label class="phase-item"><input type="checkbox" id="check-groups" onchange="saveAdminData()"> Grupos</label>
+                    <label class="phase-item"><input type="checkbox" id="check-r32" onchange="saveAdminData()"> 16avos</label>
+                    <label class="phase-item"><input type="checkbox" id="check-r16" onchange="saveAdminData()"> 8vos</label>
+                    <label class="phase-item"><input type="checkbox" id="check-qf" onchange="saveAdminData()"> Cuartos</label>
+                    <label class="phase-item"><input type="checkbox" id="check-sf" onchange="saveAdminData()"> Semis</label>
+                    <label class="phase-item"><input type="checkbox" id="check-f" onchange="saveAdminData()"> Final</label>
+                </div>
+            </div>
+            
+            <br>
+            <button class="btn-enter" style="width:auto; margin:0 auto; display:block;" onclick="openUserManagement()">👥 Gestionar Usuarios</button>
+        </div>
     </div>
 
     <div id="tab-real" class="section">

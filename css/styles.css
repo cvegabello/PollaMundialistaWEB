@@ -328,3 +328,60 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
     .match-row { grid-template-columns: 1fr 90px 1fr; }
     .modal-card { width: 95%; padding: 20px; }
 }
+
+/* --- NUEVA NAVEGACIÓN AGRUPADA --- */
+.tabs-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.nav-group {
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 15px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    text-align: center;
+    position: relative;
+}
+
+.nav-label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    font-weight: 900;
+}
+
+.nav-row, .nav-standalone {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* --- ESTILO MODERNO SOBRIO PARA ADMIN PANEL --- */
+.card-modern {
+    background: var(--bg-card); /* Mismo fondo de las tarjetas normales */
+    border: 1px solid var(--neon-blue); /* Borde neón sutil */
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.1); /* Resplandor suave */
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.admin-panel h4 {
+    border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+}
+
+/* Ajuste para inputs dentro del panel admin */
+.admin-panel input {
+    border: 1px solid #555;
+    background: rgba(0,0,0,0.5);
+}
+.admin-panel input:focus {
+    border-color: var(--neon-pink);
+    box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+}
