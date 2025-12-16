@@ -39,10 +39,23 @@ button, .tab-btn, .fab, input[type="checkbox"], .phase-item, .round-action-btn, 
 header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
 
 h1 {
-    font-size: 2.5rem; font-weight: 900; margin: 0 0 20px 0; text-align: center;
+    font-size: 2.5rem; 
+    font-weight: 900; 
+    margin: 0 0 20px 0; 
+    text-align: center;
+    
+    /* EL DEGRADADO */
     background: linear-gradient(90deg, #fff, var(--neon-blue));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    text-transform: uppercase; letter-spacing: 2px;
+    
+    /* LA CORRECCIÓN: */
+    -webkit-background-clip: text; /* Para Chrome/Safari */
+    background-clip: text;         /* <--- ESTA ES LA QUE FALTABA (Estándar) */
+    
+    -webkit-text-fill-color: transparent;
+    color: transparent; /* Buena práctica por si el navegador no entiende lo anterior */
+    
+    text-transform: uppercase; 
+    letter-spacing: 2px;
     filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.5));
     animation: pulseTitle 3s infinite alternate;
 }
