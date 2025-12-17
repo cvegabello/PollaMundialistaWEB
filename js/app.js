@@ -53,7 +53,12 @@ const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
 let currentUser = { name: '', preds: {}, locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } };
 let role = 'fan';
 let officialRes = JSON.parse(localStorage.getItem('m26_official')) || {};
-let rules = JSON.parse(localStorage.getItem('m26_rules')) || { exact: 5, diff: 3, winner: 1 };
+
+let rules = JSON.parse(localStorage.getItem('m26_rules')) || { 
+    exact: 5, diff: 3, winner: 1, 
+    groupExact: 10, groupMix: 5, groupOne: 2 
+};
+
 let phaseControl = JSON.parse(localStorage.getItem('m26_phase_control')) || { groups: true, r32: false, r16: false, qf: false, sf: false, f: false };
 let officialTeams = JSON.parse(localStorage.getItem('m26_official_teams')) || {};
 let simulatedTeams = {};
@@ -109,6 +114,11 @@ function setupAdminMode() {
     document.getElementById('rule-exact').value = rules.exact;
     document.getElementById('rule-diff').value = rules.diff;
     document.getElementById('rule-winner').value = rules.winner;
+    // --- NUEVOS INPUTS ---
+    document.getElementById('rule-group-exact').value = rules.groupExact || 0;
+    document.getElementById('rule-group-mix').value = rules.groupMix || 0;
+    document.getElementById('rule-group-one').value = rules.groupOne || 0;
+
     document.getElementById('check-groups').checked = phaseControl.groups;
     document.getElementById('check-r32').checked = phaseControl.r32;
     document.getElementById('check-r16').checked = phaseControl.r16;
@@ -419,6 +429,19 @@ function submitPhase(phase) {
 }
 
 function saveAdminData(showMsg) {
+    
+    // Leer reglas básicas
+    rules.exact = parseInt(document.getElementById('rule-exact').value) || 0;
+    rules.diff = parseInt(document.getElementById('rule-diff').value) || 0;
+    rules.winner = parseInt(document.getElementById('rule-winner').value) || 0;
+
+    // Leer NUEVAS reglas
+    rules.groupExact = parseInt(document.getElementById('rule-group-exact').value) || 0;
+    rules.groupMix = parseInt(document.getElementById('rule-group-mix').value) || 0;
+    rules.groupOne = parseInt(document.getElementById('rule-group-one').value) || 0;
+
+    localStorage.setItem('m26_rules', JSON.stringify(rules));
+    
     localStorage.setItem('m26_official', JSON.stringify(officialRes));
     localStorage.setItem('m26_official_teams', JSON.stringify(officialTeams));
     if(document.getElementById('check-groups')) {
@@ -438,6 +461,8 @@ function calculatePoints(preds, locks) {
     let p = preds || currentUser.preds;
     let l = locks || currentUser.locks;
     let total = 0;
+
+    // 1. PUNTOS POR PARTIDOS (GRUPOS)
     if(l.groups) {
         for(let g in GROUPS_CONFIG) {
             GROUPS_CONFIG[g].matches.forEach((m,i) => {
@@ -446,6 +471,8 @@ function calculatePoints(preds, locks) {
             });
         }
     }
+
+    // 2. PUNTOS POR PARTIDOS (FASES FINALES)
     let phaseMap = { '32': 'r32', '16': 'r16', '8': 'qf', '4': 'sf', '2': 'f' };
     let allKeys = Object.keys(officialRes).filter(k => k.startsWith('k-'));
     let processedMatches = new Set();
@@ -458,8 +485,41 @@ function calculatePoints(preds, locks) {
             total += calcMatchPts(p[`k-${matchId}-h`], p[`k-${matchId}-a`], officialRes[`k-${matchId}-h`], officialRes[`k-${matchId}-a`]);
         }
     });
+
+    // 3. BONUS DE CLASIFICADOS (GRUPOS) - NUEVA LÓGICA
+    if(l.groups) {
+        // Calculamos las posiciones simuladas del USUARIO y del OFICIAL
+        let userSim = calculateSimulatedTeams(p); 
+        let officialSim = calculateSimulatedTeams(officialRes); 
+
+        for(let g in GROUPS_CONFIG) {
+            // Equipos del usuario (1ro y 2do)
+            let u1 = userSim[g+'1']; 
+            let u2 = userSim[g+'2'];
+            
+            // Equipos oficiales (1ro y 2do)
+            let o1 = officialSim[g+'1']; 
+            let o2 = officialSim[g+'2'];
+
+            // Solo damos puntos si el grupo oficial YA se definió (no es undefined ni "3er")
+            // y si los equipos son nombres reales
+            if(o1 && o2 && !o1.includes('3er') && !o2.includes('3er')) {
+                if (u1 === o1 && u2 === o2) {
+                    // Acierto EXACTO (Orden perfecto)
+                    total += (rules.groupExact || 0);
+                } else if ((u1 === o2 && u2 === o1)) {
+                    // Acierto MIXTO (Están los dos, pero orden invertido)
+                    total += (rules.groupMix || 0);
+                } else if (u1 === o1 || u1 === o2 || u2 === o1 || u2 === o2) {
+                    // Acierto PARCIAL (Le pegó a uno de los dos)
+                    total += (rules.groupOne || 0);
+                }
+            }
+        }
+    }
+
     if(!preds) {
-        if(l.groups) document.getElementById('total-points').innerText = total;
+        if(l.groups || l.f) document.getElementById('total-points').innerText = total;
         else document.getElementById('total-points').innerText = "--";
     }
     return total;

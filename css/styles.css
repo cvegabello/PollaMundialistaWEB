@@ -285,7 +285,7 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 
 /* --- ADMIN PANEL (SOBRIO) --- */
 .admin-panel {
-    display: none;
+    display: block;
     background: linear-gradient(135deg, #2b1055, #000000); 
     border: 1px solid rgba(188, 19, 254, 0.5); 
     padding: 30px; border-radius: 20px; margin-bottom: 40px;

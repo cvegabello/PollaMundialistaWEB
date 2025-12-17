@@ -49,7 +49,6 @@
     </header>
 
     <div class="tabs-area">
-        
         <div id="nav-group-fan" class="nav-group">
             <span class="nav-label">MIS PRONÓSTICOS</span>
             <div class="nav-row">
@@ -62,7 +61,6 @@
             <button id="btn-tab-real" class="tab-btn" onclick="switchTab('real')">Resultados Oficiales</button>
             <button id="btn-tab-settings" class="tab-btn hidden" onclick="switchTab('settings')">Configuración</button>
         </div>
-
     </div>
 
     <div id="tab-groups" class="section active">
@@ -73,15 +71,42 @@
         <div id="groups-container" class="groups-grid"></div>
     </div>
 
+    <div id="tab-real" class="section">
+        <div style="text-align:center; margin-bottom:10px; color:var(--neon-green); text-transform:uppercase; letter-spacing:2px; font-weight:900;">
+            Fase de Grupos - Oficial
+        </div>
+        <div id="real-container" class="groups-grid" style="margin-bottom: 40px;"></div>
+
+        <div style="text-align:center; margin-bottom:10px; margin-top:40px; color:var(--neon-green); text-transform:uppercase; letter-spacing:2px; font-weight:900; border-top: 1px solid #333; padding-top: 20px;">
+            Fase Final - Oficial
+        </div>
+        <div id="real-bracket-container" class="bracket-container"></div>
+    </div>
+
+    <div id="tab-bracket" class="section">
+        <div id="admin-bracket-tools" style="text-align:center; margin-bottom:20px; display:none;">
+            <button style="padding:10px 20px; background:#8a2be2; color:white; border:none; border-radius:5px; font-weight:bold;" onclick="autoFillOfficialQualifiers()">🔄 Cargar Clasificados Reales</button>
+        </div>
+        <div id="bracket-container" class="bracket-container"></div>
+    </div>
+
     <div id="tab-settings" class="section">
-        <div id="admin-panel" class="admin-panel card-modern"> <h4 style="text-align:center; color:var(--neon-blue);">⚙️ CONFIGURACIÓN & REGLAS</h4>
+        <div id="admin-panel" class="admin-panel card-modern">
+            <h4 style="text-align:center; color:var(--neon-blue);">⚙️ CONFIGURACIÓN & REGLAS</h4>
             
             <div style="margin-bottom: 20px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:20px;">
-                <label style="display:block; color:var(--neon-gold); margin-bottom:10px;">Sistema de Puntos</label>
+                <label style="display:block; color:var(--neon-gold); margin-bottom:10px; font-weight:bold; letter-spacing:1px;">⚽ PUNTOS POR PARTIDO</label>
                 <div class="rules-grid">
                     <div><label>Exacto</label><input type="number" id="rule-exact" onchange="saveAdminData()"></div>
                     <div><label>Diferencia</label><input type="number" id="rule-diff" onchange="saveAdminData()"></div>
                     <div><label>Ganador</label><input type="number" id="rule-winner" onchange="saveAdminData()"></div>
+                </div>
+
+                <label style="display:block; color:var(--neon-green); margin-top:20px; margin-bottom:10px; font-weight:bold; letter-spacing:1px;">🏆 BONUS GRUPOS (CLASIFICADOS)</label>
+                <div class="rules-grid">
+                    <div><label>1° y 2° Exacto</label><input type="number" id="rule-group-exact" placeholder="Ej: 10" onchange="saveAdminData()"></div>
+                    <div><label>Los 2 (Desorden)</label><input type="number" id="rule-group-mix" placeholder="Ej: 5" onchange="saveAdminData()"></div>
+                    <div><label>Solo 1 Equipo</label><input type="number" id="rule-group-one" placeholder="Ej: 2" onchange="saveAdminData()"></div>
                 </div>
             </div>
 
@@ -100,25 +125,6 @@
             <br>
             <button class="btn-enter" style="width:auto; margin:0 auto; display:block;" onclick="openUserManagement()">👥 Gestionar Usuarios</button>
         </div>
-    </div>
-
-    <div id="tab-real" class="section">
-        <div style="text-align:center; margin-bottom:10px; color:var(--neon-green); text-transform:uppercase; letter-spacing:2px; font-weight:900;">
-            Fase de Grupos - Oficial
-        </div>
-        <div id="real-container" class="groups-grid" style="margin-bottom: 40px;"></div>
-
-        <div style="text-align:center; margin-bottom:10px; margin-top:40px; color:var(--neon-green); text-transform:uppercase; letter-spacing:2px; font-weight:900; border-top: 1px solid #333; padding-top: 20px;">
-            Fase Final - Oficial
-        </div>
-        <div id="real-bracket-container" class="bracket-container"></div>
-    </div>
-    
-    <div id="tab-bracket" class="section">
-        <div id="admin-bracket-tools" style="text-align:center; margin-bottom:20px; display:none;">
-            <button style="padding:10px 20px; background:#8a2be2; color:white; border:none; border-radius:5px; font-weight:bold;" onclick="autoFillOfficialQualifiers()">🔄 Cargar Clasificados Reales</button>
-        </div>
-        <div id="bracket-container" class="bracket-container"></div>
     </div>
 </div>
 
