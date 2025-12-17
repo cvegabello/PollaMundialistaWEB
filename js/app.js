@@ -706,3 +706,110 @@ function renderRealRoundColumn(title, matchups, simTeams) {
     });
     return html + `</div>`;
 }
+
+/* =========================================================
+   LÓGICA DE MEJORES TERCEROS (FIFA RULES)
+   ========================================================= */
+
+// Función principal que abre el modal y renderiza
+function showThirdsTable() {
+    // 1. Determinar fuente de datos
+    let sourceData;
+    
+    // CORRECCIÓN: Si soy Admin, SIEMPRE uso officialRes.
+    if (role === 'admin') {
+        sourceData = officialRes;
+    } else {
+        // Si soy Fan, dependo de qué pestaña estoy viendo
+        let isOfficialView = document.getElementById('tab-real').classList.contains('active');
+        sourceData = isOfficialView ? officialRes : currentUser.preds;
+    }
+
+    // 2. Calcular los terceros
+    let thirdsList = calculateThirdsList(sourceData);
+
+    // 3. Generar HTML
+    let tbody = document.querySelector('#thirds-table-content tbody');
+    tbody.innerHTML = '';
+
+    thirdsList.forEach((team, index) => {
+        // Los primeros 8 clasifican (Verde), los otros 4 eliminados (Rojo oscuro)
+        let isQualified = index < 8;
+        let rowColor = isQualified ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 0, 85, 0.1)';
+        let fontColor = isQualified ? '#fff' : '#777';
+        let qualIndicator = isQualified ? '✅' : '❌';
+
+        let html = `
+            <tr style="background:${rowColor}; color:${fontColor}; border-bottom:1px solid #333;">
+                <td style="font-weight:bold; color:${isQualified ? 'var(--neon-green)' : 'var(--neon-pink)'}">${index + 1}</td>
+                <td style="color:var(--neon-gold); font-weight:bold;">${team.group}</td>
+                <td style="font-weight:bold;">${team.name} ${qualIndicator}</td>
+                <td style="font-weight:900; color:white;">${team.pts}</td>
+                <td>${team.pj}</td>
+                <td>${team.pg}</td>
+                <td>${team.pe}</td>
+                <td>${team.pp}</td>
+                <td>${team.gf}</td>
+                <td>${team.gc}</td>
+                <td>${team.dif > 0 ? '+'+team.dif : team.dif}</td>
+            </tr>
+        `;
+        tbody.innerHTML += html;
+    });
+
+    // 4. Mostrar Modal
+    document.getElementById('modal-thirds-overlay').style.display = 'flex';
+}
+
+// Función auxiliar para calcular estadísticas completas
+function calculateThirdsList(sourceData) {
+    let allThirds = [];
+
+    // Recorremos cada grupo para encontrar su 3ro
+    for(let g in GROUPS_CONFIG) {
+        let teams = GROUPS_CONFIG[g].teams;
+        let stats = teams.map(name => ({
+            name: name, group: g, 
+            pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dif: 0
+        }));
+
+        GROUPS_CONFIG[g].matches.forEach((m, idx) => {
+            let id = `${g}-${idx}`;
+            let h = sourceData[`h-${id}`];
+            let a = sourceData[`a-${id}`];
+
+            if(h !== undefined && h !== "" && a !== undefined && a !== "") {
+                h = parseInt(h); a = parseInt(a);
+                let t1 = stats[m.t1];
+                let t2 = stats[m.t2];
+                
+                t1.pj++; t2.pj++;
+                t1.gf += h; t1.gc += a; t1.dif = t1.gf - t1.gc;
+                t2.gf += a; t2.gc += h; t2.dif = t2.gf - t2.gc;
+
+                if(h > a) { t1.pts += 3; t1.pg++; t2.pp++; }
+                else if(a > h) { t2.pts += 3; t2.pg++; t1.pp++; }
+                else { t1.pts++; t2.pts++; t1.pe++; t2.pe++; }
+            }
+        });
+
+        // Ordenar tabla del grupo (Pts > Dif > GF)
+        stats.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
+
+        // Tomamos el 3ro (índice 2)
+        // OJO: Si el grupo no tiene datos, igual tomamos el nombre del equipo en pos 3
+        let thirdTeam = stats[2];
+        allThirds.push(thirdTeam);
+    }
+
+    // AHORA ORDENAMOS LA TABLA DE TERCEROS (Reglas FIFA)
+    // 1. Puntos, 2. Diferencia, 3. Goles a Favor, 4. Partidos Ganados
+    allThirds.sort((a,b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        if (b.dif !== a.dif) return b.dif - a.dif;
+        if (b.gf !== a.gf) return b.gf - a.gf;
+        return b.pg - a.pg;
+    });
+
+    return allThirds;
+}

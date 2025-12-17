@@ -129,6 +129,7 @@
 </div>
 
 <div class="fab-container">
+    <button id="btn-thirds" class="fab" style="background:var(--neon-pink); color:white; margin-bottom:10px;" onclick="showThirdsTable()">🥉 3ros</button>
     <button id="btn-report" class="fab fab-report" onclick="showReport()">🏆 Ranking</button>
     <button id="btn-refresh" class="fab fab-refresh" onclick="refreshData()">🔄 Recargar</button>
     <button id="btn-save-draft" class="fab fab-save" onclick="saveUser(false)">💾 Guardar</button>
@@ -142,6 +143,36 @@
         <div id="report-content"></div>
     </div>
 </div>
+
+<div id="modal-thirds-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; justify-content:center; align-items:center;">
+    <div class="modal-card" style="width: 800px; max-width: 95%; max-height: 95vh; height: auto; padding: 20px;">
+        <button class="close-btn" onclick="document.getElementById('modal-thirds-overlay').style.display='none'">&times;</button>
+        <h3 style="color:var(--neon-pink); margin-top:0; text-align:center; text-transform:uppercase;">Tabla de Mejores Terceros</h3>
+        <p style="text-align:center; color:#aaa; font-size:0.8rem; margin-bottom:15px;">Clasifican los 8 primeros (Fondo Verde)</p>
+        
+        <div style="overflow-x:auto; overflow-y:visible;">
+            <table class="ranking-table" id="thirds-table-content" style="font-size:0.85rem;">
+                <thead>
+                    <tr style="background:#222; color:var(--neon-blue);">
+                        <th>POS</th>
+                        <th>GRP</th> <th>SELECCIÓN</th>
+                        <th title="Puntos">PTS</th>
+                        <th title="Jugados">J</th>
+                        <th title="Ganados">G</th>
+                        <th title="Empatados">E</th>
+                        <th title="Perdidos">P</th>
+                        <th title="Goles Favor">GF</th>
+                        <th title="Goles Contra">GC</th>
+                        <th title="Diferencia">DG</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 
 <script src="js/app.js"></script>
 
