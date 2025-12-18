@@ -32,20 +32,20 @@ window.addEventListener('resize', ()=>{canvas.width=window.innerWidth; canvas.he
 /* =========================================================
    2. CONFIGURACIÓN DE GRUPOS Y PARTIDOS
    ========================================================= */
-const GROUPS_CONFIG = {
-    'A': { teams: ['México', 'Egipto', 'Polonia', 'Corea'], matches: [{t1:0,t2:1,info:"11 Jun"},{t1:2,t2:3,info:"11 Jun"},{t1:0,t2:2,info:"18 Jun"},{t1:1,t2:3,info:"18 Jun"},{t1:0,t2:3,info:"24 Jun"},{t1:1,t2:2,info:"24 Jun"}] },
-    'B': { teams: ['EEUU', 'Gales', 'Inglaterra', 'Irán'], matches: [{t1:0,t2:1,info:"12 Jun"},{t1:2,t2:3,info:"12 Jun"},{t1:0,t2:2,info:"17 Jun"},{t1:1,t2:3,info:"17 Jun"},{t1:0,t2:3,info:"22 Jun"},{t1:1,t2:2,info:"22 Jun"}] },
-};
-// Llenar resto de grupos vacíos por ahora
-['C','D','E','F','G','H','I','J','K','L'].forEach(l => {
-    if(!GROUPS_CONFIG[l]) GROUPS_CONFIG[l] = { teams: ['E1','E2','E3','E4'], matches: Array(6).fill({t1:0,t2:1,info:"--"}) };
-});
+// const GROUPS_CONFIG = {
+//     'A': { teams: ['México', 'Egipto', 'Polonia', 'Corea'], matches: [{t1:0,t2:1,info:"11 Jun"},{t1:2,t2:3,info:"11 Jun"},{t1:0,t2:2,info:"18 Jun"},{t1:1,t2:3,info:"18 Jun"},{t1:0,t2:3,info:"24 Jun"},{t1:1,t2:2,info:"24 Jun"}] },
+//     'B': { teams: ['EEUU', 'Gales', 'Inglaterra', 'Irán'], matches: [{t1:0,t2:1,info:"12 Jun"},{t1:2,t2:3,info:"12 Jun"},{t1:0,t2:2,info:"17 Jun"},{t1:1,t2:3,info:"17 Jun"},{t1:0,t2:3,info:"22 Jun"},{t1:1,t2:2,info:"22 Jun"}] },
+// };
+// // Llenar resto de grupos vacíos por ahora
+// ['C','D','E','F','G','H','I','J','K','L'].forEach(l => {
+//     if(!GROUPS_CONFIG[l]) GROUPS_CONFIG[l] = { teams: ['E1','E2','E3','E4'], matches: Array(6).fill({t1:0,t2:1,info:"--"}) };
+// });
 
-const R32_MATCHUPS = [{id:'32-1', h:'A1', a:'B2'}, {id:'32-2', h:'C1', a:'D2'}, {id:'32-3', h:'E1', a:'F2'}, {id:'32-4', h:'G1', a:'H2'},{id:'32-5', h:'I1', a:'J2'}, {id:'32-6', h:'K1', a:'L2'}, {id:'32-7', h:'A2', a:'C2'}, {id:'32-8', h:'B1', a:'T1'},{id:'32-9', h:'D1', a:'T2'}, {id:'32-10', h:'E2', a:'F1'}, {id:'32-11', h:'G2', a:'H1'}, {id:'32-12', h:'I2', a:'J1'},{id:'32-13', h:'K2', a:'L1'}, {id:'32-14', h:'T3', a:'T4'}, {id:'32-15', h:'T5', a:'T6'}, {id:'32-16', h:'T7', a:'T8'}];
-const R16_MATCHUPS = [{id:'16-1', h:'32-1', a:'32-2'}, {id:'16-2', h:'32-3', a:'32-4'}, {id:'16-3', h:'32-5', a:'32-6'}, {id:'16-4', h:'32-7', a:'32-8'},{id:'16-5', h:'32-9', a:'32-10'}, {id:'16-6', h:'32-11', a:'32-12'}, {id:'16-7', h:'32-13', a:'32-14'}, {id:'16-8', h:'32-15', a:'32-16'}];
-const QF_MATCHUPS = [ {id:'8-1',h:'16-1',a:'16-2'}, {id:'8-2',h:'16-3',a:'16-4'}, {id:'8-3',h:'16-5',a:'16-6'}, {id:'8-4',h:'16-7',a:'16-8'} ];
-const SF_MATCHUPS = [ {id:'4-1',h:'8-1',a:'8-2'}, {id:'4-2',h:'8-3',a:'8-4'} ];
-const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
+// const R32_MATCHUPS = [{id:'32-1', h:'A1', a:'B2'}, {id:'32-2', h:'C1', a:'D2'}, {id:'32-3', h:'E1', a:'F2'}, {id:'32-4', h:'G1', a:'H2'},{id:'32-5', h:'I1', a:'J2'}, {id:'32-6', h:'K1', a:'L2'}, {id:'32-7', h:'A2', a:'C2'}, {id:'32-8', h:'B1', a:'T1'},{id:'32-9', h:'D1', a:'T2'}, {id:'32-10', h:'E2', a:'F1'}, {id:'32-11', h:'G2', a:'H1'}, {id:'32-12', h:'I2', a:'J1'},{id:'32-13', h:'K2', a:'L1'}, {id:'32-14', h:'T3', a:'T4'}, {id:'32-15', h:'T5', a:'T6'}, {id:'32-16', h:'T7', a:'T8'}];
+// const R16_MATCHUPS = [{id:'16-1', h:'32-1', a:'32-2'}, {id:'16-2', h:'32-3', a:'32-4'}, {id:'16-3', h:'32-5', a:'32-6'}, {id:'16-4', h:'32-7', a:'32-8'},{id:'16-5', h:'32-9', a:'32-10'}, {id:'16-6', h:'32-11', a:'32-12'}, {id:'16-7', h:'32-13', a:'32-14'}, {id:'16-8', h:'32-15', a:'32-16'}];
+// const QF_MATCHUPS = [ {id:'8-1',h:'16-1',a:'16-2'}, {id:'8-2',h:'16-3',a:'16-4'}, {id:'8-3',h:'16-5',a:'16-6'}, {id:'8-4',h:'16-7',a:'16-8'} ];
+// const SF_MATCHUPS = [ {id:'4-1',h:'8-1',a:'8-2'}, {id:'4-2',h:'8-3',a:'8-4'} ];
+// const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
 
 /* =========================================================
    3. ESTADO GLOBAL
@@ -813,3 +813,60 @@ function calculateThirdsList(sourceData) {
 
     return allThirds;
 }
+
+/* =========================================================
+   FUNCIONES DE LA NUEVA BARRA DE HERRAMIENTAS
+   ========================================================= */
+
+// Función para SALIR (Recarga la página y vuelve al login)
+function logout() {
+    location.reload();
+}
+
+// Función GUARDAR INTELIGENTE
+// Detecta si el panel de admin está visible para saber qué guardar
+function smartSave() {
+    const adminBar = document.getElementById('admin-status-bar');
+    
+    // Si la barra de admin se ve, es porque soy Admin
+    if (adminBar && adminBar.style.display !== 'none') {
+        saveAdminData(true); // Guarda Config y Resultados
+    } else {
+        saveUser(false); // Guarda Pronósticos del Fan
+    }
+}
+
+/* =========================================================
+   MEJORAS DEL LOGIN (Enter y Ver Password)
+   ========================================================= */
+
+// 1. Función para mostrar/ocultar contraseña
+function togglePass() {
+    const passInput = document.getElementById('password');
+    const icon = document.getElementById('eye-icon');
+    
+    if (passInput.type === 'password') {
+        passInput.type = 'text'; // Mostrar texto
+        icon.innerText = '🙈';   // Cambiar icono a "monito tapándose"
+    } else {
+        passInput.type = 'password'; // Ocultar
+        icon.innerText = '👁️';   // Volver al ojo normal
+    }
+}
+
+// 2. Escuchar la tecla ENTER en los campos de texto
+// Esto se ejecuta apenas carga el archivo
+document.addEventListener('DOMContentLoaded', () => {
+    const inputUser = document.getElementById('username');
+    const inputPass = document.getElementById('password');
+
+    // Función auxiliar para activar el login con Enter
+    const triggerLogin = (event) => {
+        if (event.key === 'Enter') {
+            handleLogin(); // Llamamos a su función original de entrar
+        }
+    };
+
+    if(inputUser) inputUser.addEventListener('keypress', triggerLogin);
+    if(inputPass) inputPass.addEventListener('keypress', triggerLogin);
+});

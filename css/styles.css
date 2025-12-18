@@ -385,3 +385,53 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
     border-color: var(--neon-pink);
     box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
 }
+
+/* --- NUEVA BARRA DE HERRAMIENTAS (TOOLBAR) --- */
+.toolbar {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap; /* Para que se adapte al celular */
+}
+
+.tool-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff; /* Color texto blanco */
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Roboto', sans-serif;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+}
+
+.tool-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--neon-blue, #0ff);
+    transform: translateY(-2px);
+}
+
+.tool-btn:active {
+    transform: scale(0.95);
+}
+
+/* Botón Salir en Rojito */
+.tool-btn.logout {
+    border-color: rgba(255, 0, 85, 0.4);
+    color: #ff8fa3;
+}
+
+/* En Celulares: Ocultar texto, dejar solo icono */
+@media (max-width: 480px) {
+    .tool-text { display: none; }
+    .tool-btn { padding: 10px; font-size: 1.2rem; }
+}

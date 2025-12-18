@@ -1,0 +1,145 @@
+/* ============================================================
+   ARCHIVO DE DATOS (DATA.JS)
+   Aquí reposan los equipos, grupos y partidos.
+   Puede editar fechas, horas y estadios sin dañar la lógica.
+   ============================================================ */
+
+const GROUPS_CONFIG = {
+    'A': {
+        teams: ['México', 'Sudáfrica', 'Corea del Sur', 'Repechaje UEFA D'],
+        matches: [
+            { t1: 0, t2: 1, date: '11 Jun', time: '14:00', stadium: 'Azteca' },
+            { t1: 2, t2: 3, date: '11 Jun', time: '17:00', stadium: 'Guadalajara' },
+            { t1: 0, t2: 2, date: '15 Jun', time: '18:00', stadium: 'Monterrey' },
+            { t1: 3, t2: 1, date: '15 Jun', time: '15:00', stadium: 'Azteca' },
+            { t1: 3, t2: 0, date: '19 Jun', time: '12:00', stadium: 'Guadalajara' },
+            { t1: 1, t2: 2, date: '19 Jun', time: '12:00', stadium: 'Monterrey' }
+        ]
+    },
+    'B': {
+        teams: ['Canadá', 'Repechaje UEFA A', 'Qatar', 'Suiza'],
+        matches: [
+            { t1: 0, t2: 1, date: '12 Jun', time: '13:00', stadium: 'Toronto' },
+            { t1: 2, t2: 3, date: '12 Jun', time: '16:00', stadium: 'Vancouver' },
+            { t1: 0, t2: 2, date: '16 Jun', time: '14:00', stadium: 'Vancouver' },
+            { t1: 3, t2: 1, date: '16 Jun', time: '17:00', stadium: 'Toronto' },
+            { t1: 3, t2: 0, date: '20 Jun', time: '13:00', stadium: 'Vancouver' },
+            { t1: 1, t2: 2, date: '20 Jun', time: '16:00', stadium: 'Toronto' }
+        ]
+    },
+    'C': {
+        teams: ['Brasil', 'Marruecos', 'Haití', 'Escocia'],
+        matches: [
+            { t1: 0, t2: 1, date: '13 Jun', time: '14:00', stadium: 'Boston' },
+            { t1: 2, t2: 3, date: '13 Jun', time: '17:00', stadium: 'New York' },
+            { t1: 0, t2: 2, date: '17 Jun', time: '15:00', stadium: 'Boston' },
+            { t1: 3, t2: 1, date: '17 Jun', time: '18:00', stadium: 'New York' },
+            { t1: 3, t2: 0, date: '21 Jun', time: '14:00', stadium: 'New York' },
+            { t1: 1, t2: 2, date: '21 Jun', time: '17:00', stadium: 'Boston' }
+        ]
+    },
+    'D': {
+        teams: ['USA', 'Paraguay', 'Australia', 'Repechaje UEFA C'],
+        matches: [
+            { t1: 0, t2: 1, date: '12 Jun', time: '15:00', stadium: 'Los Angeles' },
+            { t1: 2, t2: 3, date: '12 Jun', time: '18:00', stadium: 'Seattle' },
+            { t1: 0, t2: 2, date: '16 Jun', time: '19:00', stadium: 'San Francisco' },
+            { t1: 3, t2: 1, date: '16 Jun', time: '16:00', stadium: 'Seattle' },
+            { t1: 3, t2: 0, date: '20 Jun', time: '15:00', stadium: 'Los Angeles' },
+            { t1: 1, t2: 2, date: '20 Jun', time: '18:00', stadium: 'San Francisco' }
+        ]
+    },
+    'E': {
+        teams: ['Alemania', 'Curazao', 'Costa de Marfil', 'Ecuador'],
+        matches: [
+            { t1: 0, t2: 1, date: '13 Jun', time: '12:00', stadium: 'Philadelphia' },
+            { t1: 2, t2: 3, date: '13 Jun', time: '15:00', stadium: 'Houston' },
+            { t1: 0, t2: 2, date: '17 Jun', time: '13:00', stadium: 'Houston' },
+            { t1: 3, t2: 1, date: '17 Jun', time: '16:00', stadium: 'Philadelphia' },
+            { t1: 3, t2: 0, date: '21 Jun', time: '13:00', stadium: 'Philadelphia' },
+            { t1: 1, t2: 2, date: '21 Jun', time: '16:00', stadium: 'Houston' }
+        ]
+    },
+    'F': {
+        teams: ['Países Bajos', 'Japón', 'Repechaje UEFA B', 'Túnez'],
+        matches: [
+            { t1: 0, t2: 1, date: '14 Jun', time: '14:00', stadium: 'Dallas' },
+            { t1: 2, t2: 3, date: '14 Jun', time: '17:00', stadium: 'Atlanta' },
+            { t1: 0, t2: 2, date: '18 Jun', time: '15:00', stadium: 'Atlanta' },
+            { t1: 3, t2: 1, date: '18 Jun', time: '18:00', stadium: 'Dallas' },
+            { t1: 3, t2: 0, date: '22 Jun', time: '14:00', stadium: 'Dallas' },
+            { t1: 1, t2: 2, date: '22 Jun', time: '17:00', stadium: 'Atlanta' }
+        ]
+    },
+    'G': {
+        teams: ['Bélgica', 'Egipto', 'Irán', 'Nueva Zelanda'],
+        matches: [
+            { t1: 0, t2: 1, date: '14 Jun', time: '13:00', stadium: 'Kansas City' },
+            { t1: 2, t2: 3, date: '14 Jun', time: '16:00', stadium: 'Miami' },
+            { t1: 0, t2: 2, date: '18 Jun', time: '14:00', stadium: 'Miami' },
+            { t1: 3, t2: 1, date: '18 Jun', time: '17:00', stadium: 'Kansas City' },
+            { t1: 3, t2: 0, date: '22 Jun', time: '13:00', stadium: 'Kansas City' },
+            { t1: 1, t2: 2, date: '22 Jun', time: '16:00', stadium: 'Miami' }
+        ]
+    },
+    'H': {
+        teams: ['España', 'Cabo Verde', 'Arabia Saudita', 'Uruguay'],
+        matches: [
+            { t1: 0, t2: 1, date: '15 Jun', time: '14:00', stadium: 'Houston' },
+            { t1: 2, t2: 3, date: '15 Jun', time: '17:00', stadium: 'Monterrey' },
+            { t1: 0, t2: 2, date: '19 Jun', time: '15:00', stadium: 'Houston' },
+            { t1: 3, t2: 1, date: '19 Jun', time: '18:00', stadium: 'Monterrey' },
+            { t1: 3, t2: 0, date: '23 Jun', time: '14:00', stadium: 'Monterrey' },
+            { t1: 1, t2: 2, date: '23 Jun', time: '17:00', stadium: 'Houston' }
+        ]
+    },
+    'I': {
+        teams: ['Francia', 'Senegal', 'Repechaje FIFA 2', 'Noruega'],
+        matches: [
+            { t1: 0, t2: 1, date: '15 Jun', time: '13:00', stadium: 'New York' },
+            { t1: 2, t2: 3, date: '15 Jun', time: '16:00', stadium: 'Boston' },
+            { t1: 0, t2: 2, date: '19 Jun', time: '14:00', stadium: 'Boston' },
+            { t1: 3, t2: 1, date: '19 Jun', time: '17:00', stadium: 'New York' },
+            { t1: 3, t2: 0, date: '23 Jun', time: '13:00', stadium: 'New York' },
+            { t1: 1, t2: 2, date: '23 Jun', time: '16:00', stadium: 'Boston' }
+        ]
+    },
+    'J': {
+        teams: ['Argentina', 'Argelia', 'Austria', 'Jordania'],
+        matches: [
+            { t1: 0, t2: 1, date: '16 Jun', time: '14:00', stadium: 'Dallas' },
+            { t1: 2, t2: 3, date: '16 Jun', time: '17:00', stadium: 'San Francisco' },
+            { t1: 0, t2: 2, date: '20 Jun', time: '15:00', stadium: 'Dallas' },
+            { t1: 3, t2: 1, date: '20 Jun', time: '18:00', stadium: 'San Francisco' },
+            { t1: 3, t2: 0, date: '24 Jun', time: '14:00', stadium: 'San Francisco' },
+            { t1: 1, t2: 2, date: '24 Jun', time: '17:00', stadium: 'Dallas' }
+        ]
+    },
+    'K': {
+        teams: ['Portugal', 'Repechaje FIFA 1', 'Uzbekistán', 'Colombia'],
+        matches: [
+            { t1: 0, t2: 1, date: '16 Jun', time: '13:00', stadium: 'Atlanta' },
+            { t1: 2, t2: 3, date: '16 Jun', time: '16:00', stadium: 'Miami' },
+            { t1: 0, t2: 2, date: '20 Jun', time: '14:00', stadium: 'Miami' },
+            { t1: 3, t2: 1, date: '20 Jun', time: '17:00', stadium: 'Atlanta' },
+            { t1: 3, t2: 0, date: '24 Jun', time: '13:00', stadium: 'Atlanta' },
+            { t1: 1, t2: 2, date: '24 Jun', time: '16:00', stadium: 'Miami' }
+        ]
+    },
+    'L': {
+        teams: ['Inglaterra', 'Croacia', 'Panamá', 'Ghana'],
+        matches: [
+            { t1: 0, t2: 1, date: '17 Jun', time: '14:00', stadium: 'Philadelphia' },
+            { t1: 2, t2: 3, date: '17 Jun', time: '17:00', stadium: 'Toronto' },
+            { t1: 0, t2: 2, date: '21 Jun', time: '15:00', stadium: 'Philadelphia' },
+            { t1: 3, t2: 1, date: '21 Jun', time: '18:00', stadium: 'Toronto' },
+            { t1: 3, t2: 0, date: '25 Jun', time: '14:00', stadium: 'Toronto' },
+            { t1: 1, t2: 2, date: '25 Jun', time: '17:00', stadium: 'Philadelphia' }
+        ]
+    }
+};
+const R32_MATCHUPS = [{id:'32-1', h:'A1', a:'B2'}, {id:'32-2', h:'C1', a:'D2'}, {id:'32-3', h:'E1', a:'F2'}, {id:'32-4', h:'G1', a:'H2'},{id:'32-5', h:'I1', a:'J2'}, {id:'32-6', h:'K1', a:'L2'}, {id:'32-7', h:'A2', a:'C2'}, {id:'32-8', h:'B1', a:'T1'},{id:'32-9', h:'D1', a:'T2'}, {id:'32-10', h:'E2', a:'F1'}, {id:'32-11', h:'G2', a:'H1'}, {id:'32-12', h:'I2', a:'J1'},{id:'32-13', h:'K2', a:'L1'}, {id:'32-14', h:'T3', a:'T4'}, {id:'32-15', h:'T5', a:'T6'}, {id:'32-16', h:'T7', a:'T8'}];
+const R16_MATCHUPS = [{id:'16-1', h:'32-1', a:'32-2'}, {id:'16-2', h:'32-3', a:'32-4'}, {id:'16-3', h:'32-5', a:'32-6'}, {id:'16-4', h:'32-7', a:'32-8'},{id:'16-5', h:'32-9', a:'32-10'}, {id:'16-6', h:'32-11', a:'32-12'}, {id:'16-7', h:'32-13', a:'32-14'}, {id:'16-8', h:'32-15', a:'32-16'}];
+const QF_MATCHUPS = [ {id:'8-1',h:'16-1',a:'16-2'}, {id:'8-2',h:'16-3',a:'16-4'}, {id:'8-3',h:'16-5',a:'16-6'}, {id:'8-4',h:'16-7',a:'16-8'} ];
+const SF_MATCHUPS = [ {id:'4-1',h:'8-1',a:'8-2'}, {id:'4-2',h:'8-3',a:'8-4'} ];
+const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
