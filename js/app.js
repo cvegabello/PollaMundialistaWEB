@@ -48,10 +48,27 @@ window.addEventListener('resize', ()=>{canvas.width=window.innerWidth; canvas.he
 // const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
 
 /* =========================================================
-   3. ESTADO GLOBAL
+   3. ESTADO GLOBAL (CORREGIDO)
    ========================================================= */
-let currentUser = { name: '', preds: {}, locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } };
-let role = 'fan';
+
+// 1. LISTA DE USUARIOS (¡Esta era la que faltaba!)
+// Cargamos de 'm26_users' para seguir su nomenclatura
+let users = JSON.parse(localStorage.getItem('m26_users')) || [];
+
+// 2. USUARIO ACTUAL
+// Intentamos recuperar la sesión guardada. Si no hay, creamos uno vacío.
+let storedUser = JSON.parse(localStorage.getItem('m26_currentUser'));
+let currentUser = storedUser || { 
+    name: '', 
+    preds: {}, 
+    locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } 
+};
+
+// 3. ROL
+// Si recuperamos un usuario, usamos su rol. Si no, es 'fan'.
+let role = (currentUser && currentUser.role) ? currentUser.role : 'fan';
+
+// 4. EL RESTO (Igual a como lo tenía)
 let officialRes = JSON.parse(localStorage.getItem('m26_official')) || {};
 
 let rules = JSON.parse(localStorage.getItem('m26_rules')) || { 
@@ -61,6 +78,8 @@ let rules = JSON.parse(localStorage.getItem('m26_rules')) || {
 
 let phaseControl = JSON.parse(localStorage.getItem('m26_phase_control')) || { groups: true, r32: false, r16: false, qf: false, sf: false, f: false };
 let officialTeams = JSON.parse(localStorage.getItem('m26_official_teams')) || {};
+
+// Variable para el Motor FIFA
 let simulatedTeams = {};
 
 /* =========================================================
@@ -325,19 +344,27 @@ function switchTab(tab) {
 //     }
 // }
 
+/* =========================================================
+   RENDER GROUPS (ESTRATEGIA BLINDADA)
+   ========================================================= */
 function renderGroups() {
     const container = document.getElementById('groups-container');
+    if(!container) return; // Protección por si no existe el contenedor
     container.innerHTML = '';
     
-    if(typeof calculatePoints === 'function' && role === 'fan') calculatePoints();
+    // NOTA: Quitamos calculatePoints() para evitar conflictos. 
+    // Ahora calculamos todo aquí mismo.
 
     for(let g in GROUPS_CONFIG) {
         const data = GROUPS_CONFIG[g];
         let matchesHTML = '';
+        
+        // 1. Inicializar Stats
         let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
         
         data.matches.forEach((m, idx) => {
             let id = `${g}-${idx}`;
+            // Obtener valores
             let uH = currentUser.preds[`h-${id}`] || ''; 
             let uA = currentUser.preds[`a-${id}`] || '';
             let oH = officialRes[`h-${id}`] || ''; 
@@ -347,34 +374,40 @@ function renderGroups() {
             let valA = role === 'admin' ? oA : uA;
             let disabled = (role === 'fan' && currentUser.locks && currentUser.locks.groups) ? 'disabled' : '';
 
+            // 2. Calcular Matemáticas
             if(valH !== '' && valA !== '') {
                 let sH = parseInt(valH); let sA = parseInt(valA);
+                // Sumar al Local
                 teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
+                // Sumar al Visitante
                 teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
+                
                 if(sH > sA) teamStats[m.t1].pts += 3;
                 else if(sA > sH) teamStats[m.t2].pts += 3;
                 else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
             }
             
-            // VOLVEMOS A 'onchange': Más robusto y confiable
+            // 3. HTML del Partido (Usamos oninput para respuesta inmediata)
             matchesHTML += `<div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
                 <div class="center-inputs">
                     <div class="match-info">${m.info}</div>
                     <div class="score-container">
                         <input type="number" min="0" value="${valH}" ${disabled} 
-                               onchange="updateVal('${id}','h',this.value)">
+                               oninput="updateVal('${id}','h',this.value)">
                         <span>-</span>
                         <input type="number" min="0" value="${valA}" ${disabled} 
-                               onchange="updateVal('${id}','a',this.value)">
+                               oninput="updateVal('${id}','a',this.value)">
                     </div>
                 </div>
                 <div class="team-name team-away">${data.teams[m.t2]}</div>
             </div>`;
         });
 
+        // 4. Ordenamiento FIFA
         teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
 
+        // 5. Generar Tabla Compacta
         let tableRows = teamStats.map((t,i) => 
             `<tr class="${i<2?'qual-zone':''}">
                 <td class="pos-num">${i+1}</td>
@@ -409,33 +442,54 @@ function renderGroups() {
     }
 }
 
+/* =========================================================
+   UPDATE VAL (CON SEGURIDAD TRY-CATCH)
+   ========================================================= */
+function updateVal(id, type, val) {
+    if(val < 0) val = 0;
+    
+    // 1. Guardar en memoria
+    let key = (role === 'admin') ? (type === 'h' ? `h-${id}` : `a-${id}`) : `${type}-${id}`;
+    if(role === 'admin') officialRes[key] = val;
+    else {
+        // Validación de seguridad para locks
+        if(currentUser.locks && currentUser.locks.groups) return; 
+        currentUser.preds[key] = val;
+    }
+
+    // 2. Persistir
+    saveUsersDB(); 
+
+    // 3. REFRESCAR PANTALLA INMEDIATAMENTE
+    renderGroups(); 
+
+    // 4. CALCULAR FUTURO (Protegido para que no rompa la tabla si falla)
+    setTimeout(() => {
+        try {
+            if (typeof calculateSimulatedTeams === 'function') {
+                let preds = role === 'admin' ? officialRes : currentUser.preds;
+                let projected = calculateSimulatedTeams(preds);
+                
+                if(!currentUser.computed) currentUser.computed = {};
+                currentUser.computed.r32 = projected;
+                
+                // Variable global segura
+                if(typeof simulatedTeams !== 'undefined') {
+                    simulatedTeams = projected;
+                }
+            }
+        } catch (e) {
+            console.log("Error calculando llaves (tranquilo, la tabla sí se actualizó):", e);
+        }
+    }, 0);
+}
+
 function updateStats(stats, i1, i2, s1, s2) {
     let t1=stats[i1], t2=stats[i2];
     t1.dif += (s1-s2); t2.dif += (s2-s1);
     if(s1>s2) t1.pts+=3; else if(s2>s1) t2.pts+=3; else {t1.pts++; t2.pts++;}
 }
 
-/* =========================================================
-   GATILLO DE ACTUALIZACIÓN (UPDATE VAL)
-   Se dispara cada vez que cambias un numerito en los grupos
-   ========================================================= */
-function updateVal(id, type, val) {
-    let key = (role === 'admin') ? (type === 'h' ? `h-${id}` : `a-${id}`) : `${type}-${id}`;
-    
-    // 1. Guardar
-    if(role === 'admin') officialRes[key] = val;
-    else currentUser.preds[key] = val;
-    saveUsersDB(); 
-
-    // 2. RECARGAR LA PANTALLA (Fuerza Bruta)
-    // Esto asegura que la tabla cambie SIEMPRE.
-    renderGroups(); 
-
-    // 3. Calcular el futuro (Llaves)
-    if (typeof updateGlobalProjections === 'function') {
-        updateGlobalProjections();
-    }
-}
 
 /* =========================================================
    6. RENDERIZADO DE LLAVES (BRACKET)
@@ -1308,4 +1362,28 @@ function refreshGroupTable(gid) {
     // 4. Inyectar SOLO en el cuerpo de la tabla (No toca los inputs)
     let tbody = document.getElementById(`tbody-${gid}`);
     if(tbody) tbody.innerHTML = newRows;
+}
+
+/* =========================================================
+   PERSISTENCIA DE DATOS (GUARDAR EN LOCALSTORAGE)
+   Esta es la función que faltaba y causaba el error.
+   ========================================================= */
+function saveUsersDB() {
+    if(role === 'admin') {
+        localStorage.setItem('m26_official', JSON.stringify(officialRes));
+    } else {
+        // Buscar y actualizar usuario en la lista
+        let idx = users.findIndex(u => u.username === currentUser.username);
+        if(idx !== -1) {
+            users[idx] = currentUser;
+        } else {
+            // Si por alguna razón no está en la lista (caso raro), lo agregamos
+            if(currentUser.username) users.push(currentUser);
+        }
+        
+        // Guardar en LocalStorage con sus claves m26_
+        localStorage.setItem('m26_users', JSON.stringify(users));
+        localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
+    }
+    console.log("💾 Datos guardados en m26_users.");
 }
