@@ -221,32 +221,191 @@ function switchTab(tab) {
 /* =========================================================
    5. RENDERIZADO DE GRUPOS
    ========================================================= */
+// function renderGroups() {
+//     const container = document.getElementById('groups-container');
+//     container.innerHTML = '';
+    
+//     if(typeof calculatePoints === 'function' && role === 'fan') calculatePoints();
+
+//     for(let g in GROUPS_CONFIG) {
+//         const data = GROUPS_CONFIG[g];
+//         let matchesHTML = '';
+        
+//         // 1. Inicializamos tambien GC (Goles en Contra)
+//         let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
+        
+//         data.matches.forEach((m, idx) => {
+//             let id = `${g}-${idx}`;
+//             // ... (Obtención de valores igual que antes) ...
+//             let uH = currentUser.preds[`h-${id}`] || ''; 
+//             let uA = currentUser.preds[`a-${id}`] || '';
+//             let oH = officialRes[`h-${id}`] || ''; 
+//             let oA = officialRes[`a-${id}`] || '';
+            
+//             let valH = role === 'admin' ? oH : uH; 
+//             let valA = role === 'admin' ? oA : uA;
+//             let disabled = (role === 'fan' && currentUser.locks && currentUser.locks.groups) ? 'disabled' : '';
+
+//             // 2. Calculamos GF y GC
+//             if(valH !== '' && valA !== '') {
+//                 let sH = parseInt(valH);
+//                 let sA = parseInt(valA);
+                
+//                 // LOCAL
+//                 teamStats[m.t1].gf += sH;
+//                 teamStats[m.t1].gc += sA; // Le hicieron sA goles
+//                 teamStats[m.t1].dif += (sH - sA);
+                
+//                 // VISITANTE
+//                 teamStats[m.t2].gf += sA;
+//                 teamStats[m.t2].gc += sH; // Le hicieron sH goles
+//                 teamStats[m.t2].dif += (sA - sH);
+                
+//                 if(sH > sA) teamStats[m.t1].pts += 3;
+//                 else if(sA > sH) teamStats[m.t2].pts += 3;
+//                 else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
+//             }
+            
+//             // ... (HTML del partido igual que antes) ...
+//             matchesHTML += `<div class="match-row">
+//                 <div class="team-name team-home">${data.teams[m.t1]}</div>
+//                 <div class="center-inputs">
+//                     <div class="match-info">${m.info}</div>
+//                     <div class="score-container">
+//                         <input type="number" min="0" value="${valH}" ${disabled} 
+//                                onchange="updateVal('${id}','h',this.value)">
+//                         <span>-</span>
+//                         <input type="number" min="0" value="${valA}" ${disabled} 
+//                                onchange="updateVal('${id}','a',this.value)">
+//                     </div>
+//                 </div>
+//                 <div class="team-name team-away">${data.teams[m.t2]}</div>
+//             </div>`;
+//         });
+
+//         // Ordenamiento FIFA
+//         teamStats.sort((a,b) => {
+//             if (b.pts !== a.pts) return b.pts - a.pts;
+//             if (b.dif !== a.dif) return b.dif - a.dif;
+//             return b.gf - a.gf;
+//         });
+
+//         // 3. TABLA MEJORADA: Agregamos las columnas GF y GC
+//         // Note que usaremos una clase 'compact-table' para controlar el ancho con CSS
+//         let tableRows = teamStats.map((t,i) => 
+//             `<tr class="${i<2?'qual-zone':''}">
+//                 <td class="pos-num">${i+1}</td>
+//                 <td style="text-align:left; padding-left:5px;">${t.name}</td>
+//                 <td>${t.pts}</td>
+//                 <td>${t.dif}</td>
+//                 <td>${t.gf}</td> <td>${t.gc}</td> </tr>`
+//         ).join('');
+        
+//         let titleTxt = role === 'admin' ? `GRUPO ${g} [OFICIAL]` : (currentUser.locks && currentUser.locks.groups ? `GRUPO ${g} [ENVIADO]` : `GRUPO ${g}`);
+        
+//         // Encabezados nuevos
+//         container.innerHTML += `
+//         <div class="card">
+//             <div class="group-header">${titleTxt}</div>
+//             <div class="card-body">
+//                 ${matchesHTML}
+//                 <table class="compact-table" style="width:100%; margin-top:10px; font-size:0.85rem; text-align:center;">
+//                     <tr style="background:rgba(255,255,255,0.1); color:#aaa;">
+//                         <th width="10%">#</th>
+//                         <th width="40%" style="text-align:left; padding-left:5px;">EQ</th>
+//                         <th width="10%" title="Puntos">PT</th>
+//                         <th width="10%" title="Diferencia">DF</th>
+//                         <th width="10%" title="Goles Favor">GF</th>
+//                         <th width="10%" title="Goles Contra">GC</th>
+//                     </tr>
+//                     ${tableRows}
+//                 </table>
+//             </div>
+//         </div>`;
+//     }
+// }
+
 function renderGroups() {
     const container = document.getElementById('groups-container');
     container.innerHTML = '';
-    if(role === 'fan') calculatePoints();
+    
+    if(typeof calculatePoints === 'function' && role === 'fan') calculatePoints();
+
     for(let g in GROUPS_CONFIG) {
         const data = GROUPS_CONFIG[g];
         let matchesHTML = '';
-        let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0 }));
+        let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
         
         data.matches.forEach((m, idx) => {
             let id = `${g}-${idx}`;
-            let uH = currentUser.preds[`h-${id}`] || ''; let uA = currentUser.preds[`a-${id}`] || '';
-            let oH = officialRes[`h-${id}`] || ''; let oA = officialRes[`a-${id}`] || '';
-            let valH = role === 'admin' ? oH : uH; let valA = role === 'admin' ? oA : uA;
-            let disabled = (role === 'fan' && currentUser.locks.groups) ? 'disabled' : '';
-            let cH = role === 'admin' ? oH : uH; let cA = role === 'admin' ? oA : uA;
-            if(cH !== '' && cA !== '') updateStats(teamStats, m.t1, m.t2, parseInt(cH), parseInt(cA));
+            let uH = currentUser.preds[`h-${id}`] || ''; 
+            let uA = currentUser.preds[`a-${id}`] || '';
+            let oH = officialRes[`h-${id}`] || ''; 
+            let oA = officialRes[`a-${id}`] || '';
             
-            matchesHTML += `<div class="match-row"><div class="team-name team-home">${data.teams[m.t1]}</div><div class="center-inputs"><div class="match-info">${m.info}</div><div class="score-container"><input type="number" min="0" value="${valH}" ${disabled} onchange="updateVal('${id}','h',this.value)"><span>-</span><input type="number" min="0" value="${valA}" ${disabled} onchange="updateVal('${id}','a',this.value)"></div></div><div class="team-name team-away">${data.teams[m.t2]}</div></div>`;
+            let valH = role === 'admin' ? oH : uH; 
+            let valA = role === 'admin' ? oA : uA;
+            let disabled = (role === 'fan' && currentUser.locks && currentUser.locks.groups) ? 'disabled' : '';
+
+            if(valH !== '' && valA !== '') {
+                let sH = parseInt(valH); let sA = parseInt(valA);
+                teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
+                teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
+                if(sH > sA) teamStats[m.t1].pts += 3;
+                else if(sA > sH) teamStats[m.t2].pts += 3;
+                else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
+            }
+            
+            // VOLVEMOS A 'onchange': Más robusto y confiable
+            matchesHTML += `<div class="match-row">
+                <div class="team-name team-home">${data.teams[m.t1]}</div>
+                <div class="center-inputs">
+                    <div class="match-info">${m.info}</div>
+                    <div class="score-container">
+                        <input type="number" min="0" value="${valH}" ${disabled} 
+                               onchange="updateVal('${id}','h',this.value)">
+                        <span>-</span>
+                        <input type="number" min="0" value="${valA}" ${disabled} 
+                               onchange="updateVal('${id}','a',this.value)">
+                    </div>
+                </div>
+                <div class="team-name team-away">${data.teams[m.t2]}</div>
+            </div>`;
         });
 
-        teamStats.sort((a,b) => b.pts - a.pts || b.dif - a.dif);
-        let tableRows = teamStats.map((t,i) => `<tr class="${i<2?'qual-zone':''}"><td class="pos-num">${i+1}</td><td>${t.name}</td><td>${t.pts}</td><td>${t.dif}</td></tr>`).join('');
-        let titleTxt = role === 'admin' ? `GRUPO ${g} [OFICIAL]` : (currentUser.locks.groups ? `GRUPO ${g} [ENVIADO]` : `GRUPO ${g}`);
+        teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+
+        let tableRows = teamStats.map((t,i) => 
+            `<tr class="${i<2?'qual-zone':''}">
+                <td class="pos-num">${i+1}</td>
+                <td style="text-align:left; padding-left:5px;">${t.name}</td>
+                <td style="font-weight:bold; color:#fff; font-size:0.95rem;">${t.pts}</td>
+                <td style="color:#888;">${t.dif}</td>
+                <td style="color:#888;">${t.gf}</td>
+                <td style="color:#888;">${t.gc}</td>
+             </tr>`
+        ).join('');
         
-        container.innerHTML += `<div class="card"><div class="group-header">${titleTxt}</div><div class="card-body">${matchesHTML}<table><tr><th>#</th><th>EQ</th><th>PTS</th><th>DIF</th></tr>${tableRows}</table></div></div>`;
+        let titleTxt = role === 'admin' ? `GRUPO ${g} [OFICIAL]` : (currentUser.locks && currentUser.locks.groups ? `GRUPO ${g} [ENVIADO]` : `GRUPO ${g}`);
+        
+        container.innerHTML += `
+        <div class="card">
+            <div class="group-header">${titleTxt}</div>
+            <div class="card-body">
+                ${matchesHTML}
+                <table class="compact-table" style="width:100%; margin-top:10px; font-size:0.85rem; text-align:center;">
+                    <tr style="background:rgba(255,255,255,0.05); color:#666;">
+                        <th width="10%">#</th>
+                        <th width="40%" style="text-align:left; padding-left:5px; color:#aaa;">EQ</th>
+                        <th width="10%" title="Puntos" style="color:#fff; font-weight:bold;">PT</th>
+                        <th width="10%" title="Diferencia">DF</th>
+                        <th width="10%" title="Goles Favor">GF</th>
+                        <th width="10%" title="Goles Contra">GC</th>
+                    </tr>
+                    ${tableRows}
+                </table>
+            </div>
+        </div>`;
     }
 }
 
@@ -256,42 +415,157 @@ function updateStats(stats, i1, i2, s1, s2) {
     if(s1>s2) t1.pts+=3; else if(s2>s1) t2.pts+=3; else {t1.pts++; t2.pts++;}
 }
 
-function updateVal(id, slot, val) {
-    if(val<0) val=0;
-    let k = `${slot}-${id}`;
-    if(role === 'admin') officialRes[k] = val;
-    else {
-        if(currentUser.locks.groups) return;
-        currentUser.preds[k] = val;
+/* =========================================================
+   GATILLO DE ACTUALIZACIÓN (UPDATE VAL)
+   Se dispara cada vez que cambias un numerito en los grupos
+   ========================================================= */
+function updateVal(id, type, val) {
+    let key = (role === 'admin') ? (type === 'h' ? `h-${id}` : `a-${id}`) : `${type}-${id}`;
+    
+    // 1. Guardar
+    if(role === 'admin') officialRes[key] = val;
+    else currentUser.preds[key] = val;
+    saveUsersDB(); 
+
+    // 2. RECARGAR LA PANTALLA (Fuerza Bruta)
+    // Esto asegura que la tabla cambie SIEMPRE.
+    renderGroups(); 
+
+    // 3. Calcular el futuro (Llaves)
+    if (typeof updateGlobalProjections === 'function') {
+        updateGlobalProjections();
     }
-    renderGroups();
 }
 
 /* =========================================================
    6. RENDERIZADO DE LLAVES (BRACKET)
    ========================================================= */
-function calculateSimulatedTeams(sourceData) {
-    let q = {}; let thirds = [];
-    for(let g in GROUPS_CONFIG) {
-        let stats = GROUPS_CONFIG[g].teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0 }));
-        GROUPS_CONFIG[g].matches.forEach((m, idx) => {
-            let id = `${g}-${idx}`;
-            let h = sourceData[`h-${id}`]; let a = sourceData[`a-${id}`]; 
-            if(h && a) {
-                h=parseInt(h); a=parseInt(a);
-                let t1=stats[m.t1]; let t2=stats[m.t2];
-                if(h>a) t1.pts+=3; else if(a>h) t2.pts+=3; else {t1.pts++; t2.pts++;}
-                t1.dif += (h-a); t2.dif += (a-h);
-                t1.gf += h; t2.gf += a;
+// function calculateSimulatedTeams(sourceData) {
+//     let q = {}; let thirds = [];
+//     for(let g in GROUPS_CONFIG) {
+//         let stats = GROUPS_CONFIG[g].teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0 }));
+//         GROUPS_CONFIG[g].matches.forEach((m, idx) => {
+//             let id = `${g}-${idx}`;
+//             let h = sourceData[`h-${id}`]; let a = sourceData[`a-${id}`]; 
+//             if(h && a) {
+//                 h=parseInt(h); a=parseInt(a);
+//                 let t1=stats[m.t1]; let t2=stats[m.t2];
+//                 if(h>a) t1.pts+=3; else if(a>h) t2.pts+=3; else {t1.pts++; t2.pts++;}
+//                 t1.dif += (h-a); t2.dif += (a-h);
+//                 t1.gf += h; t2.gf += a;
+//             }
+//         });
+//         stats.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
+//         q[g+'1'] = stats[0].name; q[g+'2'] = stats[1].name;
+//         thirds.push({name: stats[2].name, pts: stats[2].pts, dif: stats[2].dif, gf: stats[2].gf});
+//     }
+//     thirds.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
+//     for(let i=0; i<8; i++) { if(thirds[i]) q['T'+(i+1)] = thirds[i].name; else q['T'+(i+1)] = "3er"; }
+//     return q;
+// }
+/* =========================================================
+   EL CEREBRO FIFA (CALCULATE SIMULATED TEAMS)
+   Recibe los pronósticos y devuelve los clasificados calculados
+   ========================================================= */
+
+/* =========================================================
+   EL CEREBRO FIFA (CALCULATE SIMULATED TEAMS)
+   ========================================================= */
+/* =========================================================
+   EL CEREBRO FIFA (CALCULATE SIMULATED TEAMS) - VERSIÓN FINAL
+   ========================================================= */
+function calculateSimulatedTeams(predsSource) {
+    const standings = {};
+    
+    // 1. CALCULAR TABLA DE TODOS LOS GRUPOS
+    Object.keys(GROUPS_CONFIG).forEach(gid => {
+        const groupData = GROUPS_CONFIG[gid];
+        
+        let teamsMap = groupData.teams.map((name, idx) => ({ 
+            name: name, group: gid,
+            pts: 0, dif: 0, gf: 0, gc: 0
+        }));
+
+        groupData.matches.forEach((m, idx) => {
+            let id = `${gid}-${idx}`;
+            // Claves para leer los inputs
+            let vH = predsSource[`h-${id}`];
+            let vA = predsSource[`a-${id}`];
+
+            if(vH && vA && vH !== '' && vA !== '') { 
+                let sH = parseInt(vH); let sA = parseInt(vA);
+                teamsMap[m.t1].gf += sH; teamsMap[m.t1].gc += sA; teamsMap[m.t1].dif += (sH-sA);
+                teamsMap[m.t2].gf += sA; teamsMap[m.t2].gc += sH; teamsMap[m.t2].dif += (sA-sH);
+                
+                if(sH > sA) teamsMap[m.t1].pts += 3;
+                else if(sA > sH) teamsMap[m.t2].pts += 3;
+                else { teamsMap[m.t1].pts += 1; teamsMap[m.t2].pts += 1; }
             }
         });
-        stats.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
-        q[g+'1'] = stats[0].name; q[g+'2'] = stats[1].name;
-        thirds.push({name: stats[2].name, pts: stats[2].pts, dif: stats[2].dif, gf: stats[2].gf});
+
+        // ORDENAMIENTO FIFA: PTS > DIF > GF
+        teamsMap.sort((a,b) => {
+            if(b.pts !== a.pts) return b.pts - a.pts;
+            if(b.dif !== a.dif) return b.dif - a.dif;
+            return b.gf - a.gf;
+        });
+
+        standings[gid] = teamsMap;
+    });
+
+    // 2. ENCONTRAR MEJORES TERCEROS
+    let thirds = [];
+    Object.keys(standings).forEach(g => {
+        let t = standings[g][2]; // El tercero
+        if(t) thirds.push(t);
+    });
+    // Ordenar terceros
+    thirds.sort((a,b) => {
+        if(b.pts !== a.pts) return b.pts - a.pts;
+        if(b.dif !== a.dif) return b.dif - a.dif;
+        return b.gf - a.gf;
+    });
+    let bestThirds = thirds.slice(0, 8); // Top 8 Clasifican
+
+    // 3. MAPEAR CLASIFICADOS A LAS LLAVES (R32)
+    const projected = {};
+    
+    // --- FUNCIÓN INTERNA UNIFICADA (resolveTeam) ---
+    const resolveTeam = (code) => {
+        if(!code) return '...';
+
+        // CASO A: Clasificados Directos (Ej: A1, B2, L1...)
+        // Verifica si es Letra + Numero (del 1 al 2)
+        if (code.match(/^[A-L][1-2]$/)) {
+            let type = code.charAt(0); 
+            let idx = parseInt(code.charAt(1)) - 1; // 1->0, 2->1
+            
+            if(standings[type] && standings[type][idx]) {
+                return standings[type][idx].name;
+            }
+        }
+
+        // CASO B: Mejores Terceros Complejos (Ej: T_ABCDF)
+        if (code.startsWith('T_')) {
+            // Muestra los posibles grupos de origen
+            // Ej: Convierte "T_ABCDF" en "(3ro A,B,C,D,F)"
+            return code.replace('T_', '(3ro ').replace(/_/g, '') + ')';
+        }
+        
+        return '...';
+    };
+
+    // Usamos R32_MATCHUPS de data.js
+    if(typeof R32_MATCHUPS !== 'undefined') {
+        R32_MATCHUPS.forEach(m => {
+            projected[m.id] = {
+                home: resolveTeam(m.h),
+                away: resolveTeam(m.a)
+            };
+        });
     }
-    thirds.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
-    for(let i=0; i<8; i++) { if(thirds[i]) q['T'+(i+1)] = thirds[i].name; else q['T'+(i+1)] = "3er"; }
-    return q;
+
+    return projected;
 }
 
 function autoFillOfficialQualifiers() {
@@ -349,11 +623,18 @@ function renderRoundColumn(title, matchups, prefix, phaseKey) {
     return html + `</div>`;
 }
 
-function resolveTeamName(matchId, slot, originalCode) {
-    if (officialTeams[`${matchId}-${slot}`]) return officialTeams[`${matchId}-${slot}`];
-    if(simulatedTeams[originalCode]) return simulatedTeams[originalCode];
-    if (originalCode.includes('-')) return "Ganador " + originalCode;
-    return originalCode;
+/* =========================================================
+   EL PUENTE (Resuelve qué nombre mostrar en la llave)
+   Conecta el cálculo matemático con la pantalla.
+   ========================================================= */
+function resolveTeamName(matchId, side, defaultCode) {
+    // 1. Verificamos si el Motor ya calculó este partido
+    if (simulatedTeams && simulatedTeams[matchId]) {
+        return side === 'h' ? simulatedTeams[matchId].home : simulatedTeams[matchId].away;
+    }
+    
+    // 2. Si no hay cálculo (o es una fase futura vacía), devolvemos puntos suspensivos
+    return '...'; 
 }
 
 function updateOfficialTeamName(matchId, slot, newName) {
@@ -870,3 +1151,161 @@ document.addEventListener('DOMContentLoaded', () => {
     if(inputUser) inputUser.addEventListener('keypress', triggerLogin);
     if(inputPass) inputPass.addEventListener('keypress', triggerLogin);
 });
+
+/* =========================================================
+   CÁLCULO GLOBAL DE PROYECCIONES (FIFA)
+   Calcula posiciones, mejores terceros y llena las llaves.
+   ========================================================= */
+function updateGlobalProjections() {
+    console.log("🔄 Calculando proyecciones FIFA...");
+
+    const standings = {};
+    // Decidimos qué fuente de datos usar (Fan u Oficial)
+    const predsSource = role === 'admin' ? officialRes : currentUser.preds;
+
+    // 1. CALCULAR TABLAS DE TODOS LOS GRUPOS
+    Object.keys(GROUPS_CONFIG).forEach(gid => {
+        const groupData = GROUPS_CONFIG[gid];
+        // Estructura temporal para cálculo
+        let teamsMap = groupData.teams.map((name, idx) => ({ 
+            name: name, 
+            group: gid,
+            pts: 0, dif: 0, gf: 0, gc: 0 
+        }));
+
+        groupData.matches.forEach((m, idx) => {
+            let id = `${gid}-${idx}`;
+            // Buscar predicción H y A (ajuste las claves según como las guarde su app)
+            // NOTA: Su app usa claves tipo 'h-A-0'.
+            let vH = predsSource[`h-${id}`];
+            let vA = predsSource[`a-${id}`];
+
+            if(vH && vA && vH !== '' && vA !== '') { 
+                let sH = parseInt(vH); let sA = parseInt(vA);
+                
+                // Sumar stats
+                teamsMap[m.t1].gf += sH; teamsMap[m.t1].gc += sA; teamsMap[m.t1].dif += (sH-sA);
+                teamsMap[m.t2].gf += sA; teamsMap[m.t2].gc += sH; teamsMap[m.t2].dif += (sA-sH);
+                
+                if(sH > sA) teamsMap[m.t1].pts+=3;
+                else if(sA > sH) teamsMap[m.t2].pts+=3;
+                else { teamsMap[m.t1].pts+=1; teamsMap[m.t2].pts+=1; }
+            }
+        });
+
+        // ORDENAMIENTO FIFA (PTS > DIF > GF)
+        teamsMap.sort((a,b) => {
+            if(b.pts !== a.pts) return b.pts - a.pts;
+            if(b.dif !== a.dif) return b.dif - a.dif;
+            return b.gf - a.gf;
+        });
+
+        standings[gid] = teamsMap;
+    });
+
+    // 2. ENCONTRAR MEJORES TERCEROS
+    let thirds = [];
+    Object.keys(standings).forEach(g => {
+        // El equipo en índice 2 es el 3ro del grupo
+        let t = standings[g][2]; 
+        if(t) thirds.push(t);
+    });
+
+    // Ordenar los terceros entre sí para sacar los Top 8
+    thirds.sort((a,b) => {
+        if(b.pts !== a.pts) return b.pts - a.pts;
+        if(b.dif !== a.dif) return b.dif - a.dif;
+        return b.gf - a.gf;
+    });
+    
+    // Tomamos los 8 mejores
+    let bestThirds = thirds.slice(0, 8); 
+
+    // 3. MAPEAR A LAS LLAVES (Round of 32)
+    const projectedR32 = {};
+    
+    // Función auxiliar para traducir códigos (Ej: "A1" -> "México")
+    const resolveTeam = (code) => {
+        if(!code) return '...';
+        let type = code.charAt(0); // 'A', 'B' ... o 'T' (Tercero)
+        let idx = parseInt(code.charAt(1)) - 1; // 1 -> 0
+
+        // Caso Clasificado Directo (A1, A2...)
+        if(type !== 'T') {
+            if(standings[type] && standings[type][idx]) {
+                return standings[type][idx].name;
+            }
+        } 
+        // Caso Mejor Tercero (T1, T2...)
+        else {
+            // T1 es el mejor tercero #1. 
+            if(bestThirds[idx]) {
+                return `(3${bestThirds[idx].group}) ${bestThirds[idx].name}`;
+            }
+        }
+        return '...'; // Si no hay datos aún
+    };
+
+    // Usamos la configuración de data.js
+    if(typeof R32_MATCHUPS !== 'undefined') {
+        R32_MATCHUPS.forEach(m => {
+            projectedR32[m.id] = {
+                homeTeam: resolveTeam(m.h),
+                awayTeam: resolveTeam(m.a)
+            };
+        });
+    }
+
+    // 4. GUARDAR EN MEMORIA DEL USUARIO
+    if(!currentUser.computed) currentUser.computed = {};
+    currentUser.computed.r32 = projectedR32;
+    
+    // Nota: No llamamos a renderBracket() aquí porque estamos en la vista de Grupos.
+    // Cuando el usuario cambie de pestaña, el renderBracket leerá 'currentUser.computed.r32'.
+}
+
+/* =========================================================
+   REFRESCO QUIRÚRGICO DE TABLA (Solo actualiza un grupo)
+   ========================================================= */
+function refreshGroupTable(gid) {
+    const groupData = GROUPS_CONFIG[gid];
+    if(!groupData) return;
+
+    // 1. Recalcular Stats solo de este grupo
+    let teamStats = groupData.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
+    const predsSource = role === 'admin' ? officialRes : currentUser.preds;
+
+    groupData.matches.forEach((m, idx) => {
+        let id = `${gid}-${idx}`;
+        let vH = predsSource[`h-${id}`];
+        let vA = predsSource[`a-${id}`];
+
+        if(vH && vA && vH !== '' && vA !== '') { 
+            let sH = parseInt(vH); let sA = parseInt(vA);
+            teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
+            teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
+            if(sH > sA) teamStats[m.t1].pts += 3;
+            else if(sA > sH) teamStats[m.t2].pts += 3;
+            else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
+        }
+    });
+
+    // 2. Ordenar FIFA
+    teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+
+    // 3. Generar HTML de las filas
+    let newRows = teamStats.map((t,i) => 
+        `<tr class="${i<2?'qual-zone':''}">
+            <td class="pos-num">${i+1}</td>
+            <td style="text-align:left; padding-left:5px;">${t.name}</td>
+            <td style="font-weight:bold; color:#fff; font-size:0.95rem;">${t.pts}</td>
+            <td style="color:#888;">${t.dif}</td>
+            <td style="color:#888;">${t.gf}</td>
+            <td style="color:#888;">${t.gc}</td>
+         </tr>`
+    ).join('');
+
+    // 4. Inyectar SOLO en el cuerpo de la tabla (No toca los inputs)
+    let tbody = document.getElementById(`tbody-${gid}`);
+    if(tbody) tbody.innerHTML = newRows;
+}

@@ -435,3 +435,26 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
     .tool-text { display: none; }
     .tool-btn { padding: 10px; font-size: 1.2rem; }
 }
+
+/* Tabla Compacta para Grupos */
+.compact-table {
+    border-collapse: collapse;
+}
+
+.compact-table th, .compact-table td {
+    padding: 4px 2px; /* Reducimos el relleno para que quepan */
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.compact-table th {
+    font-weight: normal;
+    font-size: 0.75rem; /* Letra pequeñita para los títulos */
+}
+
+/* En móviles, si los nombres son muy largos, evita que rompan la tabla */
+.compact-table td:nth-child(2) {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px; /* Ajuste esto si necesita */
+}

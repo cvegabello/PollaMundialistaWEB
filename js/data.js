@@ -138,7 +138,39 @@ const GROUPS_CONFIG = {
         ]
     }
 };
-const R32_MATCHUPS = [{id:'32-1', h:'A1', a:'B2'}, {id:'32-2', h:'C1', a:'D2'}, {id:'32-3', h:'E1', a:'F2'}, {id:'32-4', h:'G1', a:'H2'},{id:'32-5', h:'I1', a:'J2'}, {id:'32-6', h:'K1', a:'L2'}, {id:'32-7', h:'A2', a:'C2'}, {id:'32-8', h:'B1', a:'T1'},{id:'32-9', h:'D1', a:'T2'}, {id:'32-10', h:'E2', a:'F1'}, {id:'32-11', h:'G2', a:'H1'}, {id:'32-12', h:'I2', a:'J1'},{id:'32-13', h:'K2', a:'L1'}, {id:'32-14', h:'T3', a:'T4'}, {id:'32-15', h:'T5', a:'T6'}, {id:'32-16', h:'T7', a:'T8'}];
+/* =========================================================
+   CRUCES OFICIALES FIFA WORLD CUP 2026 (ROUND OF 32)
+   Basado en el esquema de 12 Grupos (48 equipos)
+   ========================================================= */
+const R32_MATCHUPS = [
+    // --- DOMINGO 28 JUNIO 2026 ---
+    { id: '73', h: 'A2', a: 'B2', info: 'Los Angeles (M73)' }, // ¡El que usted dijo!
+
+    // --- LUNES 29 JUNIO 2026 ---
+    { id: '74', h: 'E1', a: 'T_ABCDF', info: 'Boston (M74)' }, // 1E vs 3ro de A,B,C,D,F
+    { id: '75', h: 'F1', a: 'C2',      info: 'Monterrey (M75)' },
+    { id: '76', h: 'C1', a: 'F2',      info: 'Houston (M76)' },
+
+    // --- MARTES 30 JUNIO 2026 ---
+    { id: '77', h: 'I1', a: 'T_CDFGH', info: 'New York/NJ (M77)' }, // 1I vs 3ro de C,D,F,G,H
+    { id: '78', h: 'E2', a: 'I2',      info: 'Dallas (M78)' },      // 2E vs 2I
+    { id: '79', h: 'A1', a: 'T_CEFHI', info: 'Mexico City (M79)' }, // 1A vs 3ro de C,E,F,H,I
+
+    // --- MIÉRCOLES 1 JULIO 2026 ---
+    { id: '80', h: 'L1', a: 'T_EHIJK', info: 'Atlanta (M80)' },     // 1L vs 3ro de E,H,I,J,K
+    { id: '81', h: 'D1', a: 'T_BEFIJ', info: 'San Francisco (M81)' }, // 1D vs 3ro de B,E,F,I,J
+    { id: '82', h: 'G1', a: 'T_AEHIJ', info: 'Seattle (M82)' },     // 1G vs 3ro de A,E,H,I,J
+
+    // --- JUEVES 2 JULIO 2026 ---
+    { id: '83', h: 'K2', a: 'L2',      info: 'Toronto (M83)' },     // 2K vs 2L
+    { id: '84', h: 'H1', a: 'J2',      info: 'Los Angeles (M84)' }, 
+    { id: '85', h: 'B1', a: 'T_EFGIJ', info: 'Vancouver (M85)' },   // 1B vs 3ro de E,F,G,I,J
+
+    // --- VIERNES 3 JULIO 2026 ---
+    { id: '86', h: 'J1', a: 'H2',      info: 'Miami (M86)' },
+    { id: '87', h: 'K1', a: 'T_DEIJL', info: 'Kansas City (M87)' }, // 1K vs 3ro de D,E,I,J,L
+    { id: '88', h: 'D2', a: 'G2',      info: 'Dallas (M88)' }       // 2D vs 2G
+];
 const R16_MATCHUPS = [{id:'16-1', h:'32-1', a:'32-2'}, {id:'16-2', h:'32-3', a:'32-4'}, {id:'16-3', h:'32-5', a:'32-6'}, {id:'16-4', h:'32-7', a:'32-8'},{id:'16-5', h:'32-9', a:'32-10'}, {id:'16-6', h:'32-11', a:'32-12'}, {id:'16-7', h:'32-13', a:'32-14'}, {id:'16-8', h:'32-15', a:'32-16'}];
 const QF_MATCHUPS = [ {id:'8-1',h:'16-1',a:'16-2'}, {id:'8-2',h:'16-3',a:'16-4'}, {id:'8-3',h:'16-5',a:'16-6'}, {id:'8-4',h:'16-7',a:'16-8'} ];
 const SF_MATCHUPS = [ {id:'4-1',h:'8-1',a:'8-2'}, {id:'4-2',h:'8-3',a:'8-4'} ];
