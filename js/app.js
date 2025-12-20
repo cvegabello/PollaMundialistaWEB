@@ -88,11 +88,40 @@ let simulatedTeams = {};
 function handleLogin() {
     const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value;
+    
     if(!u) return alert("Ingresa usuario");
+    
+    // 1. Ocultar Login y Mostrar la App
     document.getElementById('login-overlay').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    if(p === 'admin2026') setupAdminMode();
-    else setupUserMode(u);
+
+    // 2. Referencias a los Nuevos Tableros
+    const fanDash = document.getElementById('fan-dashboard');
+    const adminDash = document.getElementById('admin-dashboard');
+
+    // 3. Decidir qué camino tomar (Admin o Fan)
+    if(p === 'admin2026') {
+        // --- CAMINO ADMIN ---
+        setupAdminMode(); // Su función existente que configura el currentUser
+        
+        // Mostrar Tablero Admin, Ocultar Fan
+        if(adminDash) adminDash.classList.remove('hidden');
+        if(fanDash) fanDash.classList.add('hidden');
+        
+        // Cargar vista inicial del Admin (Ingreso de Grupos Oficiales)
+        loadView('official', 'groups'); 
+
+    } else {
+        // --- CAMINO FAN ---
+        setupUserMode(u); // Su función existente que configura al usuario
+        
+        // Mostrar Tablero Fan, Ocultar Admin
+        if(fanDash) fanDash.classList.remove('hidden');
+        if(adminDash) adminDash.classList.add('hidden');
+        
+        // Cargar vista inicial del Fan (Sus Pronósticos de Grupos)
+        loadView('user', 'groups');
+    }
 }
 
 function setupAdminMode() {
@@ -150,36 +179,56 @@ function setupAdminMode() {
 }
 
 function setupUserMode(username) {
+    // 1. Definir Rol
     role = 'fan';
-    document.getElementById('admin-status-bar').style.display = 'none';
-    document.getElementById('admin-bracket-tools').style.display = 'none';
-    document.getElementById('btn-save-admin').style.display = 'none';
-    document.getElementById('user-status-bar').style.display = 'grid'; 
-    document.getElementById('btn-save-draft').style.display = 'flex';
-    document.getElementById('btn-refresh').style.display = 'flex';
 
-    // --- RESTAURAR VISTA FAN (Por si venimos de un logout de admin) ---
-    // Simplemente recargamos el HTML original de los tabs si es necesario, 
-    // pero como la página carga limpia, basta con asegurar visibilidad.
+    // 2. Gestionar Elementos de la Interfaz (Header y Botones)
+    // Ocultar cosas de Admin
+    const adminBar = document.getElementById('admin-status-bar');
+    if(adminBar) adminBar.style.display = 'none';
     
-    // Si recargamos la página, el HTML está intacto.
-    // Solo ocultamos el botón de settings
-    document.getElementById('nav-group-fan').style.display = 'block';
-    document.getElementById('btn-tab-settings').classList.add('hidden');
+    const adminTools = document.getElementById('admin-bracket-tools');
+    if(adminTools) adminTools.style.display = 'none';
     
-    // Asegurar nombres originales
-    document.getElementById('btn-tab-groups').innerText = "Fase de Grupos";
-    document.getElementById('btn-tab-bracket').innerText = "Fase Final";
+    const btnSaveAdmin = document.getElementById('btn-save-admin');
+    if(btnSaveAdmin) btnSaveAdmin.style.display = 'none';
+
+    // Mostrar cosas de Fan
+    const userBar = document.getElementById('user-status-bar');
+    if(userBar) userBar.style.display = 'grid'; // O flex, según su diseño
     
+    const btnSaveDraft = document.getElementById('btn-save-draft');
+    if(btnSaveDraft) btnSaveDraft.style.display = 'flex'; // O block
+    
+    const btnRefresh = document.getElementById('btn-refresh');
+    if(btnRefresh) btnRefresh.style.display = 'flex'; // O block
+
+    // 3. CARGAR DATOS DEL USUARIO (LocalStorage)
+    // Esta parte es vital, la dejamos quietica
     const key = `m26_data_${username}`;
     let saved = JSON.parse(localStorage.getItem(key));
-    if(saved && saved.locks) currentUser = saved;
-    else currentUser = { name: username, preds: {}, locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } };
     
-    document.getElementById('display-username').innerText = currentUser.name.toUpperCase();
-    updateStatusUI();
-    renderGroups();
-    renderBracket();
+    if(saved && saved.locks) {
+        currentUser = saved;
+    } else {
+        // Si es usuario nuevo
+        currentUser = { 
+            name: username, 
+            preds: {}, 
+            locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } 
+        };
+    }
+    
+    // 4. Actualizar Nombre en Pantalla
+    const displayUser = document.getElementById('display-username');
+    if(displayUser) displayUser.innerText = currentUser.name.toUpperCase();
+    
+    // 5. Actualizar Barra de Progreso
+    if(typeof updateStatusUI === 'function') updateStatusUI();
+
+    // NOTA: ELIMINAMOS renderGroups() y renderBracket() de aquí.
+    // ¿Por qué? Porque handleLogin() va a llamar a loadView() inmediatamente después,
+    // y loadView se encarga de pintar la pantalla. Así evitamos pintar dos veces.
 }
 
 function updateStatusUI() {
@@ -238,148 +287,63 @@ function switchTab(tab) {
 }
 
 /* =========================================================
-   5. RENDERIZADO DE GRUPOS
+   RENDERIZADOR DE GRUPOS (User vs Official)
    ========================================================= */
-// function renderGroups() {
-//     const container = document.getElementById('groups-container');
-//     container.innerHTML = '';
-    
-//     if(typeof calculatePoints === 'function' && role === 'fan') calculatePoints();
-
-//     for(let g in GROUPS_CONFIG) {
-//         const data = GROUPS_CONFIG[g];
-//         let matchesHTML = '';
-        
-//         // 1. Inicializamos tambien GC (Goles en Contra)
-//         let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
-        
-//         data.matches.forEach((m, idx) => {
-//             let id = `${g}-${idx}`;
-//             // ... (Obtención de valores igual que antes) ...
-//             let uH = currentUser.preds[`h-${id}`] || ''; 
-//             let uA = currentUser.preds[`a-${id}`] || '';
-//             let oH = officialRes[`h-${id}`] || ''; 
-//             let oA = officialRes[`a-${id}`] || '';
-            
-//             let valH = role === 'admin' ? oH : uH; 
-//             let valA = role === 'admin' ? oA : uA;
-//             let disabled = (role === 'fan' && currentUser.locks && currentUser.locks.groups) ? 'disabled' : '';
-
-//             // 2. Calculamos GF y GC
-//             if(valH !== '' && valA !== '') {
-//                 let sH = parseInt(valH);
-//                 let sA = parseInt(valA);
-                
-//                 // LOCAL
-//                 teamStats[m.t1].gf += sH;
-//                 teamStats[m.t1].gc += sA; // Le hicieron sA goles
-//                 teamStats[m.t1].dif += (sH - sA);
-                
-//                 // VISITANTE
-//                 teamStats[m.t2].gf += sA;
-//                 teamStats[m.t2].gc += sH; // Le hicieron sH goles
-//                 teamStats[m.t2].dif += (sA - sH);
-                
-//                 if(sH > sA) teamStats[m.t1].pts += 3;
-//                 else if(sA > sH) teamStats[m.t2].pts += 3;
-//                 else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
-//             }
-            
-//             // ... (HTML del partido igual que antes) ...
-//             matchesHTML += `<div class="match-row">
-//                 <div class="team-name team-home">${data.teams[m.t1]}</div>
-//                 <div class="center-inputs">
-//                     <div class="match-info">${m.info}</div>
-//                     <div class="score-container">
-//                         <input type="number" min="0" value="${valH}" ${disabled} 
-//                                onchange="updateVal('${id}','h',this.value)">
-//                         <span>-</span>
-//                         <input type="number" min="0" value="${valA}" ${disabled} 
-//                                onchange="updateVal('${id}','a',this.value)">
-//                     </div>
-//                 </div>
-//                 <div class="team-name team-away">${data.teams[m.t2]}</div>
-//             </div>`;
-//         });
-
-//         // Ordenamiento FIFA
-//         teamStats.sort((a,b) => {
-//             if (b.pts !== a.pts) return b.pts - a.pts;
-//             if (b.dif !== a.dif) return b.dif - a.dif;
-//             return b.gf - a.gf;
-//         });
-
-//         // 3. TABLA MEJORADA: Agregamos las columnas GF y GC
-//         // Note que usaremos una clase 'compact-table' para controlar el ancho con CSS
-//         let tableRows = teamStats.map((t,i) => 
-//             `<tr class="${i<2?'qual-zone':''}">
-//                 <td class="pos-num">${i+1}</td>
-//                 <td style="text-align:left; padding-left:5px;">${t.name}</td>
-//                 <td>${t.pts}</td>
-//                 <td>${t.dif}</td>
-//                 <td>${t.gf}</td> <td>${t.gc}</td> </tr>`
-//         ).join('');
-        
-//         let titleTxt = role === 'admin' ? `GRUPO ${g} [OFICIAL]` : (currentUser.locks && currentUser.locks.groups ? `GRUPO ${g} [ENVIADO]` : `GRUPO ${g}`);
-        
-//         // Encabezados nuevos
-//         container.innerHTML += `
-//         <div class="card">
-//             <div class="group-header">${titleTxt}</div>
-//             <div class="card-body">
-//                 ${matchesHTML}
-//                 <table class="compact-table" style="width:100%; margin-top:10px; font-size:0.85rem; text-align:center;">
-//                     <tr style="background:rgba(255,255,255,0.1); color:#aaa;">
-//                         <th width="10%">#</th>
-//                         <th width="40%" style="text-align:left; padding-left:5px;">EQ</th>
-//                         <th width="10%" title="Puntos">PT</th>
-//                         <th width="10%" title="Diferencia">DF</th>
-//                         <th width="10%" title="Goles Favor">GF</th>
-//                         <th width="10%" title="Goles Contra">GC</th>
-//                     </tr>
-//                     ${tableRows}
-//                 </table>
-//             </div>
-//         </div>`;
-//     }
-// }
-
-/* =========================================================
-   RENDER GROUPS (ESTRATEGIA BLINDADA)
-   ========================================================= */
-function renderGroups() {
+function renderGroups(customData, customMode) {
     const container = document.getElementById('groups-container');
-    if(!container) return; // Protección por si no existe el contenedor
+    if(!container) return; 
     container.innerHTML = '';
     
-    // NOTA: Quitamos calculatePoints() para evitar conflictos. 
-    // Ahora calculamos todo aquí mismo.
+    // 1. DEFINIR EL MODO
+    let modeToUse = customMode || 'user'; // 'user' o 'official'
+    
+    // 2. SELECCIONAR LA FUENTE DE DATOS (Corrección Clave) 🧠
+    let dataToUse;
+    
+    if (modeToUse === 'official') {
+        // Si estoy en la pestaña Oficial, SIEMPRE uso los datos oficiales
+        dataToUse = officialRes; 
+    } else {
+        // Si no, uso los pronósticos del usuario (o lo que me pasen)
+        dataToUse = customData || currentUser.preds;
+    }
+
+    // 3. DETERMINAR SI ES SOLO LECTURA (CANDADO) 🔒
+    let isReadOnly = false;
+
+    if (modeToUse === 'official') {
+        // En vista oficial:
+        // - Si soy Admin: PUEDO editar (isReadOnly = false)
+        // - Si soy Fan: NO PUEDO editar (isReadOnly = true)
+        if (role !== 'admin') isReadOnly = true; 
+    } else {
+        // En vista usuario (Mis Pronósticos):
+        // - Se bloquea solo si ya envié (locked)
+        if (role === 'fan' && currentUser.locks && currentUser.locks.groups) isReadOnly = true;
+    }
 
     for(let g in GROUPS_CONFIG) {
         const data = GROUPS_CONFIG[g];
         let matchesHTML = '';
         
-        // 1. Inicializar Stats
+        // Inicializar Stats
         let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
         
         data.matches.forEach((m, idx) => {
             let id = `${g}-${idx}`;
-            // Obtener valores
-            let uH = currentUser.preds[`h-${id}`] || ''; 
-            let uA = currentUser.preds[`a-${id}`] || '';
-            let oH = officialRes[`h-${id}`] || ''; 
-            let oA = officialRes[`a-${id}`] || '';
             
-            let valH = role === 'admin' ? oH : uH; 
-            let valA = role === 'admin' ? oA : uA;
-            let disabled = (role === 'fan' && currentUser.locks && currentUser.locks.groups) ? 'disabled' : '';
+            // 3. OBTENER VALORES DE LA FUENTE DINÁMICA
+            // Ya no miramos currentUser vs officialRes fijo, miramos dataToUse
+            let valH = dataToUse[`h-${id}`] || ''; 
+            let valA = dataToUse[`a-${id}`] || '';
+            
+            // Definir atributo disabled
+            let disabledAttr = isReadOnly ? 'disabled' : '';
 
-            // 2. Calcular Matemáticas
+            // CALCULAR MATEMÁTICAS (Igual que antes)
             if(valH !== '' && valA !== '') {
                 let sH = parseInt(valH); let sA = parseInt(valA);
-                // Sumar al Local
                 teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
-                // Sumar al Visitante
                 teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
                 
                 if(sH > sA) teamStats[m.t1].pts += 3;
@@ -387,16 +351,20 @@ function renderGroups() {
                 else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
             }
             
-            // 3. HTML del Partido (Usamos oninput para respuesta inmediata)
+            // HTML DEL PARTIDO
+            // Usamos oninput="updateVal..." pero OJO:
+            // Si es modo oficial y soy fan, updateVal no debería dejar guardar.
+            // Pero como el input está 'disabled', no hay lío.
+            
             matchesHTML += `<div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
                 <div class="center-inputs">
                     <div class="match-info">${m.info}</div>
                     <div class="score-container">
-                        <input type="number" min="0" value="${valH}" ${disabled} 
+                        <input type="number" min="0" value="${valH}" ${disabledAttr} 
                                oninput="updateVal('${id}','h',this.value)">
                         <span>-</span>
-                        <input type="number" min="0" value="${valA}" ${disabled} 
+                        <input type="number" min="0" value="${valA}" ${disabledAttr} 
                                oninput="updateVal('${id}','a',this.value)">
                     </div>
                 </div>
@@ -404,23 +372,25 @@ function renderGroups() {
             </div>`;
         });
 
-        // 4. Ordenamiento FIFA
+        // 4. ORDENAMIENTO Y TABLA (Igual que antes)
         teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
 
-        // 5. Generar Tabla Compacta
         let tableRows = teamStats.map((t,i) => 
             `<tr class="${i<2?'qual-zone':''}">
                 <td class="pos-num">${i+1}</td>
                 <td style="text-align:left; padding-left:5px;">${t.name}</td>
-                <td style="font-weight:bold; color:#fff; font-size:0.95rem;">${t.pts}</td>
+                <td style="font-weight:bold; color:#fff;">${t.pts}</td>
                 <td style="color:#888;">${t.dif}</td>
                 <td style="color:#888;">${t.gf}</td>
                 <td style="color:#888;">${t.gc}</td>
              </tr>`
         ).join('');
         
-        let titleTxt = role === 'admin' ? `GRUPO ${g} [OFICIAL]` : (currentUser.locks && currentUser.locks.groups ? `GRUPO ${g} [ENVIADO]` : `GRUPO ${g}`);
-        
+        // Título dinámico
+        let titleTxt = `GRUPO ${g}`;
+        if (modeToUse === 'official') titleTxt += " [OFICIAL FIFA]";
+        else if (isReadOnly) titleTxt += " [ENVIADO]";
+
         container.innerHTML += `
         <div class="card">
             <div class="group-header">${titleTxt}</div>
@@ -428,12 +398,7 @@ function renderGroups() {
                 ${matchesHTML}
                 <table class="compact-table" style="width:100%; margin-top:10px; font-size:0.85rem; text-align:center;">
                     <tr style="background:rgba(255,255,255,0.05); color:#666;">
-                        <th width="10%">#</th>
-                        <th width="40%" style="text-align:left; padding-left:5px; color:#aaa;">EQ</th>
-                        <th width="10%" title="Puntos" style="color:#fff; font-weight:bold;">PT</th>
-                        <th width="10%" title="Diferencia">DF</th>
-                        <th width="10%" title="Goles Favor">GF</th>
-                        <th width="10%" title="Goles Contra">GC</th>
+                        <th>#</th> <th style="text-align:left;">EQ</th> <th>PT</th> <th>DF</th> <th>GF</th> <th>GC</th>
                     </tr>
                     ${tableRows}
                 </table>
@@ -441,6 +406,7 @@ function renderGroups() {
         </div>`;
     }
 }
+
 
 /* =========================================================
    UPDATE VAL (CON SEGURIDAD TRY-CATCH)
@@ -949,15 +915,31 @@ function renderBracket() {
 // }
 
 /* =========================================================
-   RENDERIZADOR CON ETIQUETAS Y LINEAS DE FLUJO
+   RENDERIZADOR DE COLUMNAS (Con Soporte Oficial/User)
    ========================================================= */
-function renderRoundColumn(title, matchups, prefix, phaseKey) {
-    let isLocked = currentUser.locks && currentUser.locks[phaseKey];
+// 1. CAMBIO EN LA FIRMA: Agregamos sourceData y mode
+function renderRoundColumn(title, matchups, prefix, phaseKey, sourceData, mode) {
+    
+    // 2. NUEVA LÓGICA DE CANDADO 🔒
+    let isLocked = false;
+    
+    if (mode === 'official') {
+        // En oficial, solo edita el Admin. El Fan mira.
+        if (role !== 'admin') isLocked = true;
+    } else {
+        // En user, se bloquea si ya envió
+        if (role === 'fan' && currentUser.locks && currentUser.locks[phaseKey]) isLocked = true;
+    }
+    
     let isEnabled = phaseControl[phaseKey];
     
-    // Header y Botones (Sin cambios)
+    // Header y Botones (Sin cambios, solo añadimos protección visual)
     let btnHTML = '';
-    if(role === 'fan') {
+    // Ocultamos botones de envío si estamos en modo oficial (solo visualización)
+    if (mode === 'official' && role === 'fan') {
+        btnHTML = `<span style="font-size:0.7rem; color:#ffd700">OFICIAL</span>`;
+    } 
+    else if(role === 'fan') {
         if(isLocked) btnHTML = `<button class="round-action-btn btn-done">ENVIADO</button>`;
         else if (!isEnabled) btnHTML = `<button class="round-action-btn btn-wait">ESPERANDO</button>`;
         else btnHTML = `<button class="round-action-btn btn-go" onclick="submitPhase('${phaseKey}')">ENVIAR</button>`;
@@ -969,53 +951,55 @@ function renderRoundColumn(title, matchups, prefix, phaseKey) {
                     <div class="round-header"><span class="round-title">${title}</span>${btnHTML}</div>`;
 
     matchups.forEach(m => {
-        // --- LOGICA DE CEREBRO (Igual que antes) ---
+        // --- LOGICA DE CEREBRO ---
         let simData = (typeof simulatedTeams !== 'undefined' && simulatedTeams[m.id]) ? simulatedTeams[m.id] : null;
         let nameH = simData ? simData.home.name : resolveTeamName(m.id, 'h', m.h);
         let seedH = simData ? simData.home.seed : m.h;
         let nameA = simData ? simData.away.name : resolveTeamName(m.id, 'a', m.a);
         let seedA = simData ? simData.away.seed : m.a;
         
+        // 3. CAMBIO EN LECTURA DE DATOS 🧠
+        // Usamos sourceData que viene desde loadView -> renderBracketView -> aquí
         let kH = `k-${m.id}-h`; let kA = `k-${m.id}-a`; let kW = `w-${m.id}`;
-        let scH, scA, penWinner;
         
-        if(role === 'admin') { 
-            scH = officialRes[kH]||''; scA = officialRes[kA]||''; penWinner = officialRes[kW]; 
-        } else { 
-            scH = currentUser.preds[kH]||''; scA = currentUser.preds[kA]||''; penWinner = currentUser.preds[kW]; 
-        }
+        // Leemos de la fuente dinámica, con fallback a vacío
+        let scH = (sourceData && sourceData[kH]) ? sourceData[kH] : '';
+        let scA = (sourceData && sourceData[kA]) ? sourceData[kA] : '';
+        let penWinner = (sourceData && sourceData[kW]) ? sourceData[kW] : null;
 
         let isTie = (scH !== '' && scA !== '' && parseInt(scH) === parseInt(scA));
         let checkStyle = isTie ? 'visibility:visible;' : 'visibility:hidden;'; 
-        let disabled = (role === 'fan' && isLocked) ? 'disabled' : '';
+        
+        // Atributo disabled basado en la lógica nueva
+        let disabled = isLocked ? 'disabled' : '';
 
-        // --- NUEVO: ETIQUETAS DE ORIGEN (W74 vs W77) ---
-        // Si la fase NO es 16avos, mostramos de dónde vienen
+        // --- ETIQUETAS Y FLUJO (Sin cambios) ---
         let sourceTag = '';
         if(phaseKey !== 'r32') {
             sourceTag = `<div class="match-source-label">${m.h} <span style="color:#666">vs</span> ${m.a}</div>`;
         }
 
-        // --- NUEVO: CLASE PARA LAS LINEAS CONECTORAS ---
-        // Le damos una clase especial para saber si dibujar lineas a la izq o der
         let flowClass = '';
-        if(phaseKey === 'r32') flowClass = 'flow-start';       // Solo salida derecha
-        else if(phaseKey === 'f') flowClass = 'flow-end';      // Solo entrada izquierda
-        else flowClass = 'flow-mid';                           // Entrada y Salida
+        if(phaseKey === 'r32') flowClass = 'flow-start'; 
+        else if(phaseKey === 'f') flowClass = 'flow-end'; 
+        else flowClass = 'flow-mid'; 
 
         // Render Team Helper
         let renderTeam = (slot, name, seed, type) => {
             let isChecked = (penWinner === type) ? 'checked' : '';
+            // Ajustamos el onchange para que no se dispare si es readonly, aunque disabled lo protege
             let checkHTML = `<input type="checkbox" class="pen-check" ${isChecked} ${disabled} style="${checkStyle} margin-left:5px; cursor:pointer;" onchange="updateWinner('${m.id}', '${type}', this.checked)">`;
             let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${seed}</span>`;
 
-            if(role === 'admin') { 
+            // Si es admin Y está en modo oficial, puede editar nombres
+            if(role === 'admin' && mode === 'official') { 
                 return `<div style="display:flex; align-items:center; width:100%;">
                             ${badgeHTML}
                             <input type="text" style="flex-grow:1; border:1px solid #555; background:#222; color:#fff; padding:5px; font-size:0.85rem;" value="${name}" onchange="updateOfficialTeamName('${m.id}', '${slot}', this.value)">
                             ${checkHTML}
                         </div>`;
             } else { 
+                // Fan o Admin viendo user
                 return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
                             ${badgeHTML}
                             <span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
@@ -1024,7 +1008,7 @@ function renderRoundColumn(title, matchups, prefix, phaseKey) {
             }
         };
 
-        // --- CONSTRUCCIÓN DE LA TARJETA MEJORADA ---
+        // --- CONSTRUCCIÓN DE LA TARJETA ---
         html += `<div class="bracket-match ${flowClass}" id="match-${m.id}">
                     <div class="match-top-bar">
                         <span class="match-id-badge">M${m.id}</span>
@@ -1778,4 +1762,124 @@ function updateWinner(matchId, type, isChecked) {
     
     // Repintar para que el bracket avance
     renderBracket();
+}
+
+/* =========================================================
+   NUEVO SISTEMA DE VISTAS (User vs Official)
+   ========================================================= */
+
+let currentViewMode = 'user'; // 'user' o 'official'
+
+// Esta es la función que llaman los botones nuevos
+function loadView(mode, phase) {
+    currentViewMode = mode;
+    console.log(`Cargando vista: ${mode} - ${phase}`);
+
+    // 1. Actualizar Título
+    const titleEl = document.getElementById('view-title');
+    if(titleEl) {
+        let titleText = (mode === 'user') ? "👤 Mis Pronósticos" : "🏆 Resultados Oficiales";
+        titleText += (phase === 'groups') ? " - Fase de Grupos" : " - Fase Final";
+        titleEl.innerText = titleText;
+        titleEl.style.color = (mode === 'official') ? "#ffd700" : "#fff";
+    }
+
+    // 2. Gestionar Activos (Botones)
+    document.querySelectorAll('.dash-btn').forEach(b => b.classList.remove('active'));
+    
+    // Identificar qué botón activar visualmente
+    let btnId = '';
+    if (mode === 'user' && phase === 'groups') btnId = 'btn-user-groups';
+    if (mode === 'user' && phase === 'final') btnId = 'btn-user-final';
+    if (mode === 'official' && phase === 'groups') btnId = 'btn-off-groups';
+    if (mode === 'official' && phase === 'final') btnId = 'btn-off-final';
+    
+    const activeBtn = document.getElementById(btnId);
+    if(activeBtn) activeBtn.classList.add('active');
+
+    // 3. Ocultar contenedores viejos
+    const grpCont = document.getElementById('tab-groups'); 
+    const brkCont = document.getElementById('tab-bracket');
+
+    if(grpCont) grpCont.style.display = 'none';
+    if(brkCont) brkCont.style.display = 'none';
+
+    const realCont = document.getElementById('tab-real');
+    if(realCont) realCont.style.display = 'none';
+    
+       
+    
+
+    // 4. Determinar la FUENTE DE DATOS
+    // Si es user, usa currentUser.preds. Si es official, usa officialRes
+    let dataSource;
+    if (mode === 'official') {
+        dataSource = officialRes; // <--- Usamos la variable que me mostró al inicio
+    } else {
+        dataSource = currentUser.preds;
+    }
+
+    // 5. Renderizar
+    if (phase === 'groups') {
+        if(grpCont) grpCont.style.display = 'block';
+
+        // ============================================================
+        // ✨ NUEVO: CONTROLAR LA CAJA DE ENVIAR (submit-groups-area)
+        // ============================================================
+        const submitArea = document.getElementById('submit-groups-area');
+        if (submitArea) {
+            if (mode === 'official') {
+                // Si es oficial, escondemos la caja completa
+                submitArea.style.display = 'none';
+            } else {
+                // Si es usuario, la mostramos (para que pueda enviar o ver su estado)
+                submitArea.style.display = 'block'; // O 'flex' si usaba flex
+            }
+        }
+        // ============================================================
+
+
+        // IMPORTANTE: Aquí llamamos a renderGroups pasándole la data y el modo
+        renderGroups(dataSource, mode); 
+    } else {
+        if(brkCont) brkCont.style.display = 'block';
+        renderBracketView(dataSource, mode);
+    }
+}
+
+// Adaptador para el Árbol
+/* =========================================================
+   RENDERIZADOR DEL ÁRBOL (Fase Final) - INTELIGENTE 🧠
+   ========================================================= */
+function renderBracketView(customData, customMode) {
+    // 1. Apuntar al contenedor correcto
+    // OJO AQUÍ: Asegúrate de que en tu HTML tengas <div id="bracket-container"> dentro de tab-bracket
+    const container = document.getElementById('bracket-container'); 
+    if(!container) return;
+    
+    container.innerHTML = ''; // Limpiar pizarra
+
+    // 2. Definir Datos y Modo
+    let dataToUse = customData || currentUser.preds;
+    let modeToUse = customMode || 'user';
+
+    // Si es Admin en modo oficial, forzamos officialRes
+    if (role === 'admin' && modeToUse === 'official') {
+        dataToUse = officialRes;
+    }
+
+    // 3. CALCULAR LOS EQUIPOS QUE PASAN (Simulación)
+    // Importante: Calculamos quién juega contra quién basado en LA DATA QUE ELEGIMOS
+    simulatedTeams = calculateSimulatedTeams(dataToUse); 
+
+    // 4. DIBUJAR LAS COLUMNAS (Pasando la data y el modo hacia abajo) 👇
+    // Fíjate que al final de cada línea pasamos (dataToUse, modeToUse)
+    
+    container.innerHTML += renderRoundColumn('16avos', R32_MATCHUPS, 'r32', 'r32', dataToUse, modeToUse);
+    container.innerHTML += renderRoundColumn('Octavos', R16_MATCHUPS, 'r16', 'r16', dataToUse, modeToUse);
+    container.innerHTML += renderRoundColumn('Cuartos', QF_MATCHUPS, 'qf', 'qf', dataToUse, modeToUse);
+    container.innerHTML += renderRoundColumn('Semis', SF_MATCHUPS, 'sf', 'sf', dataToUse, modeToUse);
+    container.innerHTML += renderRoundColumn('Final', F_MATCHUPS, 'f', 'f', dataToUse, modeToUse);
+    
+    // Si tienes partido de 3er puesto, agrégalo aquí también
 }

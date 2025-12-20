@@ -66,20 +66,50 @@
 
     </header>
 
-    <div class="tabs-area">
-        <div id="nav-group-fan" class="nav-group">
-            <span class="nav-label">MIS PRONÓSTICOS</span>
-            <div class="nav-row">
-                <button id="btn-tab-groups" class="tab-btn active" onclick="switchTab('groups')">Fase de Grupos</button>
-                <button id="btn-tab-bracket" class="tab-btn" onclick="switchTab('bracket')">Fase Final</button>
+    <div id="fan-dashboard" class="dashboard-container hidden">
+        
+        <div class="control-card user-card">
+            <div class="card-header">
+                <span class="card-icon">👤</span> 
+                <span class="card-title">MIS PRONÓSTICOS</span>
+            </div>
+            <div class="card-buttons">
+                <button id="btn-user-groups" class="dash-btn active" onclick="loadView('user', 'groups')">Fase Grupos</button>
+                <button id="btn-user-final" class="dash-btn" onclick="loadView('user', 'final')">Fase Final</button>
             </div>
         </div>
 
-        <div class="nav-standalone">
-            <button id="btn-tab-real" class="tab-btn" onclick="switchTab('real')">Resultados Oficiales</button>
-            <button id="btn-tab-settings" class="tab-btn hidden" onclick="switchTab('settings')">Configuración</button>
+        <div class="control-card official-card">
+            <div class="card-header">
+                <span class="card-icon">🏆</span> 
+                <span class="card-title">RESULTADOS FIFA</span>
+            </div>
+            <div class="card-buttons">
+                <button id="btn-off-groups" class="dash-btn btn-gold" onclick="loadView('official', 'groups')">Ver Grupos</button>
+                <button id="btn-off-final" class="dash-btn btn-gold" onclick="loadView('official', 'final')">Ver Finales</button>
+            </div>
         </div>
     </div>
+
+    <div id="admin-dashboard" class="dashboard-container hidden">
+        
+        <div class="control-card admin-card">
+            <div class="card-header">
+                <span class="card-icon">⚡</span> 
+                <span class="card-title">PANEL DE CONTROL</span>
+            </div>
+            <div class="card-buttons admin-buttons-row">
+                <button class="dash-btn btn-admin" onclick="loadView('official', 'groups')">📝 Ingreso Grupos</button>
+                <button class="dash-btn btn-admin" onclick="loadView('official', 'final')">📝 Ingreso Finales</button>
+            </div>
+            <div style="margin-top:10px; width:100%">
+                <button class="dash-btn btn-settings" onclick="switchTab('settings')">⚙️ Configuración</button>
+            </div>
+        </div>
+
+    </div>
+
+    <h2 id="view-title" class="dynamic-title">Cargando...</h2>
 
     <div id="tab-groups" class="section active">
         <div id="submit-groups-area" class="hidden">

@@ -403,7 +403,7 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
     .modal-card { width: 95%; padding: 20px; }
 }
 
-/* --- NUEVA NAVEGACIÓN AGRUPADA --- */
+/* --- NUEVA NAVEGACIÓN AGRUPADA ---
 .tabs-area {
     display: flex;
     flex-direction: column;
@@ -419,7 +419,7 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
     background: rgba(255, 255, 255, 0.03);
     text-align: center;
     position: relative;
-}
+} */
 
 .nav-label {
     display: block;
@@ -846,4 +846,174 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
     flex-direction: column;
     align-items: center;
     justify-content: center;
+}
+
+/* --- CLASE UTILITARIA PARA OCULTAR --- */
+.hidden {
+    display: none !important;
+}
+
+/* --- ESTILOS ESPECÍFICOS DEL ADMIN --- */
+.admin-card {
+    border: 1px solid #ff4444; /* Borde Rojo Admin */
+    background: linear-gradient(180deg, #1a0a0a 0%, #000 100%);
+    width: 400px; /* Un poco más ancha para que quepan los botones */
+}
+
+.admin-card .card-title {
+    color: #ff4444; /* Texto Rojo */
+}
+
+.btn-admin {
+    background: #333;
+    border: 1px solid #555;
+}
+
+.btn-admin:hover {
+    background: #ff4444;
+    color: white;
+    border-color: #ff4444;
+}
+
+.btn-settings {
+    background: #444;
+    width: 100%; /* Ocupa todo el ancho abajo */
+    margin-top: 5px;
+}
+
+.btn-settings:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* Alineación de botones admin */
+.admin-buttons-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+/* =========================================================
+   ESTILOS DEL DASHBOARD (TABLERO DE CONTROL) 🎛️
+   ========================================================= */
+
+/* 1. El Contenedor Principal (Centrado y Flexible) */
+.dashboard-container {
+    display: flex;
+    justify-content: center; /* Centrado horizontalmente */
+    align-items: stretch;    /* Que ambas tarjetas tengan la misma altura */
+    gap: 20px;               /* Espacio entre tarjetas */
+    flex-wrap: wrap;         /* Si es celular, baja una debajo de la otra */
+    margin: 30px auto;       /* Margen vertical y centrado automático */
+    padding: 0 10px;
+    max-width: 800px;        /* Que no se estire infinitamente en pantallas grandes */
+}
+
+/* 2. Las Tarjetas (Cajitas) */
+.control-card {
+    background: #151515;       /* Gris muy oscuro (casi negro) */
+    border: 1px solid #333;
+    border-radius: 12px;
+    padding: 20px;
+    width: 300px;              /* Ancho fijo para escritorio */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); /* Sombra elegante */
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.control-card:hover {
+    transform: translateY(-3px); /* Efecto de levitación al pasar el mouse */
+    border-color: #555;
+}
+
+/* 3. Estilo Específico: Tarjeta Oficial (Mundo FIFA) */
+.official-card {
+    border: 1px solid #b8860b; /* Borde Dorado Oscuro */
+    /* Degradado sutil para que se vea VIP */
+    background: linear-gradient(180deg, #1a1a10 0%, #0d0d0d 100%); 
+}
+
+.official-card .card-title {
+    color: #ffd700; /* Título Dorado */
+}
+
+/* 4. Encabezados de las Tarjetas */
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #aaa;
+    text-transform: uppercase;
+}
+
+.card-icon {
+    font-size: 1.5rem; /* Icono un poco más grande */
+}
+
+/* 5. Los Botones dentro de las tarjetas */
+.card-buttons {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+}
+
+.dash-btn {
+    flex: 1; /* Ocupan todo el ancho disponible */
+    padding: 12px 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 6px;
+    background: #2a2a2a;
+    color: #eee;
+    font-weight: bold;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+}
+
+.dash-btn:hover {
+    background: #444;
+    color: #fff;
+}
+
+/* Estado ACTIVO (El botón presionado) */
+.dash-btn.active {
+    background: #3b82f6; /* Azul brillante para User */
+    color: #fff;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); /* Resplandor azul */
+}
+
+/* Botones Dorados (Lado Oficial) */
+.btn-gold:hover {
+    background: #b8860b;
+    color: #000;
+}
+
+.btn-gold.active { /* Cuando está activo el oficial */
+    background: #ffd700;
+    color: #000;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); /* Resplandor dorado */
+}
+
+/* 6. RESPONSIVE (CELULARES) 📱 */
+@media (max-width: 700px) {
+    .dashboard-container {
+        flex-direction: column; /* Pila vertical */
+        align-items: center;
+    }
+    
+    .control-card {
+        width: 100%; /* Ocupa todo el ancho del celular */
+        max-width: 350px;
+    }
+}
+
+/* CLASE UTILITARIA (Para ocultar/mostrar paneles) */
+.hidden {
+    display: none !important;
 }
