@@ -491,50 +491,120 @@ function updateStats(stats, i1, i2, s1, s2) {
 }
 
 
-/* =========================================================
-   6. RENDERIZADO DE LLAVES (BRACKET)
-   ========================================================= */
-// function calculateSimulatedTeams(sourceData) {
-//     let q = {}; let thirds = [];
-//     for(let g in GROUPS_CONFIG) {
-//         let stats = GROUPS_CONFIG[g].teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0 }));
-//         GROUPS_CONFIG[g].matches.forEach((m, idx) => {
-//             let id = `${g}-${idx}`;
-//             let h = sourceData[`h-${id}`]; let a = sourceData[`a-${id}`]; 
-//             if(h && a) {
-//                 h=parseInt(h); a=parseInt(a);
-//                 let t1=stats[m.t1]; let t2=stats[m.t2];
-//                 if(h>a) t1.pts+=3; else if(a>h) t2.pts+=3; else {t1.pts++; t2.pts++;}
-//                 t1.dif += (h-a); t2.dif += (a-h);
-//                 t1.gf += h; t2.gf += a;
+// /* =========================================================
+//    EL CEREBRO FIFA (V2.0 - Con Inteligencia de Terceros)
+//    ========================================================= */
+// function calculateSimulatedTeams(predsSource) {
+//     const standings = {};
+    
+//     // 1. CALCULAR TABLA DE TODOS LOS GRUPOS
+//     Object.keys(GROUPS_CONFIG).forEach(gid => {
+//         const groupData = GROUPS_CONFIG[gid];
+//         let teamsMap = groupData.teams.map((name, idx) => ({ 
+//             name: name, group: gid,
+//             pts: 0, dif: 0, gf: 0, gc: 0
+//         }));
+
+//         groupData.matches.forEach((m, idx) => {
+//             let id = `${gid}-${idx}`;
+//             let vH = predsSource[`h-${id}`];
+//             let vA = predsSource[`a-${id}`];
+
+//             if(vH && vA && vH !== '' && vA !== '') { 
+//                 let sH = parseInt(vH); let sA = parseInt(vA);
+//                 teamsMap[m.t1].gf += sH; teamsMap[m.t1].gc += sA; teamsMap[m.t1].dif += (sH-sA);
+//                 teamsMap[m.t2].gf += sA; teamsMap[m.t2].gc += sH; teamsMap[m.t2].dif += (sA-sH);
+                
+//                 if(sH > sA) teamsMap[m.t1].pts += 3;
+//                 else if(sA > sH) teamsMap[m.t2].pts += 3;
+//                 else { teamsMap[m.t1].pts += 1; teamsMap[m.t2].pts += 1; }
 //             }
 //         });
-//         stats.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
-//         q[g+'1'] = stats[0].name; q[g+'2'] = stats[1].name;
-//         thirds.push({name: stats[2].name, pts: stats[2].pts, dif: stats[2].dif, gf: stats[2].gf});
+
+//         // Ordenar FIFA: PTS > DIF > GF
+//         teamsMap.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+//         standings[gid] = teamsMap;
+//     });
+
+//     // 2. ENCONTRAR Y CLASIFICAR LOS MEJORES TERCEROS
+//     let allThirds = [];
+//     Object.keys(standings).forEach(g => {
+//         let t = standings[g][2]; // El equipo en posición 2 (índice 0,1,2)
+//         if(t) allThirds.push(t);
+//     });
+    
+//     // Ordenar terceros entre sí para saber quiénes entran
+//     allThirds.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+    
+//     // Los 8 mejores pasan (Top 8)
+//     const qualifiedThirds = allThirds.slice(0, 8);
+//     // Nota: Guardamos de qué grupo vienen para buscarlos luego
+
+//     // 3. RESOLVER LOS CRUCES (Ahora devolvemos Objeto {name, seed})
+//     const projected = {};
+//     const usedThirds = new Set(); // Para no repetir equipos si la lógica se cruza
+
+//     const resolveTeamData = (code) => {
+//         if(!code) return { name: '...', seed: '' };
+
+//         // CASO A: Clasificados Directos (Ej: A1, B2)
+//         if (code.match(/^[A-L][1-2]$/)) {
+//             let g = code.charAt(0); 
+//             let pos = parseInt(code.charAt(1)) - 1;
+//             if(standings[g] && standings[g][pos]) {
+//                 return { 
+//                     name: standings[g][pos].name, 
+//                     seed: code // Retornamos "A1" como seed
+//                 };
+//             }
+//         }
+
+//         // CASO B: Mejores Terceros (Ej: T_ABCDF)
+//         if (code.startsWith('T_')) {
+//             let allowedGroups = code.split('_')[1]; // "ABCDF"
+            
+//             // LÓGICA: Buscamos el MEJOR tercero clasificado que venga de esos grupos
+//             // y que no haya sido usado ya en otra llave (simple greedy).
+//             let found = qualifiedThirds.find(t => 
+//                 allowedGroups.includes(t.group) && !usedThirds.has(t.name)
+//             );
+
+//             if (found) {
+//                 usedThirds.add(found.name);
+//                 return { 
+//                     name: found.name, 
+//                     seed: `3${found.group}` // Retornamos "3A" como seed
+//                 };
+//             } else {
+//                 // Si no hay nadie de esos grupos clasificado (raro pero posible)
+//                 return { name: 'TBD', seed: `3?` }; 
+//             }
+//         }
+        
+//         return { name: '...', seed: '' };
+//     };
+
+//     if(typeof R32_MATCHUPS !== 'undefined') {
+//         R32_MATCHUPS.forEach(m => {
+//             projected[m.id] = {
+//                 home: resolveTeamData(m.h),
+//                 away: resolveTeamData(m.a)
+//             };
+//         });
 //     }
-//     thirds.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
-//     for(let i=0; i<8; i++) { if(thirds[i]) q['T'+(i+1)] = thirds[i].name; else q['T'+(i+1)] = "3er"; }
-//     return q;
+
+//     return projected;
 // }
-/* =========================================================
-   EL CEREBRO FIFA (CALCULATE SIMULATED TEAMS)
-   Recibe los pronósticos y devuelve los clasificados calculados
-   ========================================================= */
 
 /* =========================================================
-   EL CEREBRO FIFA (CALCULATE SIMULATED TEAMS)
-   ========================================================= */
-/* =========================================================
-   EL CEREBRO FIFA (CALCULATE SIMULATED TEAMS) - VERSIÓN FINAL
+   EL CEREBRO FIFA (V6.0 - FINAL: Soporte para 'L' Loser)
    ========================================================= */
 function calculateSimulatedTeams(predsSource) {
     const standings = {};
     
-    // 1. CALCULAR TABLA DE TODOS LOS GRUPOS
+    // 1. CALCULAR GRUPOS (Esto no cambia)
     Object.keys(GROUPS_CONFIG).forEach(gid => {
         const groupData = GROUPS_CONFIG[gid];
-        
         let teamsMap = groupData.teams.map((name, idx) => ({ 
             name: name, group: gid,
             pts: 0, dif: 0, gf: 0, gc: 0
@@ -542,85 +612,136 @@ function calculateSimulatedTeams(predsSource) {
 
         groupData.matches.forEach((m, idx) => {
             let id = `${gid}-${idx}`;
-            // Claves para leer los inputs
-            let vH = predsSource[`h-${id}`];
-            let vA = predsSource[`a-${id}`];
+            let vH = predsSource[`h-${id}`] || predsSource[`k-${id}-h`];
+            let vA = predsSource[`a-${id}`] || predsSource[`k-${id}-a`];
 
-            if(vH && vA && vH !== '' && vA !== '') { 
+            if(vH && vA) { 
                 let sH = parseInt(vH); let sA = parseInt(vA);
                 teamsMap[m.t1].gf += sH; teamsMap[m.t1].gc += sA; teamsMap[m.t1].dif += (sH-sA);
                 teamsMap[m.t2].gf += sA; teamsMap[m.t2].gc += sH; teamsMap[m.t2].dif += (sA-sH);
-                
                 if(sH > sA) teamsMap[m.t1].pts += 3;
                 else if(sA > sH) teamsMap[m.t2].pts += 3;
                 else { teamsMap[m.t1].pts += 1; teamsMap[m.t2].pts += 1; }
             }
         });
-
-        // ORDENAMIENTO FIFA: PTS > DIF > GF
-        teamsMap.sort((a,b) => {
-            if(b.pts !== a.pts) return b.pts - a.pts;
-            if(b.dif !== a.dif) return b.dif - a.dif;
-            return b.gf - a.gf;
-        });
-
+        teamsMap.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
         standings[gid] = teamsMap;
     });
 
-    // 2. ENCONTRAR MEJORES TERCEROS
-    let thirds = [];
-    Object.keys(standings).forEach(g => {
-        let t = standings[g][2]; // El tercero
-        if(t) thirds.push(t);
-    });
-    // Ordenar terceros
-    thirds.sort((a,b) => {
-        if(b.pts !== a.pts) return b.pts - a.pts;
-        if(b.dif !== a.dif) return b.dif - a.dif;
-        return b.gf - a.gf;
-    });
-    let bestThirds = thirds.slice(0, 8); // Top 8 Clasifican
+    // 2. MEJORES TERCEROS
+    let allThirds = [];
+    Object.keys(standings).forEach(g => { if(standings[g][2]) allThirds.push(standings[g][2]); });
+    allThirds.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+    const qualifiedThirds = allThirds.slice(0, 8);
+    const usedThirds = new Set();
 
-    // 3. MAPEAR CLASIFICADOS A LAS LLAVES (R32)
+    // 3. RESOLVER LLAVES (RECURSIVO)
     const projected = {};
-    
-    // --- FUNCIÓN INTERNA UNIFICADA (resolveTeam) ---
-    const resolveTeam = (code) => {
-        if(!code) return '...';
 
-        // CASO A: Clasificados Directos (Ej: A1, B2, L1...)
-        // Verifica si es Letra + Numero (del 1 al 2)
-        if (code.match(/^[A-L][1-2]$/)) {
-            let type = code.charAt(0); 
-            let idx = parseInt(code.charAt(1)) - 1; // 1->0, 2->1
-            
-            if(standings[type] && standings[type][idx]) {
-                return standings[type][idx].name;
+    // --- Sub-función: Quién ganó el partido ID ---
+    const getMatchWinner = (matchId) => {
+        if (!projected[matchId]) return null; 
+
+        let vH = predsSource[`k-${matchId}-h`] || predsSource[`h-${matchId}`];
+        let vA = predsSource[`k-${matchId}-a`] || predsSource[`a-${matchId}`];
+        let winnerCode = predsSource[`w-${matchId}`];
+
+        if (vH && vA) {
+            let sH = parseInt(vH); let sA = parseInt(vA);
+            if (sH > sA) return projected[matchId].home;
+            if (sA > sH) return projected[matchId].away;
+            if (sH === sA) {
+                if (winnerCode === 'h') return projected[matchId].home;
+                if (winnerCode === 'a') return projected[matchId].away;
             }
         }
-
-        // CASO B: Mejores Terceros Complejos (Ej: T_ABCDF)
-        if (code.startsWith('T_')) {
-            // Muestra los posibles grupos de origen
-            // Ej: Convierte "T_ABCDF" en "(3ro A,B,C,D,F)"
-            return code.replace('T_', '(3ro ').replace(/_/g, '') + ')';
-        }
-        
-        return '...';
+        return { name: `Ganador M${matchId}`, seed: `W${matchId}` };
     };
 
-    // Usamos R32_MATCHUPS de data.js
-    if(typeof R32_MATCHUPS !== 'undefined') {
-        R32_MATCHUPS.forEach(m => {
+    // --- Sub-función: Resolver quién es el equipo (A1, W73, L101) ---
+    const resolveTeamData = (code) => {
+        if(!code) return { name: '...', seed: '' };
+
+        // A) GRUPOS (Ej: A1, B2)
+        if (code.match(/^[A-L][1-2]$/)) {
+            let g = code.charAt(0); let pos = parseInt(code.charAt(1)) - 1;
+            if(standings[g] && standings[g][pos]) return { name: standings[g][pos].name, seed: code };
+        }
+
+        // B) MEJORES TERCEROS (Ej: T_ABCDF)
+        if (code.startsWith('T_')) {
+            let allowed = code.split('_')[1];
+            let found = qualifiedThirds.find(t => allowed.includes(t.group) && !usedThirds.has(t.name));
+            if (found) { usedThirds.add(found.name); return { name: found.name, seed: `3${found.group}` }; }
+            return { name: 'TBD', seed: '3?' };
+        }
+
+        // C) REFERENCIA A PARTIDO PREVIO (W = Winner, L = Loser)
+        // ESTA ES LA PARTE QUE ACTUALIZAMOS
+        let type = 'W'; // Por defecto asumimos que busca al ganador
+        let cleanId = code;
+        
+        // Detectar si pide Winner (W) o Loser (L)
+        if (code.startsWith('W')) {
+            cleanId = code.substring(1);
+        } else if (code.startsWith('L')) {
+            type = 'L'; 
+            cleanId = code.substring(1);
+        }
+
+        // Si el partido ya se jugó (está en projected)
+        if (projected[cleanId]) {
+            let winner = getMatchWinner(cleanId);
+            
+            // Si ya hay un ganador definido
+            if(winner && !winner.name.startsWith('Ganador')) {
+                // CASO 1: Queremos el GANADOR (Final)
+                if(type === 'W') return { name: winner.name, seed: code };
+                
+                // CASO 2: Queremos el PERDEDOR (3er Puesto)
+                if(type === 'L') {
+                    let match = projected[cleanId];
+                    // El perdedor es el que NO es el ganador
+                    // (Si el ganador es Home, el perdedor es Away)
+                    let loser = (match.home.name === winner.name) ? match.away : match.home;
+                    return { name: loser.name, seed: code };
+                }
+            }
+            // Si aún no se juega, mostramos texto de espera
+            return { name: (type === 'L' ? `Perdedor M${cleanId}` : `Ganador M${cleanId}`), seed: code };
+        }
+        
+        // C.2) Compatibilidad con IDs directos ('32-1')
+        if (projected[code]) {
+             let winner = getMatchWinner(code);
+             if(winner) return { name: winner.name, seed: code };
+        }
+
+        return { name: '...', seed: '' };
+    };
+
+    // 4. EJECUTAR EN CASCADA
+    const phases = [
+        (typeof R32_MATCHUPS !== 'undefined' ? R32_MATCHUPS : []),
+        (typeof R16_MATCHUPS !== 'undefined' ? R16_MATCHUPS : []),
+        (typeof QF_MATCHUPS !== 'undefined' ? QF_MATCHUPS : []),
+        (typeof SF_MATCHUPS !== 'undefined' ? SF_MATCHUPS : []),
+        (typeof F_MATCHUPS !== 'undefined' ? F_MATCHUPS : [])
+    ];
+
+    phases.forEach(phase => {
+        phase.forEach(m => {
             projected[m.id] = {
-                home: resolveTeam(m.h),
-                away: resolveTeam(m.a)
+                home: resolveTeamData(m.h),
+                away: resolveTeamData(m.a)
             };
         });
-    }
+    });
 
     return projected;
 }
+
+
 
 function autoFillOfficialQualifiers() {
     if(role !== 'admin') return;
@@ -648,9 +769,193 @@ function renderBracket() {
     container.innerHTML = html;
 }
 
+// /* =========================================================
+//    RENDERIZADOR DE COLUMNA (Respetando Roles + Seeds FIFA)
+//    ========================================================= */
+// function renderRoundColumn(title, matchups, prefix, phaseKey) {
+//     let isLocked = currentUser.locks && currentUser.locks[phaseKey];
+//     let isEnabled = phaseControl[phaseKey];
+    
+//     // 1. HEADER Y BOTONES (Esto no se toca, lógica original)
+//     let btnHTML = '';
+//     if(role === 'fan') {
+//         if(isLocked) btnHTML = `<button class="round-action-btn btn-done">ENVIADO</button>`;
+//         else if (!isEnabled) btnHTML = `<button class="round-action-btn btn-wait">ESPERANDO</button>`;
+//         else btnHTML = `<button class="round-action-btn btn-go" onclick="submitPhase('${phaseKey}')">ENVIAR</button>`;
+//     } else {
+//         btnHTML = `<span style="font-size:0.7rem; color:${isEnabled?'#0f0':'#f00'}">${isEnabled ? 'OPEN' : 'CLOSED'}</span>`;
+//     }
+
+//     let html = `<div class="round-column"><div class="round-header"><span class="round-title">${title}</span>${btnHTML}</div>`;
+
+//     matchups.forEach(m => {
+//         // 2. RECUPERAR DATOS INTELIGENTES (Step 1)
+//         // Intentamos sacar el objeto {name, seed} calculado
+//         let simData = (typeof simulatedTeams !== 'undefined' && simulatedTeams[m.id]) ? simulatedTeams[m.id] : null;
+
+//         let nameH, seedH, nameA, seedA;
+
+//         // Lógica Híbrida: Si hay dato calculado (R32) lo usamos, si no (R16, QF...) usamos la lógica vieja
+//         if (simData) {
+//             nameH = simData.home.name;
+//             seedH = simData.home.seed; // Ej: "1E"
+//             nameA = simData.away.name;
+//             seedA = simData.away.seed; // Ej: "3A"
+//         } else {
+//             // Fallback para fases avanzadas (o si falla el cálculo)
+//             nameH = resolveTeamName(m.id, 'h', m.h);
+//             seedH = m.h; // Ej: "W73"
+//             nameA = resolveTeamName(m.id, 'a', m.a);
+//             seedA = m.a; // Ej: "W74"
+//         }
+
+//         // 3. RECUPERAR SCORES (Lógica original)
+//         let kH = `k-${m.id}-h`; let kA = `k-${m.id}-a`;
+//         let scH, scA;
+//         if(role === 'admin') { scH = officialRes[kH]||''; scA = officialRes[kA]||''; }
+//         else { scH = currentUser.preds[kH]||''; scA = currentUser.preds[kA]||''; }
+        
+//         let disabled = (role === 'fan' && isLocked) ? 'disabled' : '';
+
+//         // 4. HELPER DE RENDERIZADO (Aquí metemos el Seed Badge)
+//         let renderTeam = (slot, name, seed) => {
+//             // El distintivo dorado (1E, 3A...)
+//             let badgeHTML = `<span class="seed-badge" style="
+//                 display:inline-block; 
+//                 width:28px; 
+//                 font-size:0.7rem; 
+//                 font-weight:bold; 
+//                 color:#ffd700; 
+//                 margin-right:4px;
+//                 text-align:left;">${seed}</span>`;
+
+//             if(role === 'admin') { 
+//                 // Admin: Badge + Input editable
+//                 return `<div style="display:flex; align-items:center; width:100%;">
+//                             ${badgeHTML}
+//                             <input type="text" style="flex-grow:1; border:1px solid #555; background:#222; color:#fff; padding:5px; font-size:0.85rem;" 
+//                                    value="${name}" 
+//                                    onchange="updateOfficialTeamName('${m.id}', '${slot}', this.value)">
+//                         </div>`;
+//             } else { 
+//                 // Fan: Badge + Texto
+//                 return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
+//                             ${badgeHTML}
+//                             <span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+//                         </div>`;
+//             }
+//         };
+
+//         // 5. CONSTRUCCIÓN FINAL DE LA TARJETA
+//         html += `<div class="bracket-match">
+//                     <div class="bracket-row">
+//                         ${renderTeam('h', nameH, seedH)}
+//                         <input type="number" min="0" class="bracket-input" value="${scH}" ${disabled} onchange="updateBracketScore('${m.id}','h',this.value, '${phaseKey}')">
+//                     </div>
+//                     <div class="bracket-row">
+//                         ${renderTeam('a', nameA, seedA)}
+//                         <input type="number" min="0" class="bracket-input" value="${scA}" ${disabled} onchange="updateBracketScore('${m.id}','a',this.value, '${phaseKey}')">
+//                     </div>
+//                  </div>`;
+//     });
+
+//     return html + `</div>`;
+// }
+
+// /* =========================================================
+//    RENDERIZADOR CON CHECKBOX DE PENALES
+//    ========================================================= */
+// function renderRoundColumn(title, matchups, prefix, phaseKey) {
+//     let isLocked = currentUser.locks && currentUser.locks[phaseKey];
+//     let isEnabled = phaseControl[phaseKey];
+    
+//     // Header y Botones (Sin cambios)
+//     let btnHTML = '';
+//     if(role === 'fan') {
+//         if(isLocked) btnHTML = `<button class="round-action-btn btn-done">ENVIADO</button>`;
+//         else if (!isEnabled) btnHTML = `<button class="round-action-btn btn-wait">ESPERANDO</button>`;
+//         else btnHTML = `<button class="round-action-btn btn-go" onclick="submitPhase('${phaseKey}')">ENVIAR</button>`;
+//     } else {
+//         btnHTML = `<span style="font-size:0.7rem; color:${isEnabled?'#0f0':'#f00'}">${isEnabled ? 'OPEN' : 'CLOSED'}</span>`;
+//     }
+
+//     let html = `<div class="round-column"><div class="round-header"><span class="round-title">${title}</span>${btnHTML}</div>`;
+
+//     matchups.forEach(m => {
+//         // 1. Datos del Cerebro FIFA
+//         let simData = (typeof simulatedTeams !== 'undefined' && simulatedTeams[m.id]) ? simulatedTeams[m.id] : null;
+//         let nameH = simData ? simData.home.name : resolveTeamName(m.id, 'h', m.h);
+//         let seedH = simData ? simData.home.seed : m.h;
+//         let nameA = simData ? simData.away.name : resolveTeamName(m.id, 'a', m.a);
+//         let seedA = simData ? simData.away.seed : m.a;
+
+//         // 2. Scores y Ganador de Penales
+//         let kH = `k-${m.id}-h`; let kA = `k-${m.id}-a`;
+//         let kW = `w-${m.id}`; // Clave para el ganador (checkbox)
+
+//         let scH, scA, penWinner;
+//         if(role === 'admin') { 
+//             scH = officialRes[kH]||''; scA = officialRes[kA]||''; 
+//             penWinner = officialRes[kW]; // 'h' o 'a'
+//         } else { 
+//             scH = currentUser.preds[kH]||''; scA = currentUser.preds[kA]||''; 
+//             penWinner = currentUser.preds[kW]; 
+//         }
+
+//         // 3. Detectar Empate para mostrar Checkboxes
+//         let isTie = (scH !== '' && scA !== '' && parseInt(scH) === parseInt(scA));
+//         let checkStyle = isTie ? 'visibility:visible;' : 'visibility:hidden;'; 
+        
+//         let disabled = (role === 'fan' && isLocked) ? 'disabled' : '';
+//         // Nota: El Fan SI puede editar el checkbox si no está bloqueado, para su simulación.
+
+//         // 4. Renderizador de Equipo + Checkbox
+//         let renderTeam = (slot, name, seed, type) => {
+//             let isChecked = (penWinner === type) ? 'checked' : '';
+//             // Checkbox que guarda 'h' o 'a' en la clave w-ID
+//             let checkHTML = `<input type="checkbox" class="pen-check" ${isChecked} ${disabled} 
+//                                     style="${checkStyle} margin-left:5px; cursor:pointer;"
+//                                     onchange="updateWinner('${m.id}', '${type}', this.checked)">`;
+
+//             let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${seed}</span>`;
+
+//             if(role === 'admin') { 
+//                 return `<div style="display:flex; align-items:center; width:100%;">
+//                             ${badgeHTML}
+//                             <input type="text" style="flex-grow:1; border:1px solid #555; background:#222; color:#fff; padding:5px; font-size:0.85rem;" value="${name}" onchange="updateOfficialTeamName('${m.id}', '${slot}', this.value)">
+//                             ${checkHTML}
+//                         </div>`;
+//             } else { 
+//                 return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
+//                             ${badgeHTML}
+//                             <span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+//                             ${checkHTML}
+//                         </div>`;
+//             }
+//         };
+
+//         html += `<div class="bracket-match">
+//                     <div class="bracket-row">
+//                         ${renderTeam('h', nameH, seedH, 'h')}
+//                         <input type="number" min="0" class="bracket-input" value="${scH}" ${disabled} onchange="updateBracketScore('${m.id}','h',this.value, '${phaseKey}')">
+//                     </div>
+//                     <div class="bracket-row">
+//                         ${renderTeam('a', nameA, seedA, 'a')}
+//                         <input type="number" min="0" class="bracket-input" value="${scA}" ${disabled} onchange="updateBracketScore('${m.id}','a',this.value, '${phaseKey}')">
+//                     </div>
+//                  </div>`;
+//     });
+//     return html + `</div>`;
+// }
+
+/* =========================================================
+   RENDERIZADOR CON ETIQUETAS Y LINEAS DE FLUJO
+   ========================================================= */
 function renderRoundColumn(title, matchups, prefix, phaseKey) {
-    let isLocked = currentUser.locks[phaseKey];
+    let isLocked = currentUser.locks && currentUser.locks[phaseKey];
     let isEnabled = phaseControl[phaseKey];
+    
+    // Header y Botones (Sin cambios)
     let btnHTML = '';
     if(role === 'fan') {
         if(isLocked) btnHTML = `<button class="round-action-btn btn-done">ENVIADO</button>`;
@@ -659,23 +964,86 @@ function renderRoundColumn(title, matchups, prefix, phaseKey) {
     } else {
         btnHTML = `<span style="font-size:0.7rem; color:${isEnabled?'#0f0':'#f00'}">${isEnabled ? 'OPEN' : 'CLOSED'}</span>`;
     }
-    let html = `<div class="round-column"><div class="round-header"><span class="round-title">${title}</span>${btnHTML}</div>`;
+
+    let html = `<div class="round-column" id="col-${phaseKey}">
+                    <div class="round-header"><span class="round-title">${title}</span>${btnHTML}</div>`;
+
     matchups.forEach(m => {
-        let nameH = resolveTeamName(m.id, 'h', m.h);
-        let nameA = resolveTeamName(m.id, 'a', m.a);
-        let kH = `k-${m.id}-h`; let kA = `k-${m.id}-a`;
-        let scH, scA;
-        if(role === 'admin') { scH = officialRes[kH]||''; scA = officialRes[kA]||''; }
-        else { scH = currentUser.preds[kH]||''; scA = currentUser.preds[kA]||''; }
+        // --- LOGICA DE CEREBRO (Igual que antes) ---
+        let simData = (typeof simulatedTeams !== 'undefined' && simulatedTeams[m.id]) ? simulatedTeams[m.id] : null;
+        let nameH = simData ? simData.home.name : resolveTeamName(m.id, 'h', m.h);
+        let seedH = simData ? simData.home.seed : m.h;
+        let nameA = simData ? simData.away.name : resolveTeamName(m.id, 'a', m.a);
+        let seedA = simData ? simData.away.seed : m.a;
+        
+        let kH = `k-${m.id}-h`; let kA = `k-${m.id}-a`; let kW = `w-${m.id}`;
+        let scH, scA, penWinner;
+        
+        if(role === 'admin') { 
+            scH = officialRes[kH]||''; scA = officialRes[kA]||''; penWinner = officialRes[kW]; 
+        } else { 
+            scH = currentUser.preds[kH]||''; scA = currentUser.preds[kA]||''; penWinner = currentUser.preds[kW]; 
+        }
+
+        let isTie = (scH !== '' && scA !== '' && parseInt(scH) === parseInt(scA));
+        let checkStyle = isTie ? 'visibility:visible;' : 'visibility:hidden;'; 
         let disabled = (role === 'fan' && isLocked) ? 'disabled' : '';
-        let renderTeam = (slot, name) => {
-            if(role === 'admin') return `<input type="text" style="width:100%; border:1px solid #555; background:#222; color:#fff; padding:5px;" value="${name}" onchange="updateOfficialTeamName('${m.id}', '${slot}', this.value)">`;
-            else return `<span class="b-team" title="${name}">${name}</span>`;
+
+        // --- NUEVO: ETIQUETAS DE ORIGEN (W74 vs W77) ---
+        // Si la fase NO es 16avos, mostramos de dónde vienen
+        let sourceTag = '';
+        if(phaseKey !== 'r32') {
+            sourceTag = `<div class="match-source-label">${m.h} <span style="color:#666">vs</span> ${m.a}</div>`;
+        }
+
+        // --- NUEVO: CLASE PARA LAS LINEAS CONECTORAS ---
+        // Le damos una clase especial para saber si dibujar lineas a la izq o der
+        let flowClass = '';
+        if(phaseKey === 'r32') flowClass = 'flow-start';       // Solo salida derecha
+        else if(phaseKey === 'f') flowClass = 'flow-end';      // Solo entrada izquierda
+        else flowClass = 'flow-mid';                           // Entrada y Salida
+
+        // Render Team Helper
+        let renderTeam = (slot, name, seed, type) => {
+            let isChecked = (penWinner === type) ? 'checked' : '';
+            let checkHTML = `<input type="checkbox" class="pen-check" ${isChecked} ${disabled} style="${checkStyle} margin-left:5px; cursor:pointer;" onchange="updateWinner('${m.id}', '${type}', this.checked)">`;
+            let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${seed}</span>`;
+
+            if(role === 'admin') { 
+                return `<div style="display:flex; align-items:center; width:100%;">
+                            ${badgeHTML}
+                            <input type="text" style="flex-grow:1; border:1px solid #555; background:#222; color:#fff; padding:5px; font-size:0.85rem;" value="${name}" onchange="updateOfficialTeamName('${m.id}', '${slot}', this.value)">
+                            ${checkHTML}
+                        </div>`;
+            } else { 
+                return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
+                            ${badgeHTML}
+                            <span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                            ${checkHTML}
+                        </div>`;
+            }
         };
-        html += `<div class="bracket-match"><div class="bracket-row">${renderTeam('h', nameH)}<input type="number" min="0" class="bracket-input" value="${scH}" ${disabled} onchange="updateBracketScore('${m.id}','h',this.value, '${phaseKey}')"></div><div class="bracket-row">${renderTeam('a', nameA)}<input type="number" min="0" class="bracket-input" value="${scA}" ${disabled} onchange="updateBracketScore('${m.id}','a',this.value, '${phaseKey}')"></div></div>`;
+
+        // --- CONSTRUCCIÓN DE LA TARJETA MEJORADA ---
+        html += `<div class="bracket-match ${flowClass}" id="match-${m.id}">
+                    <div class="match-top-bar">
+                        <span class="match-id-badge">M${m.id}</span>
+                        ${sourceTag}
+                    </div>
+
+                    <div class="bracket-row">
+                        ${renderTeam('h', nameH, seedH, 'h')}
+                        <input type="number" min="0" class="bracket-input" value="${scH}" ${disabled} onchange="updateBracketScore('${m.id}','h',this.value, '${phaseKey}')">
+                    </div>
+                    <div class="bracket-row">
+                        ${renderTeam('a', nameA, seedA, 'a')}
+                        <input type="number" min="0" class="bracket-input" value="${scA}" ${disabled} onchange="updateBracketScore('${m.id}','a',this.value, '${phaseKey}')">
+                    </div>
+                 </div>`;
     });
     return html + `</div>`;
 }
+
 
 /* =========================================================
    EL PUENTE (Resuelve qué nombre mostrar en la llave)
@@ -1386,4 +1754,28 @@ function saveUsersDB() {
         localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
     }
     console.log("💾 Datos guardados en m26_users.");
+}
+
+/* =========================================================
+   ACTUALIZAR GANADOR DE PENALES (CHECKBOX)
+   ========================================================= */
+function updateWinner(matchId, type, isChecked) {
+    if(!isChecked) return; // Si desmarca, no hacemos nada (o podríamos borrar)
+
+    // Lógica de Radio Button (Si marco H, desmarco A)
+    // Pero como son checkboxes visuales, simplemente guardamos quién ganó.
+    let key = `w-${matchId}`;
+    
+    if(role === 'admin') officialRes[key] = type;
+    else currentUser.preds[key] = type;
+    
+    // Si marco el local ('h'), aseguro que la data guarde 'h'. 
+    // (Visualmente el render se encarga de mostrar solo uno marcado si recarga, 
+    // pero para efecto inmediato podríamos necesitar JS extra para desmarcar el otro.
+    // Por simplicidad, al repintar se arregla).
+
+    saveUsersDB();
+    
+    // Repintar para que el bracket avance
+    renderBracket();
 }

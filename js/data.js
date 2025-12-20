@@ -8,12 +8,12 @@ const GROUPS_CONFIG = {
     'A': {
         teams: ['México', 'Sudáfrica', 'Corea del Sur', 'Repechaje UEFA D'],
         matches: [
-            { t1: 0, t2: 1, date: '11 Jun', time: '14:00', stadium: 'Azteca' },
-            { t1: 2, t2: 3, date: '11 Jun', time: '17:00', stadium: 'Guadalajara' },
-            { t1: 0, t2: 2, date: '15 Jun', time: '18:00', stadium: 'Monterrey' },
-            { t1: 3, t2: 1, date: '15 Jun', time: '15:00', stadium: 'Azteca' },
-            { t1: 3, t2: 0, date: '19 Jun', time: '12:00', stadium: 'Guadalajara' },
-            { t1: 1, t2: 2, date: '19 Jun', time: '12:00', stadium: 'Monterrey' }
+            { t1: 0, t2: 1, date: '11 Jun', time: '15:00', stadium: 'Azteca' },
+            { t1: 2, t2: 3, date: '11 Jun', time: '22:00', stadium: 'Guadalajara' },
+            { t1: 3, t2: 1, date: '18 Jun', time: '12:00', stadium: 'Azteca' },
+            { t1: 0, t2: 2, date: '18 Jun', time: '21:00', stadium: 'Monterrey' },
+            { t1: 3, t2: 0, date: '24 Jun', time: '21:00', stadium: 'Guadalajara' },
+            { t1: 1, t2: 2, date: '24 Jun', time: '21:00', stadium: 'Monterrey' }
         ]
     },
     'B': {
@@ -143,16 +143,17 @@ const GROUPS_CONFIG = {
    Basado en el esquema de 12 Grupos (48 equipos)
    ========================================================= */
 const R32_MATCHUPS = [
-    // --- DOMINGO 28 JUNIO 2026 ---
-    { id: '73', h: 'A2', a: 'B2', info: 'Los Angeles (M73)' }, // ¡El que usted dijo!
-
-    // --- LUNES 29 JUNIO 2026 ---
+    
     { id: '74', h: 'E1', a: 'T_ABCDF', info: 'Boston (M74)' }, // 1E vs 3ro de A,B,C,D,F
+    { id: '77', h: 'I1', a: 'T_CDFGH', info: 'New York/NJ (M77)' }, // 1I vs 3ro de C,D,F,G,H
+
+    { id: '73', h: 'A2', a: 'B2', info: 'Los Angeles (M73)' }, // ¡El que usted dijo!
     { id: '75', h: 'F1', a: 'C2',      info: 'Monterrey (M75)' },
+
     { id: '76', h: 'C1', a: 'F2',      info: 'Houston (M76)' },
 
     // --- MARTES 30 JUNIO 2026 ---
-    { id: '77', h: 'I1', a: 'T_CDFGH', info: 'New York/NJ (M77)' }, // 1I vs 3ro de C,D,F,G,H
+    
     { id: '78', h: 'E2', a: 'I2',      info: 'Dallas (M78)' },      // 2E vs 2I
     { id: '79', h: 'A1', a: 'T_CEFHI', info: 'Mexico City (M79)' }, // 1A vs 3ro de C,E,F,H,I
 
@@ -171,7 +172,49 @@ const R32_MATCHUPS = [
     { id: '87', h: 'K1', a: 'T_DEIJL', info: 'Kansas City (M87)' }, // 1K vs 3ro de D,E,I,J,L
     { id: '88', h: 'D2', a: 'G2',      info: 'Dallas (M88)' }       // 2D vs 2G
 ];
-const R16_MATCHUPS = [{id:'16-1', h:'32-1', a:'32-2'}, {id:'16-2', h:'32-3', a:'32-4'}, {id:'16-3', h:'32-5', a:'32-6'}, {id:'16-4', h:'32-7', a:'32-8'},{id:'16-5', h:'32-9', a:'32-10'}, {id:'16-6', h:'32-11', a:'32-12'}, {id:'16-7', h:'32-13', a:'32-14'}, {id:'16-8', h:'32-15', a:'32-16'}];
-const QF_MATCHUPS = [ {id:'8-1',h:'16-1',a:'16-2'}, {id:'8-2',h:'16-3',a:'16-4'}, {id:'8-3',h:'16-5',a:'16-6'}, {id:'8-4',h:'16-7',a:'16-8'} ];
-const SF_MATCHUPS = [ {id:'4-1',h:'8-1',a:'8-2'}, {id:'4-2',h:'8-3',a:'8-4'} ];
-const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
+
+/* =========================================================
+   ESTRUCTURA DE LLAVES OFICIAL FIFA 2026 (DATA.JS)
+   Cruces confirmados según el calendario oficial por sedes.
+   ========================================================= */
+
+// --- OCTAVOS DE FINAL (R16) ---
+// OJO: Note que los números saltan (Ej: W74 vs W77). Así es el cuadro oficial.
+const R16_MATCHUPS = [
+    // Lado Izquierdo del Cuadro (West/Central)
+    { id: '89', h: 'W74', a: 'W77', info: 'Octavos 1 (Philadelphia)' }, // 4 de Julio
+    { id: '90', h: 'W73', a: 'W75', info: 'Octavos 2 (Houston)' },      // 4 de Julio
+    { id: '91', h: 'W76', a: 'W78', info: 'Octavos 3 (New Jersey)' },   // 5 de Julio
+    { id: '92', h: 'W79', a: 'W80', info: 'Octavos 4 (Mexico City)' },  // 5 de Julio
+    
+    // Lado Derecho del Cuadro (Central/East)
+    { id: '93', h: 'W83', a: 'W84', info: 'Octavos 5 (Dallas)' },       // 6 de Julio
+    { id: '94', h: 'W81', a: 'W82', info: 'Octavos 6 (Seattle)' },      // 6 de Julio
+    { id: '95', h: 'W86', a: 'W88', info: 'Octavos 7 (Atlanta)' },      // 7 de Julio
+    { id: '96', h: 'W85', a: 'W87', info: 'Octavos 8 (Vancouver)' }     // 7 de Julio
+];
+
+// --- CUARTOS DE FINAL (QF) ---
+// Se cruzan los ganadores de los Octavos definidos arriba
+const QF_MATCHUPS = [
+    { id: '97',  h: 'W89', a: 'W90', info: 'Cuartos 1 (Boston)' },       // 9 de Julio
+    { id: '98',  h: 'W93', a: 'W94', info: 'Cuartos 2 (Los Angeles)' },  // 10 de Julio
+    { id: '99',  h: 'W91', a: 'W92', info: 'Cuartos 3 (Miami)' },        // 11 de Julio
+    { id: '100', h: 'W95', a: 'W96', info: 'Cuartos 4 (Kansas City)' }   // 11 de Julio
+];
+
+// --- SEMIFINALES (SF) ---
+const SF_MATCHUPS = [
+    { id: '101', h: 'W97', a: 'W98', info: 'Semifinal 1 (Dallas)' },     // 14 de Julio
+    { id: '102', h: 'W99', a: 'W100', info: 'Semifinal 2 (Atlanta)' }    // 15 de Julio
+];
+
+// --- FINAL Y 3ER PUESTO ---
+const F_MATCHUPS = [
+    // La Gran Final (Ganador 101 vs Ganador 102)
+    { id: '104', h: 'W101', a: 'W102', info: 'GRAN FINAL (New York/NJ)' },
+    
+    // El 3er Puesto (Perdedor 101 vs Perdedor 102)
+    // Usamos la 'L' que acabamos de programar
+    { id: '103', h: 'L101', a: 'L102', info: '3er y 4to Puesto (Miami)' }
+];
