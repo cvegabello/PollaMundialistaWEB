@@ -2,10 +2,36 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-    version: "v1.0",           // El número de la versión
+    version: "v2.0",           // El número de la versión
     environment: "BETA",       // Estado: DEV, BETA, PROD
-    buildDate: "20-Dic-2025"   // Fecha de la última actualización
+    buildDate: "22-Dic-2025"   // Fecha de la última actualización
 };
+
+/* =========================================================
+   🔥 CONEXIÓN CON FIREBASE
+   ========================================================= */
+// 1. Pegue aquí su objeto de configuración (El que tiene copiado)
+const firebaseConfig = {
+  apiKey: "AIzaSyDC81t0Ue5Ut9Z4eploqEY48yx_VVopVfY",
+  authDomain: "pollamundial2026-carlos.firebaseapp.com",
+  databaseURL: "https://pollamundial2026-carlos-default-rtdb.firebaseio.com/", 
+  projectId: "pollamundial2026-carlos",
+  storageBucket: "pollamundial2026-carlos.firebasestorage.app",
+  messagingSenderId: "182293814564",
+  appId: "1:182293814564:web:7b7987db956d74a86727b1"
+};
+
+// 2. Inicializar Firebase (Versión Compat)
+if (typeof firebase !== 'undefined') {
+    firebase.initializeApp(firebaseConfig);
+    console.log("🔥 Firebase inicializado correctamente.");
+} else {
+    console.error("☠️ Error: No se cargó la librería de Firebase en el HTML.");
+}
+
+// 3. Referencia Global a la Base de Datos
+// (Esta variable 'db' es la que usaremos para guardar y leer goles)
+const db = firebase.database();
 
 // Pintar la versión automáticamente al cargar
 document.addEventListener('DOMContentLoaded', () => {
@@ -59,23 +85,6 @@ function animP() {
 initP(); animP();
 window.addEventListener('resize', ()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight; initP();});
 
-/* =========================================================
-   2. CONFIGURACIÓN DE GRUPOS Y PARTIDOS
-   ========================================================= */
-// const GROUPS_CONFIG = {
-//     'A': { teams: ['México', 'Egipto', 'Polonia', 'Corea'], matches: [{t1:0,t2:1,info:"11 Jun"},{t1:2,t2:3,info:"11 Jun"},{t1:0,t2:2,info:"18 Jun"},{t1:1,t2:3,info:"18 Jun"},{t1:0,t2:3,info:"24 Jun"},{t1:1,t2:2,info:"24 Jun"}] },
-//     'B': { teams: ['EEUU', 'Gales', 'Inglaterra', 'Irán'], matches: [{t1:0,t2:1,info:"12 Jun"},{t1:2,t2:3,info:"12 Jun"},{t1:0,t2:2,info:"17 Jun"},{t1:1,t2:3,info:"17 Jun"},{t1:0,t2:3,info:"22 Jun"},{t1:1,t2:2,info:"22 Jun"}] },
-// };
-// // Llenar resto de grupos vacíos por ahora
-// ['C','D','E','F','G','H','I','J','K','L'].forEach(l => {
-//     if(!GROUPS_CONFIG[l]) GROUPS_CONFIG[l] = { teams: ['E1','E2','E3','E4'], matches: Array(6).fill({t1:0,t2:1,info:"--"}) };
-// });
-
-// const R32_MATCHUPS = [{id:'32-1', h:'A1', a:'B2'}, {id:'32-2', h:'C1', a:'D2'}, {id:'32-3', h:'E1', a:'F2'}, {id:'32-4', h:'G1', a:'H2'},{id:'32-5', h:'I1', a:'J2'}, {id:'32-6', h:'K1', a:'L2'}, {id:'32-7', h:'A2', a:'C2'}, {id:'32-8', h:'B1', a:'T1'},{id:'32-9', h:'D1', a:'T2'}, {id:'32-10', h:'E2', a:'F1'}, {id:'32-11', h:'G2', a:'H1'}, {id:'32-12', h:'I2', a:'J1'},{id:'32-13', h:'K2', a:'L1'}, {id:'32-14', h:'T3', a:'T4'}, {id:'32-15', h:'T5', a:'T6'}, {id:'32-16', h:'T7', a:'T8'}];
-// const R16_MATCHUPS = [{id:'16-1', h:'32-1', a:'32-2'}, {id:'16-2', h:'32-3', a:'32-4'}, {id:'16-3', h:'32-5', a:'32-6'}, {id:'16-4', h:'32-7', a:'32-8'},{id:'16-5', h:'32-9', a:'32-10'}, {id:'16-6', h:'32-11', a:'32-12'}, {id:'16-7', h:'32-13', a:'32-14'}, {id:'16-8', h:'32-15', a:'32-16'}];
-// const QF_MATCHUPS = [ {id:'8-1',h:'16-1',a:'16-2'}, {id:'8-2',h:'16-3',a:'16-4'}, {id:'8-3',h:'16-5',a:'16-6'}, {id:'8-4',h:'16-7',a:'16-8'} ];
-// const SF_MATCHUPS = [ {id:'4-1',h:'8-1',a:'8-2'}, {id:'4-2',h:'8-3',a:'8-4'} ];
-// const F_MATCHUPS = [ {id:'2-1',h:'4-1',a:'4-2'} ];
 
 /* =========================================================
    3. ESTADO GLOBAL (CORREGIDO)
@@ -116,7 +125,7 @@ let simulatedTeams = {};
    4. FUNCIONES DE LOGIN Y MODO
    ========================================================= */
 function handleLogin() {
-    const u = document.getElementById('username').value.trim();
+    const u = document.getElementById('username').value.trim().toLowerCase();
     const p = document.getElementById('password').value;
     
     if(!u) return alert("Ingresa usuario");
@@ -128,6 +137,8 @@ function handleLogin() {
     // 2. Referencias a los Nuevos Tableros
     const fanDash = document.getElementById('fan-dashboard');
     const adminDash = document.getElementById('admin-dashboard');
+
+    startFirebaseListener();
 
     // 3. Decidir qué camino tomar (Admin o Fan)
     if(p === 'admin2026') {
@@ -167,13 +178,13 @@ function setupAdminMode() {
     if(userBar) userBar.style.display = 'none';    // Ocultar barra de usuario
 
     // 3. Gestionar Botones de Herramientas (Toolbar)
-    const btnSaveDraft = document.getElementById('btn-save-draft');
-    const btnRefresh = document.getElementById('btn-refresh');
+    // const btnSaveDraft = document.getElementById('btn-save-draft');
+    // const btnRefresh = document.getElementById('btn-refresh');
     const adminBracketTools = document.getElementById('admin-bracket-tools');
     
     // El admin no guarda "borradores", guarda con botones específicos en el panel
-    if(btnSaveDraft) btnSaveDraft.style.display = 'none';
-    if(btnRefresh) btnRefresh.style.display = 'flex'; 
+    // if(btnSaveDraft) btnSaveDraft.style.display = 'none';
+    // if(btnRefresh) btnRefresh.style.display = 'flex'; 
     
     // Herramientas extra para el bracket (botón de cargar clasificados)
     if(adminBracketTools) adminBracketTools.style.display = 'block';
@@ -212,8 +223,7 @@ function setupUserMode(username) {
     // 1. Definir Rol
     role = 'fan';
 
-    // 2. Gestionar Elementos de la Interfaz (Header y Botones)
-    // Ocultar cosas de Admin
+    // 2. Gestionar Elementos de la Interfaz (Igual que como lo tenía)
     const adminBar = document.getElementById('admin-status-bar');
     if(adminBar) adminBar.style.display = 'none';
     
@@ -225,30 +235,46 @@ function setupUserMode(username) {
 
     // Mostrar cosas de Fan
     const userBar = document.getElementById('user-status-bar');
-    if(userBar) userBar.style.display = 'grid'; // O flex, según su diseño
+    if(userBar) userBar.style.display = 'grid'; 
     
-    const btnSaveDraft = document.getElementById('btn-save-draft');
-    if(btnSaveDraft) btnSaveDraft.style.display = 'flex'; // O block
+    // const btnSaveDraft = document.getElementById('btn-save-draft');
+    // if(btnSaveDraft) btnSaveDraft.style.display = 'flex'; 
     
-    const btnRefresh = document.getElementById('btn-refresh');
-    if(btnRefresh) btnRefresh.style.display = 'flex'; // O block
+    // const btnRefresh = document.getElementById('btn-refresh');
+    // if(btnRefresh) btnRefresh.style.display = 'flex';
 
-    // 3. CARGAR DATOS DEL USUARIO (LocalStorage)
-    // Esta parte es vital, la dejamos quietica
-    const key = `m26_data_${username}`;
-    let saved = JSON.parse(localStorage.getItem(key));
+    // ============================================================
+    // 3. CARGAR DATOS DEL USUARIO (MODIFICADO PARA FIREBASE ☁️)
+    // ============================================================
     
-    if(saved && saved.locks) {
-        currentUser = saved;
+    // Paso A: Buscamos si el usuario ya existe en la lista global (que viene de la nube)
+    let foundUser = users.find(u => u.name === username);
+
+    if (foundUser) {
+        // SI EXISTE: Usamos sus datos
+        currentUser = foundUser;
+        console.log(`✅ Bienvenido de nuevo, ${currentUser.name}`);
     } else {
-        // Si es usuario nuevo
+        // SI ES NUEVO: Lo creamos desde cero
         currentUser = { 
             name: username, 
             preds: {}, 
-            locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } 
+            locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
+            role: 'fan' // Aseguramos el rol
         };
+        
+        // ¡MAGIA AQUÍ! ✨
+        // Lo agregamos a la lista global
+        users.push(currentUser);
+        
+        // Y guardamos en la nube inmediatamente
+        saveToCloud(); 
+        
+        console.log(`✨ Nuevo usuario creado y subido a la nube: ${currentUser.name}`);
     }
     
+    // ============================================================
+
     // 4. Actualizar Nombre en Pantalla
     const displayUser = document.getElementById('display-username');
     if(displayUser) displayUser.innerText = currentUser.name.toUpperCase();
@@ -256,43 +282,84 @@ function setupUserMode(username) {
     // 5. Actualizar Barra de Progreso
     if(typeof updateStatusUI === 'function') updateStatusUI();
 
-    // NOTA: ELIMINAMOS renderGroups() y renderBracket() de aquí.
-    // ¿Por qué? Porque handleLogin() va a llamar a loadView() inmediatamente después,
-    // y loadView se encarga de pintar la pantalla. Así evitamos pintar dos veces.
+    // (Nota: loadView se llama después en handleLogin, así que estamos bien)
 }
 
+/* =========================================================
+   BARRA DE ESTADO Y PROGRESO (CORREGIDA - VERSIÓN FINAL 🛡️)
+   ========================================================= */
 function updateStatusUI() {
+    // 1. BLINDAJE
+    if (!currentUser) return;
+    if (role === 'admin') return; 
+
+    if (!currentUser.locks) {
+        currentUser.locks = { groups: false, r32: false, r16: false, qf: false, sf: false, f: false };
+    }
+
+    // 2. CÁLCULOS
     let count = Object.values(currentUser.locks).filter(x => x).length;
-    document.getElementById('display-progress').innerText = `Fases: ${count}/6`;
+    let progressDisplay = document.getElementById('display-progress');
+    if(progressDisplay) progressDisplay.innerText = `Fases: ${count}/6`;
+    
     calculatePoints();
     
+    // 3. REFERENCIAS
     let badge = document.getElementById('display-status');
     let groupArea = document.getElementById('submit-groups-area');
     let groupBtn = document.getElementById('btn-submit-groups');
     let groupMsg = document.getElementById('groups-msg');
+    // let saveDraftBtn = document.getElementById('btn-save-draft'); // Botón de disquette
+    
+    if(!badge || !groupArea) return;
 
+    // 4. LÓGICA DE ESTADO
     if(currentUser.locks.groups) {
+        // --- CASO: YA ENVIÓ (OFICIAL) ---
         badge.innerText = "OFICIAL";
         badge.className = "status-badge bg-official";
+        
+        // Esconder todo porque ya envió
         groupArea.style.display = 'none';
-        document.getElementById('btn-save-draft').style.display = 'none';
+
+        // if(saveDraftBtn) saveDraftBtn.style.display = 'none';
+
     } else {
+        // --- CASO: BORRADOR (AÚN NO ENVÍA) ---
         badge.innerText = "BORRADOR";
         badge.className = "status-badge bg-draft";
-        groupArea.style.display = 'block'; 
-        groupArea.classList.remove('hidden'); 
-        document.getElementById('btn-save-draft').style.display = 'flex';
         
-        if(phaseControl.groups) {
-            groupBtn.disabled = false;
-            groupBtn.className = "btn-big-submit";
-            groupBtn.innerText = "ENVIAR OFICIALMENTE";
-            groupMsg.innerHTML = "Fase de grupos habilitada.";
+        // AQUÍ ESTABA EL ERROR 🚨
+        // Antes mostrábamos la caja siempre. Ahora preguntamos:
+        // ¿Estoy en mi vista de usuario?
+        
+        if (typeof currentViewMode !== 'undefined' && currentViewMode === 'user') {
+            // SI: Muestre el panel de enviar y el disquette
+            groupArea.style.display = 'block'; 
+            groupArea.classList.remove('hidden'); 
+
+            // if(saveDraftBtn) saveDraftBtn.style.display = 'flex';
         } else {
-            groupBtn.disabled = true;
-            groupBtn.className = "btn-big-submit btn-big-disabled";
-            groupBtn.innerText = "ESPERANDO ADMIN";
-            groupMsg.innerHTML = "Fase cerrada temporalmente.";
+            // NO (Estoy viendo Oficiales): Escóndase, no estorbe
+            groupArea.style.display = 'none';
+            // if(saveDraftBtn) saveDraftBtn.style.display = 'none';
+        }
+        
+        // Configurar el botón grande (Habilitado/Deshabilitado según Admin)
+        if(phaseControl.groups) {
+            if(groupBtn) {
+                groupBtn.disabled = false;
+                groupBtn.className = "btn-big-submit";
+                groupBtn.innerText = "ENVIAR OFICIALMENTE";
+            }
+            if(groupMsg) groupMsg.innerHTML = "Fase de grupos habilitada.";
+        } else {
+            if(groupBtn) {
+                groupBtn.disabled = true;
+                groupBtn.className = "btn-big-submit btn-big-disabled";
+                groupBtn.innerText = "ESPERANDO ADMIN";
+            }
+            if(groupMsg) groupMsg.innerHTML = "Fase cerrada temporalmente.";
         }
     }
 }
@@ -331,11 +398,12 @@ function renderGroups(customData, customMode) {
     let dataToUse;
     
     if (modeToUse === 'official') {
-        // Si estoy en la pestaña Oficial, SIEMPRE uso los datos oficiales
-        dataToUse = officialRes; 
+        dataToUse = officialRes || {}; 
     } else {
-        // Si no, uso los pronósticos del usuario (o lo que me pasen)
-        dataToUse = customData || currentUser.preds;
+        // Si me pasan data, la uso.
+        // Si no, uso currentUser.preds.
+        // Y SI NO EXISTE (Firebase lo borró), uso un objeto vacío {} para que no explote.
+        dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
     }
 
     // 3. DETERMINAR SI ES SOLO LECTURA (CANDADO) 🔒
@@ -444,66 +512,46 @@ function renderGroups(customData, customMode) {
 function updateVal(id, type, val) {
     if(val < 0) val = 0;
 
-    // 1. VALIDACIÓN DE MODO (El Candado)
-    // Si estoy en 'official' (Fan viendo), no toco nada.
     if (currentViewMode === 'official') return; 
 
-    // 2. IDENTIFICAR BASE DE DATOS Y CLAVE
     let targetDB;
-    // Usamos el modo visual para decidir, no solo el rol
     if (currentViewMode === 'admin') {
         targetDB = officialRes;
     } else {
-        // Validación extra para el Fan (bloqueo por fecha/envío)
         if(currentUser.locks && currentUser.locks.groups) return; 
         targetDB = currentUser.preds;
     }
 
-    // Generamos la clave estándar: h-A-0 o a-A-0
     let key = `${type}-${id}`; 
     targetDB[key] = val;
 
-    // 3. PERSISTIR (GUARDAR EN DISCO) 💾
+    // --- GUARDADO ---
     if (currentViewMode === 'admin') {
-        // Si soy Admin, guardo en la "Hoja del Profesor"
         localStorage.setItem('m26_official', JSON.stringify(officialRes));
+        
+        // 🔥 GUARDADO LÁSER: Solo actualiza ESTE gol.
+        db.ref('/officialRes/' + key).set(val)
+            .then(() => console.log(`✅ ${key} actualizado.`));
+        
     } else {
-        // Si soy Fan, uso su función auxiliar o guardamos manualmente
-        // (Aquí mantengo su llamada original si confía en ella, o uso la lógica segura)
-        if (typeof saveUsersDB === 'function') {
-            saveUsersDB(); 
-        } else {
-            // Fallback seguro por si saveUsersDB no existe o falla
-            localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
-        }
+        // El fan sí usa el guardado de usuarios
+        saveUsersDB(); 
     }
 
-    // 4. REFRESCAR PANTALLA (AQUÍ SE ARREGLA EL FANTASMA 👻)
-    // ¡OJO! Pasamos targetDB y currentViewMode.
-    // Esto obliga a renderGroups a pintar LO QUE ACABAMOS DE ESCRIBIR.
     renderGroups(targetDB, currentViewMode); 
-
-    // 5. CALCULAR FUTURO (Su lógica original preservada) 🔮
+    
+    // Calcular futuro...
     setTimeout(() => {
         try {
             if (typeof calculateSimulatedTeams === 'function') {
-                // Calculamos proyecciones basadas en la data que estamos editando
                 let projected = calculateSimulatedTeams(targetDB);
-                
-                // Si es usuario, guardamos en su objeto computed
                 if (currentViewMode !== 'admin') {
                     if(!currentUser.computed) currentUser.computed = {};
                     currentUser.computed.r32 = projected;
                 }
-                
-                // Actualizamos la variable global para que el Bracket sepa qué pintar
-                if(typeof simulatedTeams !== 'undefined') {
-                    simulatedTeams = projected;
-                }
+                if(typeof simulatedTeams !== 'undefined') simulatedTeams = projected;
             }
-        } catch (e) {
-            console.log("Error calculando llaves futuras:", e);
-        }
+        } catch (e) { console.log(e); }
     }, 0);
 }
 
@@ -821,38 +869,31 @@ function updateOfficialTeamName(matchId, slot, newName) {
 function updateBracketScore(matchId, side, val, phaseKey) {
     if(val < 0) val = 0;
 
-    // 1. CANDADO: Si soy Fan mirando Oficiales, no toco nada.
     if (currentViewMode === 'official') return;
 
-    // 2. SELECCIONAR LA BASE DE DATOS CORRECTA
     let targetDB;
-    // Si estoy en modo Admin, uso officialRes. Si no, currentUser.preds
     if (currentViewMode === 'admin') {
         targetDB = officialRes;
     } else {
-        // Bloqueo de seguridad para el Fan
         if (currentUser.locks && currentUser.locks[phaseKey]) return;
         targetDB = currentUser.preds;
     }
 
-    // 3. GUARDAR EL DATO
-    // Construimos la llave: k-M64-h
     let key = `k-${matchId}-${side}`;
     targetDB[key] = val;
 
-    // 4. PERSISTIR (IMPORTANTE: Guardar para que no se pierda al recargar)
+    // 4. PERSISTIR (CIRUGÍA LÁSER 🔫)
     if (currentViewMode === 'admin') {
         localStorage.setItem('m26_official', JSON.stringify(officialRes));
+        
+        // Guardado directo y específico
+        db.ref('/officialRes/' + key).set(val);
+        
     } else {
-        // Guardar usuario
         if (typeof saveUsersDB === 'function') saveUsersDB();
         else localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
     }
 
-    // 5. REFRESCAR PANTALLA CORRECTAMENTE
-    // Aquí está el arreglo: Le pasamos la data que acabamos de modificar
-    // NOTA: Asegúrate de que tu función de pintar se llame 'renderBracketView' 
-    // (Si en tu código se llama 'renderBracket', cámbiale el nombre aquí abajo)
     if (typeof renderBracketView === 'function') {
         renderBracketView(targetDB, currentViewMode);
     } else if (typeof renderBracket === 'function') {
@@ -863,26 +904,26 @@ function updateBracketScore(matchId, side, val, phaseKey) {
 /* =========================================================
    7. FUNCIONES DE GUARDADO Y PUNTOS
    ========================================================= */
-function refreshData() {
-    officialRes = JSON.parse(localStorage.getItem('m26_official')) || {};
-    phaseControl = JSON.parse(localStorage.getItem('m26_phase_control')) || { groups: true, r32: false, r16: false, qf: false, sf: false, f: false };
-    officialTeams = JSON.parse(localStorage.getItem('m26_official_teams')) || {};
-    if(currentUser && currentUser.name) {
-        const key = `m26_data_${currentUser.name}`;
-        let saved = JSON.parse(localStorage.getItem(key));
-        if(saved) currentUser = saved;
-    }
-    updateStatusUI();
-    renderGroups();
-    renderBracket();
+// function refreshData() {
+//     officialRes = JSON.parse(localStorage.getItem('m26_official')) || {};
+//     phaseControl = JSON.parse(localStorage.getItem('m26_phase_control')) || { groups: true, r32: false, r16: false, qf: false, sf: false, f: false };
+//     officialTeams = JSON.parse(localStorage.getItem('m26_official_teams')) || {};
+//     if(currentUser && currentUser.name) {
+//         const key = `m26_data_${currentUser.name}`;
+//         let saved = JSON.parse(localStorage.getItem(key));
+//         if(saved) currentUser = saved;
+//     }
+//     updateStatusUI();
+//     renderGroups();
+//     renderBracket();
 
-    // Si estamos en modo fan, refrescamos los oficiales
-    if(role === 'fan') {
-        renderRealResults();
-        renderRealBracket(); // <--- AGREGAR ESTA LÍNEA
-    }
-    alert("¡Datos actualizados!");
-}
+//     // Si estamos en modo fan, refrescamos los oficiales
+//     if(role === 'fan') {
+//         renderRealResults();
+//         renderRealBracket(); // <--- AGREGAR ESTA LÍNEA
+//     }
+//     alert("¡Datos actualizados!");
+// }
 
 function saveUser(silent) {
     localStorage.setItem(`m26_data_${currentUser.name}`, JSON.stringify(currentUser));
@@ -918,21 +959,22 @@ function submitPhase(phase) {
 }
 
 function saveAdminData(showMsg) {
-    
     // Leer reglas básicas
-    rules.exact = parseInt(document.getElementById('rule-exact').value) || 0;
-    rules.diff = parseInt(document.getElementById('rule-diff').value) || 0;
-    rules.winner = parseInt(document.getElementById('rule-winner').value) || 0;
+    if(document.getElementById('rule-exact')) {
+        rules.exact = parseInt(document.getElementById('rule-exact').value) || 0;
+        rules.diff = parseInt(document.getElementById('rule-diff').value) || 0;
+        rules.winner = parseInt(document.getElementById('rule-winner').value) || 0;
+        rules.groupExact = parseInt(document.getElementById('rule-group-exact').value) || 0;
+        rules.groupMix = parseInt(document.getElementById('rule-group-mix').value) || 0;
+        rules.groupOne = parseInt(document.getElementById('rule-group-one').value) || 0;
+    }
 
-    // Leer NUEVAS reglas
-    rules.groupExact = parseInt(document.getElementById('rule-group-exact').value) || 0;
-    rules.groupMix = parseInt(document.getElementById('rule-group-mix').value) || 0;
-    rules.groupOne = parseInt(document.getElementById('rule-group-one').value) || 0;
-
+    // Actualizar LocalStorage
     localStorage.setItem('m26_rules', JSON.stringify(rules));
-    
     localStorage.setItem('m26_official', JSON.stringify(officialRes));
     localStorage.setItem('m26_official_teams', JSON.stringify(officialTeams));
+
+    // Leer Checkboxes
     if(document.getElementById('check-groups')) {
         phaseControl.groups = document.getElementById('check-groups').checked;
         phaseControl.r32 = document.getElementById('check-r32').checked;
@@ -942,7 +984,14 @@ function saveAdminData(showMsg) {
         phaseControl.f = document.getElementById('check-f').checked;
         localStorage.setItem('m26_phase_control', JSON.stringify(phaseControl));
     }
-    if(showMsg) alert("Admin: Guardado OK");
+    
+    // 👇 GUARDADO LÁSER DE CONFIGURACIÓN (Seguro y Específico) 👇
+    // En lugar de 'saveToCloud()', guardamos cada cosa en su cajón.
+    db.ref('/m26_rules').set(rules);
+    db.ref('/phaseControl').set(phaseControl);
+    db.ref('/officialTeams').set(officialTeams); // Por si cargó clasificados
+
+    if(showMsg) alert("Admin: Configuración Guardada en la Nube ☁️");
     renderBracket();
 }
 
@@ -1519,72 +1568,85 @@ function refreshGroupTable(gid) {
 }
 
 /* =========================================================
-   PERSISTENCIA DE DATOS (GUARDAR EN LOCALSTORAGE)
-   Esta es la función que faltaba y causaba el error.
+   PERSISTENCIA DE DATOS (CORREGIDO CON FIREBASE ☁️)
    ========================================================= */
 function saveUsersDB() {
     if(role === 'admin') {
+        // Si por error entra aquí siendo admin, guardamos oficiales
         localStorage.setItem('m26_official', JSON.stringify(officialRes));
     } else {
-        // Buscar y actualizar usuario en la lista
-        let idx = users.findIndex(u => u.username === currentUser.username);
+        // Buscar y actualizar usuario en la lista global
+        let idx = users.findIndex(u => u.name === currentUser.name); // Ojo: usé .name, no .username
+        
         if(idx !== -1) {
             users[idx] = currentUser;
         } else {
-            // Si por alguna razón no está en la lista (caso raro), lo agregamos
-            if(currentUser.username) users.push(currentUser);
+            // Si no está, lo agregamos
+            if(currentUser.name) users.push(currentUser);
         }
         
-        // Guardar en LocalStorage con sus claves m26_
+        // Guardar backup local
         localStorage.setItem('m26_users', JSON.stringify(users));
         localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
     }
-    console.log("💾 Datos guardados en m26_users.");
+
+    // 👇 LA LÍNEA MÁGICA: ¡SUBIR A LA NUBE! 👇
+    saveToCloud(); 
+    
+    console.log("💾 Datos guardados y sincronizados con la nube.");
 }
 
 /* =========================================================
-   ACTUALIZAR GANADOR (PENALES) - CORREGIDO ✅
+   ACTUALIZAR GANADOR (PENALES) - BLINDADO 🛡️
    ========================================================= */
 function updateWinner(matchId, type, isChecked) {
-    // 1. Validar modo 'official' (Fan solo mirando no toca nada)
+    // 1. Si es modo oficial (Fan mirando), no hace nada.
     if (currentViewMode === 'official') return;
 
-    // 2. SELECCIONAR LA BASE DE DATOS CORRECTA
+    // 2. Seleccionar qué base de datos modificar
     let targetDB;
     if (currentViewMode === 'admin') {
         targetDB = officialRes;
     } else {
-        // Asumimos que si pudo dar click es porque la fase está abierta
         targetDB = currentUser.preds;
     }
 
-    // 3. ACTUALIZAR EL DATO
     let key = `w-${matchId}`;
-    
+
+    // 3. LÓGICA DE GUARDADO (AQUÍ ESTÁ EL CAMBIO "LÁSER" 🔫)
     if (isChecked) {
-        // Guardamos quién ganó ('h' o 'a')
-        targetDB[key] = type;
+        // --- CASO A: MARCAR (GUARDAR) ---
+        targetDB[key] = type; // Actualiza memoria local
+
+        if (currentViewMode === 'admin') {
+            // Guardar en LocalStorage
+            localStorage.setItem('m26_official', JSON.stringify(officialRes));
+            
+            // 🔥 GUARDADO LÁSER EN NUBE: Solo actualiza este dato específico
+            db.ref('/officialRes/' + key).set(type); 
+        }
+
     } else {
-        // Si desmarcó el checkbox, borramos la predicción para poder corregir
-        delete targetDB[key];
+        // --- CASO B: DESMARCAR (BORRAR) ---
+        delete targetDB[key]; // Borra de memoria local
+
+        if (currentViewMode === 'admin') {
+            // Guardar en LocalStorage
+            localStorage.setItem('m26_official', JSON.stringify(officialRes));
+            
+            // 🔥 BORRADO LÁSER EN NUBE: Elimina solo este dato
+            db.ref('/officialRes/' + key).remove();
+        }
     }
 
-    // 4. PERSISTIR (GUARDAR EN DISCO)
-    if (currentViewMode === 'admin') {
-        localStorage.setItem('m26_official', JSON.stringify(officialRes));
-    } else {
+    // 4. Persistencia para el Fan (Sigue igual)
+    if (currentViewMode !== 'admin') {
         if (typeof saveUsersDB === 'function') saveUsersDB();
-        else localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
     }
 
-    // 5. REFRESCAR PANTALLA CORRECTAMENTE
-    // NOTA: Usamos renderBracketView que es la función moderna que recibe datos.
-    // Si su función principal se llama 'renderBracket', cambie el nombre abajo.
-    if (typeof renderBracketView === 'function') {
-        renderBracketView(targetDB, currentViewMode);
-    } else {
-        renderBracket(targetDB, currentViewMode);
-    }
+    // 5. Refrescar Pantalla
+    if (typeof renderBracketView === 'function') renderBracketView(targetDB, currentViewMode);
+    else renderBracket(targetDB, currentViewMode);
 }
 
 /* =========================================================
@@ -1592,10 +1654,12 @@ function updateWinner(matchId, type, isChecked) {
    ========================================================= */
 
 let currentViewMode = 'user'; // 'user' o 'official'
+let currentPhase = 'groups';
 
 // Esta es la función que llaman los botones nuevos
 function loadView(mode, phase) {
     currentViewMode = mode; 
+    currentPhase = phase;
     console.log(`Cargando vista: ${mode} - ${phase}`);
 
     // 1. TÍTULOS DINÁMICOS Y COLORES
@@ -1669,7 +1733,14 @@ function loadView(mode, phase) {
     // 6. SELECCIÓN DE DATOS
     // Si es 'user' -> currentUser.preds
     // Si es 'admin' u 'official' -> officialRes
-    let dataSource = (mode === 'user') ? currentUser.preds : officialRes;
+    // 6. SELECCIÓN DE DATOS (BLINDADO 🛡️)
+    let dataSource;
+    if (mode === 'user') {
+        // Si currentUser.preds es undefined, usamos {}
+        dataSource = (currentUser && currentUser.preds) ? currentUser.preds : {};
+    } else {
+        dataSource = officialRes || {};
+    }
 
     // 7. RENDERIZAR VISTAS
     if (phase === 'groups') {
@@ -1716,4 +1787,82 @@ function renderBracketView(customData, customMode) {
     container.innerHTML += renderRoundColumn('Final', F_MATCHUPS, 'f', 'f', dataToUse, modeToUse);
     
     // Si tienes partido de 3er puesto, agrégalo aquí también
+}
+
+/* =========================================================
+   ☁️ CEREBRO DE FIREBASE (SINCRONIZACIÓN)
+   ========================================================= */
+
+
+// 1. ESCUCHAR CAMBIOS (Bajar datos de la nube) 📡
+// VERSIÓN BLINDADA FINAL 🛡️
+function startFirebaseListener() {
+    console.log("📡 Conectando antena al satélite...");
+    
+    // Escuchamos la raíz '/' de la base de datos
+    db.ref('/').on('value', (snapshot) => {
+        const data = snapshot.val();
+        
+        if (!data) {
+            console.log("☁️ Nube vacía. Usando datos locales.");
+            return;
+        }
+
+        // 1. CARGA DE DATOS (Sin condiciones 'if' que bloqueen)
+        // Usamos || {} para que si viene undefined, no se rompa, pero que asigne.
+        if (data.users) users = data.users;
+        officialRes = data.officialRes || {}; // <--- AQUÍ ESTÁ EL CAMBIO CLAVE
+        if (data.phaseControl) phaseControl = data.phaseControl;
+        if (data.officialTeams) officialTeams = data.officialTeams;
+        if (data.simulatedTeams) simulatedTeams = data.simulatedTeams;
+
+        console.log(`🔥 Datos recibidos. Marcadores Oficiales: ${Object.keys(officialRes).length}`);
+
+        // 2. ACTUALIZAR USUARIO ACTUAL
+        if (currentUser && currentUser.name) {
+            const foundUser = users.find(u => u.name === currentUser.name);
+            if (foundUser) {
+                currentUser = foundUser;
+                // Rescate de propiedades perdidas
+                if (!currentUser.preds) currentUser.preds = {};
+                if (!currentUser.locks) currentUser.locks = { groups: false, r32: false, r16: false, qf: false, sf: false, f: false };
+                
+                localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
+            }
+        }
+
+        // 3. REFRESCO VISUAL AGRESIVO 🎨
+        // No importa en qué vista estemos, forzamos el repintado.
+        
+        if (typeof loadView === 'function') {
+            // Si estamos en resultados oficiales, repintamos YA MISMO
+            if (currentViewMode === 'official') {
+                loadView('official', currentPhase || 'groups');
+            }
+            // Si estamos en usuario, repintamos también para actualizar puntos
+            else if (currentViewMode === 'user') {
+                loadView('user', currentPhase || 'groups');
+            }
+        }
+        
+        // Actualizamos las otras partes de la UI
+        if (typeof updateStatusUI === 'function') updateStatusUI();
+        if (typeof renderRanking === 'function') renderRanking();
+    });
+}
+
+// 2. GUARDAR CAMBIOS (NEUTRALIZADO PARA NO BORRAR RESULTADOS 🛡️)
+function saveToCloud() {
+    console.log("☁️ Sincronizando usuarios con la nube...");
+    
+    // SOLO enviamos lo que es seguro sobrescribir masivamente (Usuarios)
+    // Quitamos officialRes, officialTeams y phaseControl de aquí para evitar accidentes.
+    const payload = {
+        users: users,
+        lastUpdate: new Date().toISOString()
+    };
+
+    db.ref('/').update(payload)
+        .then(() => console.log("✅ Usuarios sincronizados."))
+        .catch((e) => console.error("❌ Error guardando:", e));
 }
