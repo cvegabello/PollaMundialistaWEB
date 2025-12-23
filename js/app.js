@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-    version: "v2.0",           // El número de la versión
+    version: "v2.1",           // El número de la versión
     environment: "BETA",       // Estado: DEV, BETA, PROD
     buildDate: "22-Dic-2025"   // Fecha de la última actualización
 };
@@ -68,7 +68,7 @@ class Particle {
     draw() { ctx.fillStyle = 'rgba(0,243,255,0.5)'; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
 }
 
-function initP() { particlesArray=[]; for(let i=0; i<60; i++) particlesArray.push(new Particle()); }
+function initP() { particlesArray=[]; for(let i=0; i<20; i++) particlesArray.push(new Particle()); }
 function animP() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
     for(let i=0; i<particlesArray.length; i++) {
@@ -122,47 +122,137 @@ let officialTeams = JSON.parse(localStorage.getItem('m26_official_teams')) || {}
 let simulatedTeams = {};
 
 /* =========================================================
+   VARIALBES GLOBALES EXTRA
+   ========================================================= */
+let isEditing = false; // Bandera para saber si el usuario está escribiendo
+
+/* =========================================================
    4. FUNCIONES DE LOGIN Y MODO
    ========================================================= */
+/* =========================================================
+   LOGIN INTELIGENTE (VERIFICACIÓN EN NUBE ☁️)
+   ========================================================= */
 function handleLogin() {
-    const u = document.getElementById('username').value.trim().toLowerCase();
-    const p = document.getElementById('password').value;
+    const uInput = document.getElementById('username');
+    const pInput = document.getElementById('password');
+    const btn = document.querySelector('.login-btn'); // Asegúrese que su botón tenga esta clase o un ID
     
-    if(!u) return alert("Ingresa usuario");
-    
-    // 1. Ocultar Login y Mostrar la App
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+    const u = uInput.value.trim().toLowerCase(); // Guardamos en minúsculas para evitar 'Carlos' vs 'carlos'
+    const p = pInput.value;
 
-    // 2. Referencias a los Nuevos Tableros
-    const fanDash = document.getElementById('fan-dashboard');
-    const adminDash = document.getElementById('admin-dashboard');
+    if(!u) return alert("Por favor ingresa un nombre de usuario.");
 
-    startFirebaseListener();
-
-    // 3. Decidir qué camino tomar (Admin o Fan)
+    // --- CAMINO ADMIN (Este es local y rápido) ---
     if(p === 'admin2026') {
-        // --- CAMINO ADMIN ---
-        setupAdminMode(); // Su función existente que configura el currentUser
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
         
-        // Mostrar Tablero Admin, Ocultar Fan
+        startFirebaseListener(); // Arrancamos el listener general
+        
+        // Configurar Admin
+        setupAdminMode();
+        
+        // Gestión de tableros
+        const fanDash = document.getElementById('fan-dashboard');
+        const adminDash = document.getElementById('admin-dashboard');
         if(adminDash) adminDash.classList.remove('hidden');
         if(fanDash) fanDash.classList.add('hidden');
         
-        // Cargar vista inicial del Admin (Ingreso de Grupos Oficiales)
-        loadView('admin', 'groups'); 
-
-    } else {
-        // --- CAMINO FAN ---
-        setupUserMode(u); // Su función existente que configura al usuario
-        
-        // Mostrar Tablero Fan, Ocultar Admin
-        if(fanDash) fanDash.classList.remove('hidden');
-        if(adminDash) adminDash.classList.add('hidden');
-        
-        // Cargar vista inicial del Fan (Sus Pronósticos de Grupos)
-        loadView('user', 'groups');
+        loadView('admin', 'groups');
+        return;
     }
+
+    // --- CAMINO FAN (AQUÍ ESTÁ LA MAGIA 🎩) ---
+    
+    // 1. Mostrar estado de carga (Feedback visual)
+    const originalBtnText = btn ? btn.innerText : 'ENTRAR';
+    if(btn) {
+        btn.innerText = "Buscando en la nube...";
+        btn.disabled = true;
+    }
+
+    console.log(`☁️ Preguntando a Firebase por: ${u}...`);
+
+    // 2. CONSULTA DIRECTA A FIREBASE (ONCE)
+    // No dependemos del listener, vamos a buscar activamente.
+    db.ref('/users').once('value')
+        .then((snapshot) => {
+            const allUsers = snapshot.val() || [];
+            
+            // Buscamos si ya existe (Búsqueda insensible a mayúsculas/minúsculas)
+            let existingUserIndex = -1;
+            let existingUser = null;
+
+            if (Array.isArray(allUsers)) {
+                // Si es un array
+                existingUserIndex = allUsers.findIndex(user => user.name.toLowerCase() === u);
+                if(existingUserIndex !== -1) existingUser = allUsers[existingUserIndex];
+            } else {
+                // Si Firebase lo devolvió como objeto (raro pero posible)
+                const keys = Object.keys(allUsers);
+                for(let key of keys) {
+                    if (allUsers[key].name.toLowerCase() === u) {
+                        existingUser = allUsers[key];
+                        break;
+                    }
+                }
+            }
+
+            // 3. DECISIÓN
+            if (existingUser) {
+                // CASO A: EL USUARIO YA EXISTE -> RECUPERAMOS SUS DATOS ✅
+                console.log("✅ Usuario encontrado en la nube. Cargando datos...");
+                currentUser = existingUser;
+                // Nos aseguramos que users esté actualizado localmente también
+                users = Array.isArray(allUsers) ? allUsers : Object.values(allUsers);
+            } else {
+                // CASO B: EL USUARIO ES NUEVO -> LO CREAMOS 🆕
+                console.log("✨ Usuario nuevo. Creando perfil...");
+                currentUser = { 
+                    name: u, // Guardamos el nombre tal cual lo escribió (pero ya validamos que no existe en lowercase)
+                    preds: {}, 
+                    locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
+                    role: 'fan'
+                };
+                
+                // Agregamos a la lista local
+                if (!Array.isArray(users)) users = [];
+                users.push(currentUser);
+                
+                // Guardamos la nueva lista en la nube (Aquí sí usamos saveToCloud neutralizado)
+                saveToCloud(); 
+            }
+
+            // 4. ENTRAR AL SISTEMA
+            enterAppAsFan();
+
+        })
+        .catch((error) => {
+            console.error("❌ Error conectando con Firebase:", error);
+            alert("Error de conexión. Intenta de nuevo.");
+            if(btn) {
+                btn.innerText = originalBtnText;
+                btn.disabled = false;
+            }
+        });
+}
+
+// Función auxiliar para ordenar la entrada del Fan (Limpia el código de arriba)
+function enterAppAsFan() {
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+
+    startFirebaseListener(); // Arrancamos el listener para seguir recibiendo actualizaciones
+
+    // Gestión de Tableros
+    const fanDash = document.getElementById('fan-dashboard');
+    const adminDash = document.getElementById('admin-dashboard');
+    if(fanDash) fanDash.classList.remove('hidden');
+    if(adminDash) adminDash.classList.add('hidden');
+
+    // Configuración visual
+    setupUserModeHelper(); // Llamamos a una versión simplificada
+    loadView('user', 'groups');
 }
 
 function setupAdminMode() {
@@ -219,71 +309,95 @@ function setupAdminMode() {
     // De mostrar el tablero correcto se encarga la función handleLogin().
 }
 
-function setupUserMode(username) {
-    // 1. Definir Rol
-    role = 'fan';
+// function setupUserMode(username) {
+//     // 1. Definir Rol
+//     role = 'fan';
 
-    // 2. Gestionar Elementos de la Interfaz (Igual que como lo tenía)
+//     // 2. Gestionar Elementos de la Interfaz (Igual que como lo tenía)
+//     const adminBar = document.getElementById('admin-status-bar');
+//     if(adminBar) adminBar.style.display = 'none';
+    
+//     const adminTools = document.getElementById('admin-bracket-tools');
+//     if(adminTools) adminTools.style.display = 'none';
+    
+//     const btnSaveAdmin = document.getElementById('btn-save-admin');
+//     if(btnSaveAdmin) btnSaveAdmin.style.display = 'none';
+
+//     // Mostrar cosas de Fan
+//     const userBar = document.getElementById('user-status-bar');
+//     if(userBar) userBar.style.display = 'grid'; 
+    
+//     // const btnSaveDraft = document.getElementById('btn-save-draft');
+//     // if(btnSaveDraft) btnSaveDraft.style.display = 'flex'; 
+    
+//     // const btnRefresh = document.getElementById('btn-refresh');
+//     // if(btnRefresh) btnRefresh.style.display = 'flex';
+
+//     // ============================================================
+//     // 3. CARGAR DATOS DEL USUARIO (MODIFICADO PARA FIREBASE ☁️)
+//     // ============================================================
+    
+//     // Paso A: Buscamos si el usuario ya existe en la lista global (que viene de la nube)
+//     let foundUser = users.find(u => u.name === username);
+
+//     if (foundUser) {
+//         // SI EXISTE: Usamos sus datos
+//         currentUser = foundUser;
+//         console.log(`✅ Bienvenido de nuevo, ${currentUser.name}`);
+//     } else {
+//         // SI ES NUEVO: Lo creamos desde cero
+//         currentUser = { 
+//             name: username, 
+//             preds: {}, 
+//             locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
+//             role: 'fan' // Aseguramos el rol
+//         };
+        
+//         // ¡MAGIA AQUÍ! ✨
+//         // Lo agregamos a la lista global
+//         users.push(currentUser);
+        
+//         // Y guardamos en la nube inmediatamente
+//         saveToCloud(); 
+        
+//         console.log(`✨ Nuevo usuario creado y subido a la nube: ${currentUser.name}`);
+//     }
+    
+//     // ============================================================
+
+//     // 4. Actualizar Nombre en Pantalla
+//     const displayUser = document.getElementById('display-username');
+//     if(displayUser) displayUser.innerText = currentUser.name.toUpperCase();
+    
+//     // 5. Actualizar Barra de Progreso
+//     if(typeof updateStatusUI === 'function') updateStatusUI();
+
+//     // (Nota: loadView se llama después en handleLogin, así que estamos bien)
+// }
+
+function setupUserModeHelper() {
+    role = 'fan';
+    
+    // Ocultar cosas de admin
     const adminBar = document.getElementById('admin-status-bar');
     if(adminBar) adminBar.style.display = 'none';
-    
     const adminTools = document.getElementById('admin-bracket-tools');
     if(adminTools) adminTools.style.display = 'none';
-    
     const btnSaveAdmin = document.getElementById('btn-save-admin');
     if(btnSaveAdmin) btnSaveAdmin.style.display = 'none';
 
-    // Mostrar cosas de Fan
+    // Mostrar barra de usuario
     const userBar = document.getElementById('user-status-bar');
-    if(userBar) userBar.style.display = 'grid'; 
-    
-    // const btnSaveDraft = document.getElementById('btn-save-draft');
-    // if(btnSaveDraft) btnSaveDraft.style.display = 'flex'; 
-    
-    // const btnRefresh = document.getElementById('btn-refresh');
-    // if(btnRefresh) btnRefresh.style.display = 'flex';
+    if(userBar) userBar.style.display = 'grid';
 
-    // ============================================================
-    // 3. CARGAR DATOS DEL USUARIO (MODIFICADO PARA FIREBASE ☁️)
-    // ============================================================
-    
-    // Paso A: Buscamos si el usuario ya existe en la lista global (que viene de la nube)
-    let foundUser = users.find(u => u.name === username);
-
-    if (foundUser) {
-        // SI EXISTE: Usamos sus datos
-        currentUser = foundUser;
-        console.log(`✅ Bienvenido de nuevo, ${currentUser.name}`);
-    } else {
-        // SI ES NUEVO: Lo creamos desde cero
-        currentUser = { 
-            name: username, 
-            preds: {}, 
-            locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
-            role: 'fan' // Aseguramos el rol
-        };
-        
-        // ¡MAGIA AQUÍ! ✨
-        // Lo agregamos a la lista global
-        users.push(currentUser);
-        
-        // Y guardamos en la nube inmediatamente
-        saveToCloud(); 
-        
-        console.log(`✨ Nuevo usuario creado y subido a la nube: ${currentUser.name}`);
-    }
-    
-    // ============================================================
-
-    // 4. Actualizar Nombre en Pantalla
+    // Nombre en pantalla
     const displayUser = document.getElementById('display-username');
     if(displayUser) displayUser.innerText = currentUser.name.toUpperCase();
-    
-    // 5. Actualizar Barra de Progreso
-    if(typeof updateStatusUI === 'function') updateStatusUI();
 
-    // (Nota: loadView se llama después en handleLogin, así que estamos bien)
+    // Actualizar estado
+    if(typeof updateStatusUI === 'function') updateStatusUI();
 }
+
 
 /* =========================================================
    BARRA DE ESTADO Y PROGRESO (CORREGIDA - VERSIÓN FINAL 🛡️)
@@ -386,37 +500,27 @@ function switchTab(tab) {
 /* =========================================================
    RENDERIZADOR DE GRUPOS (User vs Official)
    ========================================================= */
+/* =========================================================
+   RENDERIZADOR DE GRUPOS (Con ID para actualización quirúrgica 🏥)
+   ========================================================= */
 function renderGroups(customData, customMode) {
     const container = document.getElementById('groups-container');
     if(!container) return; 
     container.innerHTML = '';
     
-    // 1. DEFINIR EL MODO
-    let modeToUse = customMode || 'user'; // 'user' o 'official'
-    
-    // 2. SELECCIONAR LA FUENTE DE DATOS (Corrección Clave) 🧠
+    let modeToUse = customMode || 'user'; 
     let dataToUse;
     
     if (modeToUse === 'official') {
         dataToUse = officialRes || {}; 
     } else {
-        // Si me pasan data, la uso.
-        // Si no, uso currentUser.preds.
-        // Y SI NO EXISTE (Firebase lo borró), uso un objeto vacío {} para que no explote.
         dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
     }
 
-    // 3. DETERMINAR SI ES SOLO LECTURA (CANDADO) 🔒
     let isReadOnly = false;
-
     if (modeToUse === 'official') {
-        // En vista oficial:
-        // - Si soy Admin: PUEDO editar (isReadOnly = false)
-        // - Si soy Fan: NO PUEDO editar (isReadOnly = true)
         if (role !== 'admin') isReadOnly = true; 
     } else {
-        // En vista usuario (Mis Pronósticos):
-        // - Se bloquea solo si ya envié (locked)
         if (role === 'fan' && currentUser.locks && currentUser.locks.groups) isReadOnly = true;
     }
 
@@ -424,35 +528,22 @@ function renderGroups(customData, customMode) {
         const data = GROUPS_CONFIG[g];
         let matchesHTML = '';
         
-        // Inicializar Stats
         let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
         
         data.matches.forEach((m, idx) => {
             let id = `${g}-${idx}`;
-            
-            // 3. OBTENER VALORES DE LA FUENTE DINÁMICA
-            // Ya no miramos currentUser vs officialRes fijo, miramos dataToUse
             let valH = dataToUse[`h-${id}`] || ''; 
             let valA = dataToUse[`a-${id}`] || '';
-            
-            // Definir atributo disabled
             let disabledAttr = isReadOnly ? 'disabled' : '';
 
-            // CALCULAR MATEMÁTICAS (Igual que antes)
             if(valH !== '' && valA !== '') {
                 let sH = parseInt(valH); let sA = parseInt(valA);
                 teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
                 teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
-                
                 if(sH > sA) teamStats[m.t1].pts += 3;
                 else if(sA > sH) teamStats[m.t2].pts += 3;
                 else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
             }
-            
-            // HTML DEL PARTIDO
-            // Usamos oninput="updateVal..." pero OJO:
-            // Si es modo oficial y soy fan, updateVal no debería dejar guardar.
-            // Pero como el input está 'disabled', no hay lío.
             
             matchesHTML += `<div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
@@ -470,7 +561,6 @@ function renderGroups(customData, customMode) {
             </div>`;
         });
 
-        // 4. ORDENAMIENTO Y TABLA (Igual que antes)
         teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
 
         let tableRows = teamStats.map((t,i) => 
@@ -484,7 +574,6 @@ function renderGroups(customData, customMode) {
              </tr>`
         ).join('');
         
-        // Título dinámico
         let titleTxt = `GRUPO ${g}`;
         if (modeToUse === 'official') titleTxt += " [OFICIAL FIFA]";
         else if (isReadOnly) titleTxt += " [ENVIADO]";
@@ -495,10 +584,14 @@ function renderGroups(customData, customMode) {
             <div class="card-body">
                 ${matchesHTML}
                 <table class="compact-table" style="width:100%; margin-top:10px; font-size:0.85rem; text-align:center;">
-                    <tr style="background:rgba(255,255,255,0.05); color:#666;">
-                        <th>#</th> <th style="text-align:left;">EQ</th> <th>PT</th> <th>DF</th> <th>GF</th> <th>GC</th>
-                    </tr>
-                    ${tableRows}
+                    <thead>
+                        <tr style="background:rgba(255,255,255,0.05); color:#666;">
+                            <th>#</th> <th style="text-align:left;">EQ</th> <th>PT</th> <th>DF</th> <th>GF</th> <th>GC</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-${g}">
+                        ${tableRows}
+                    </tbody>
                 </table>
             </div>
         </div>`;
@@ -508,6 +601,9 @@ function renderGroups(customData, customMode) {
 
 /* =========================================================
    ACTUALIZAR RESULTADO GRUPOS (Fusión: Seguridad + Admin + Simulación)
+   ========================================================= */
+/* =========================================================
+   ACTUALIZAR RESULTADO (SIN PERDER EL FOCO 🎯)
    ========================================================= */
 function updateVal(id, type, val) {
     if(val < 0) val = 0;
@@ -528,19 +624,24 @@ function updateVal(id, type, val) {
     // --- GUARDADO ---
     if (currentViewMode === 'admin') {
         localStorage.setItem('m26_official', JSON.stringify(officialRes));
-        
-        // 🔥 GUARDADO LÁSER: Solo actualiza ESTE gol.
-        db.ref('/officialRes/' + key).set(val)
-            .then(() => console.log(`✅ ${key} actualizado.`));
-        
+        db.ref('/officialRes/' + key).set(val);
     } else {
-        // El fan sí usa el guardado de usuarios
         saveUsersDB(); 
     }
 
-    renderGroups(targetDB, currentViewMode); 
+    // 🛑 AQUÍ ESTABA EL ERROR:
+    // renderGroups(targetDB, currentViewMode); <--- ESTO MATABA EL FOCO
     
-    // Calcular futuro...
+    // ✅ LA SOLUCIÓN:
+    // 1. Identificamos qué grupo es (El ID viene como "A-0", sacamos la "A")
+    let groupID = id.split('-')[0];
+    
+    // 2. Actualizamos SOLO la tablita de ese grupo
+    if(typeof refreshGroupTable === 'function') {
+        refreshGroupTable(groupID);
+    }
+    
+    // 3. Calculamos proyecciones (Esto es invisible, no quita foco)
     setTimeout(() => {
         try {
             if (typeof calculateSimulatedTeams === 'function') {
@@ -1796,56 +1897,51 @@ function renderBracketView(customData, customMode) {
 
 // 1. ESCUCHAR CAMBIOS (Bajar datos de la nube) 📡
 // VERSIÓN BLINDADA FINAL 🛡️
+// 1. ESCUCHAR CAMBIOS (VERSIÓN FINAL CON BANDERA isEditing 🚩)
 function startFirebaseListener() {
     console.log("📡 Conectando antena al satélite...");
     
-    // Escuchamos la raíz '/' de la base de datos
     db.ref('/').on('value', (snapshot) => {
         const data = snapshot.val();
-        
-        if (!data) {
-            console.log("☁️ Nube vacía. Usando datos locales.");
-            return;
-        }
+        if (!data) return console.log("☁️ Nube vacía.");
 
-        // 1. CARGA DE DATOS (Sin condiciones 'if' que bloqueen)
-        // Usamos || {} para que si viene undefined, no se rompa, pero que asigne.
+        // 1. Carga de datos
         if (data.users) users = data.users;
-        officialRes = data.officialRes || {}; // <--- AQUÍ ESTÁ EL CAMBIO CLAVE
+        officialRes = data.officialRes || {}; 
         if (data.phaseControl) phaseControl = data.phaseControl;
         if (data.officialTeams) officialTeams = data.officialTeams;
         if (data.simulatedTeams) simulatedTeams = data.simulatedTeams;
 
-        console.log(`🔥 Datos recibidos. Marcadores Oficiales: ${Object.keys(officialRes).length}`);
-
-        // 2. ACTUALIZAR USUARIO ACTUAL
+        // 2. Actualizar Usuario Local
         if (currentUser && currentUser.name) {
             const foundUser = users.find(u => u.name === currentUser.name);
             if (foundUser) {
                 currentUser = foundUser;
-                // Rescate de propiedades perdidas
                 if (!currentUser.preds) currentUser.preds = {};
                 if (!currentUser.locks) currentUser.locks = { groups: false, r32: false, r16: false, qf: false, sf: false, f: false };
-                
                 localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
             }
         }
 
-        // 3. REFRESCO VISUAL AGRESIVO 🎨
-        // No importa en qué vista estemos, forzamos el repintado.
-        
+        // 🛑 BLOQUEO TOTAL SI ESTÁ EDITANDO 🛑
+        // Si la bandera está arriba, NO REPINTAMOS NADA VISUAL.
+        if (isEditing) {
+            console.log("🤫 Usuario editando. Silenciando repintado.");
+            // Solo actualizamos cálculos de fondo, pero no tocamos el HTML
+            if (typeof updateStatusUI === 'function') updateStatusUI();
+            return; 
+        }
+
+        // 3. Refresco Visual (Solo si la bandera está abajo)
         if (typeof loadView === 'function') {
-            // Si estamos en resultados oficiales, repintamos YA MISMO
             if (currentViewMode === 'official') {
                 loadView('official', currentPhase || 'groups');
             }
-            // Si estamos en usuario, repintamos también para actualizar puntos
             else if (currentViewMode === 'user') {
                 loadView('user', currentPhase || 'groups');
             }
         }
         
-        // Actualizamos las otras partes de la UI
         if (typeof updateStatusUI === 'function') updateStatusUI();
         if (typeof renderRanking === 'function') renderRanking();
     });
@@ -1866,3 +1962,65 @@ function saveToCloud() {
         .then(() => console.log("✅ Usuarios sincronizados."))
         .catch((e) => console.error("❌ Error guardando:", e));
 }
+
+/* =========================================================
+   🚀 TURBO NAVEGACIÓN (ENTER PARA SALTAR)
+   Permite llenar la quiniela rápido usando la tecla Enter.
+   ========================================================= */
+document.addEventListener('keydown', function(event) {
+    // Solo nos interesa si presiona ENTER
+    if (event.key === 'Enter') {
+        const target = event.target;
+
+        // Verificamos que sea uno de nuestros inputs de goles
+        // (Son inputs tipo número y que NO estén deshabilitados)
+        if (target.tagName === 'INPUT' && target.type === 'number' && !target.disabled) {
+            
+            event.preventDefault(); // Evitamos comportamientos raros del navegador
+            
+            // 1. Buscamos TODOS los inputs válidos en la pantalla
+            // Esto crea una lista ordenada: [P1-Local, P1-Visitante, P2-Local, P2-Visitante...]
+            const allInputs = Array.from(document.querySelectorAll('input[type="number"]:not([disabled])'));
+            
+            // 2. Encontramos dónde estamos parados
+            const currentIndex = allInputs.indexOf(target);
+            
+            // 3. Si no somos el último, saltamos al siguiente
+            if (currentIndex !== -1 && currentIndex < allInputs.length - 1) {
+                const nextInput = allInputs[currentIndex + 1];
+                
+                // A. Poner el foco en el siguiente
+                nextInput.focus(); 
+                
+                // B. ¡TRUCAZO! Seleccionar el texto para sobreescribir rápido
+                // (Así no tiene que borrar el 0, solo escribe el número encima)
+                nextInput.select(); 
+            } else {
+                // Si es el último input, quitamos el foco para indicar que acabó
+                target.blur();
+            }
+        }
+    }
+});
+
+/* =========================================================
+   VIGILANTES DE FOCO (Para que no se cierre el teclado) 🕵️‍♂️
+   ========================================================= */
+document.addEventListener('focusin', (e) => {
+    // Si entró a un input de números, ALZAR BANDERA
+    if(e.target.matches('input[type="number"]')) {
+        isEditing = true;
+    }
+});
+
+document.addEventListener('focusout', (e) => {
+    // Si salió, esperamos un poquito antes de bajar la bandera
+    // por si acaso solo está saltando al siguiente input con Enter/Tab
+    setTimeout(() => {
+        // Solo bajamos la bandera si el nuevo elemento NO es un input
+        const active = document.activeElement;
+        if (!active || active.tagName !== 'INPUT' || active.type !== 'number') {
+            isEditing = false;
+        }
+    }, 500); // 0.5 segundos de gracia
+});
