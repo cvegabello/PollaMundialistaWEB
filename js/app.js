@@ -2,9 +2,9 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-    version: "v2.1",           // El número de la versión
+    version: "v2.2",           // El número de la versión
     environment: "BETA",       // Estado: DEV, BETA, PROD
-    buildDate: "22-Dic-2025"   // Fecha de la última actualización
+    buildDate: "25-Dic-2025"   // Fecha de la última actualización
 };
 
 /* =========================================================
@@ -670,7 +670,7 @@ function updateStats(stats, i1, i2, s1, s2) {
 function calculateSimulatedTeams(predsSource) {
     const standings = {};
     
-    // 1. CALCULAR GRUPOS (Esto no cambia)
+    // 1. CALCULAR POSICIONES DE GRUPOS
     Object.keys(GROUPS_CONFIG).forEach(gid => {
         const groupData = GROUPS_CONFIG[gid];
         let teamsMap = groupData.teams.map((name, idx) => ({ 
@@ -696,24 +696,64 @@ function calculateSimulatedTeams(predsSource) {
         standings[gid] = teamsMap;
     });
 
-    // 2. MEJORES TERCEROS
+    // 2. OBTENER LOS 8 MEJORES TERCEROS
     let allThirds = [];
     Object.keys(standings).forEach(g => { if(standings[g][2]) allThirds.push(standings[g][2]); });
     allThirds.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
     const qualifiedThirds = allThirds.slice(0, 8);
-    const usedThirds = new Set();
+    
+    // =========================================================
+    // 3. PRE-ASIGNACIÓN DE TERCEROS (Lógica Alfabética Estricta) 🧠
+    // =========================================================
+    const thirdAllocations = {}; 
+    const allocatedNames = new Set(); 
 
-    // 3. RESOLVER LLAVES (RECURSIVO)
+    const priorityOrder = [
+        { winner: 'A', allowed: 'CEFHI' },
+        { winner: 'B', allowed: 'EFGIJ' },
+        { winner: 'D', allowed: 'BEFIJ' },
+        { winner: 'E', allowed: 'ABCDF' },
+        { winner: 'G', allowed: 'AEHIJ' },
+        { winner: 'I', allowed: 'CDFGH' },
+        { winner: 'K', allowed: 'DEIJL' },
+        { winner: 'L', allowed: 'EHIJK' }
+    ];
+
+    priorityOrder.forEach(item => {
+        let found = null;
+        
+        // CORRECCIÓN AQUÍ: Iteramos letra por letra de la cadena 'allowed'
+        // Esto fuerza a que si la cadena es 'EFGIJ', busque PRIMERO 'E', luego 'F'...
+        let preferredGroups = item.allowed.split(''); 
+        
+        for (let groupChar of preferredGroups) {
+            // Buscamos si el tercero de ese grupo específico clasificó y está libre
+            let candidate = qualifiedThirds.find(t => t.group === groupChar && !allocatedNames.has(t.name));
+            
+            if (candidate) {
+                found = candidate;
+                break; // ¡Encontramos la prioridad más alta! Deje de buscar.
+            }
+        }
+
+        // Si no encontró por alfabeto (Plan B: Emergencia), busca cualquiera libre
+        if (!found) found = qualifiedThirds.find(t => !allocatedNames.has(t.name));
+
+        if (found) {
+            thirdAllocations[item.winner] = found;
+            allocatedNames.add(found.name);
+        }
+    });
+    // =========================================================
+
+    // 4. RESOLVER LLAVES
     const projected = {};
 
-    // --- Sub-función: Quién ganó el partido ID ---
     const getMatchWinner = (matchId) => {
         if (!projected[matchId]) return null; 
-
         let vH = predsSource[`k-${matchId}-h`] || predsSource[`h-${matchId}`];
         let vA = predsSource[`k-${matchId}-a`] || predsSource[`a-${matchId}`];
         let winnerCode = predsSource[`w-${matchId}`];
-
         if (vH && vA) {
             let sH = parseInt(vH); let sA = parseInt(vA);
             if (sH > sA) return projected[matchId].home;
@@ -726,69 +766,71 @@ function calculateSimulatedTeams(predsSource) {
         return { name: `Ganador M${matchId}`, seed: `W${matchId}` };
     };
 
-    // --- Sub-función: Resolver quién es el equipo (A1, W73, L101) ---
-    const resolveTeamData = (code) => {
+    const resolveTeamData = (code) => { 
         if(!code) return { name: '...', seed: '' };
 
-        // A) GRUPOS (Ej: A1, B2)
+        // A) GRUPOS
         if (code.match(/^[A-L][1-2]$/)) {
             let g = code.charAt(0); let pos = parseInt(code.charAt(1)) - 1;
             if(standings[g] && standings[g][pos]) return { name: standings[g][pos].name, seed: code };
         }
 
-        // B) MEJORES TERCEROS (Ej: T_ABCDF)
+        // B) MEJORES TERCEROS
         if (code.startsWith('T_')) {
             let allowed = code.split('_')[1];
-            let found = qualifiedThirds.find(t => allowed.includes(t.group) && !usedThirds.has(t.name));
-            if (found) { usedThirds.add(found.name); return { name: found.name, seed: `3${found.group}` }; }
+            
+            // INTENTO 1: Buscar en la Tabla de Asignación (Ya priorizada alfabéticamente)
+            // Normalizamos strings para evitar errores tontos
+            let sortStr = (s) => s.split('').sort().join('');
+            let ownerGroup = priorityOrder.find(p => sortStr(p.allowed) === sortStr(allowed));
+            
+            if (ownerGroup && thirdAllocations[ownerGroup.winner]) {
+                let t = thirdAllocations[ownerGroup.winner];
+                return { name: t.name, seed: `3${t.group}` };
+            }
+            
+            // INTENTO 2 (EL PARACAÍDAS): 
+            let panicFallback = qualifiedThirds.find(t => allowed.includes(t.group) && !Object.values(thirdAllocations).some(u => u.name === t.name));
+            
+            if (!panicFallback) {
+                 let assignedNames = Object.values(thirdAllocations).map(u => u.name);
+                 panicFallback = qualifiedThirds.find(t => !assignedNames.includes(t.name));
+            }
+
+            if (panicFallback) {
+                return { name: panicFallback.name, seed: `3${panicFallback.group}` };
+            }
+
             return { name: 'TBD', seed: '3?' };
         }
 
-        // C) REFERENCIA A PARTIDO PREVIO (W = Winner, L = Loser)
-        // ESTA ES LA PARTE QUE ACTUALIZAMOS
-        let type = 'W'; // Por defecto asumimos que busca al ganador
+        // C) REFERENCIA PARTIDOS
+        let type = 'W'; 
         let cleanId = code;
-        
-        // Detectar si pide Winner (W) o Loser (L)
-        if (code.startsWith('W')) {
-            cleanId = code.substring(1);
-        } else if (code.startsWith('L')) {
-            type = 'L'; 
-            cleanId = code.substring(1);
-        }
+        if (code.startsWith('W')) cleanId = code.substring(1);
+        else if (code.startsWith('L')) { type = 'L'; cleanId = code.substring(1); }
 
-        // Si el partido ya se jugó (está en projected)
         if (projected[cleanId]) {
             let winner = getMatchWinner(cleanId);
-            
-            // Si ya hay un ganador definido
             if(winner && !winner.name.startsWith('Ganador')) {
-                // CASO 1: Queremos el GANADOR (Final)
                 if(type === 'W') return { name: winner.name, seed: code };
-                
-                // CASO 2: Queremos el PERDEDOR (3er Puesto)
                 if(type === 'L') {
                     let match = projected[cleanId];
-                    // El perdedor es el que NO es el ganador
-                    // (Si el ganador es Home, el perdedor es Away)
                     let loser = (match.home.name === winner.name) ? match.away : match.home;
                     return { name: loser.name, seed: code };
                 }
             }
-            // Si aún no se juega, mostramos texto de espera
             return { name: (type === 'L' ? `Perdedor M${cleanId}` : `Ganador M${cleanId}`), seed: code };
         }
         
-        // C.2) Compatibilidad con IDs directos ('32-1')
         if (projected[code]) {
              let winner = getMatchWinner(code);
              if(winner) return { name: winner.name, seed: code };
         }
-
         return { name: '...', seed: '' };
     };
 
-    // 4. EJECUTAR EN CASCADA
+    // 5. EJECUTAR
     const phases = [
         (typeof R32_MATCHUPS !== 'undefined' ? R32_MATCHUPS : []),
         (typeof R16_MATCHUPS !== 'undefined' ? R16_MATCHUPS : []),
@@ -808,7 +850,6 @@ function calculateSimulatedTeams(predsSource) {
 
     return projected;
 }
-
 
 
 function autoFillOfficialQualifiers() {
