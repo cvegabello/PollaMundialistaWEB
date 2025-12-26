@@ -2,9 +2,9 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-    version: "v2.3",           // El número de la versión
-    environment: "BETA",       // Estado: DEV, BETA, PROD
-    buildDate: "25-Dic-2025"   // Fecha de la última actualización
+	version: 'v2.3', // El número de la versión
+	environment: 'BETA', // Estado: DEV, BETA, PROD
+	buildDate: '25-Dic-2025', // Fecha de la última actualización
 };
 
 /* =========================================================
@@ -12,21 +12,21 @@ const APP_CONFIG = {
    ========================================================= */
 // 1. Pegue aquí su objeto de configuración (El que tiene copiado)
 const firebaseConfig = {
-  apiKey: "AIzaSyDC81t0Ue5Ut9Z4eploqEY48yx_VVopVfY",
-  authDomain: "pollamundial2026-carlos.firebaseapp.com",
-  databaseURL: "https://pollamundial2026-carlos-default-rtdb.firebaseio.com/", 
-  projectId: "pollamundial2026-carlos",
-  storageBucket: "pollamundial2026-carlos.firebasestorage.app",
-  messagingSenderId: "182293814564",
-  appId: "1:182293814564:web:7b7987db956d74a86727b1"
+	apiKey: 'AIzaSyDC81t0Ue5Ut9Z4eploqEY48yx_VVopVfY',
+	authDomain: 'pollamundial2026-carlos.firebaseapp.com',
+	databaseURL: 'https://pollamundial2026-carlos-default-rtdb.firebaseio.com/',
+	projectId: 'pollamundial2026-carlos',
+	storageBucket: 'pollamundial2026-carlos.firebasestorage.app',
+	messagingSenderId: '182293814564',
+	appId: '1:182293814564:web:7b7987db956d74a86727b1',
 };
 
 // 2. Inicializar Firebase (Versión Compat)
 if (typeof firebase !== 'undefined') {
-    firebase.initializeApp(firebaseConfig);
-    console.log("🔥 Firebase inicializado correctamente.");
+	firebase.initializeApp(firebaseConfig);
+	console.log('🔥 Firebase inicializado correctamente.');
 } else {
-    console.error("☠️ Error: No se cargó la librería de Firebase en el HTML.");
+	console.error('☠️ Error: No se cargó la librería de Firebase en el HTML.');
 }
 
 // 3. Referencia Global a la Base de Datos
@@ -35,56 +35,87 @@ const db = firebase.database();
 
 // Pintar la versión automáticamente al cargar
 document.addEventListener('DOMContentLoaded', () => {
-    const vBadge = document.getElementById('app-version-badge');
-    if(vBadge) {
-        // Formato: "BETA v1.0"
-        vBadge.innerText = `${APP_CONFIG.environment} ${APP_CONFIG.version}`;
-        
-        // Colores semaforizados según el estado
-        if(APP_CONFIG.environment === 'PROD') {
-            vBadge.style.color = '#00ff00'; // Verde (Listo para la plata)
-            vBadge.style.border = '1px solid #00ff00';
-        } else if(APP_CONFIG.environment === 'BETA') {
-            vBadge.style.color = '#ffaa00'; // Naranja (Estable pero cuidado)
-            vBadge.style.border = '1px solid #ffaa00';
-        } else {
-            vBadge.style.color = '#ff4444'; // Rojo (En obra negra)
-        }
-    }
-});
+	const vBadge = document.getElementById('app-version-badge');
+	if (vBadge) {
+		// Formato: "BETA v1.0"
+		vBadge.innerText = `${APP_CONFIG.environment} ${APP_CONFIG.version}`;
 
+		// Colores semaforizados según el estado
+		if (APP_CONFIG.environment === 'PROD') {
+			vBadge.style.color = '#00ff00'; // Verde (Listo para la plata)
+			vBadge.style.border = '1px solid #00ff00';
+		} else if (APP_CONFIG.environment === 'BETA') {
+			vBadge.style.color = '#ffaa00'; // Naranja (Estable pero cuidado)
+			vBadge.style.border = '1px solid #ffaa00';
+		} else {
+			vBadge.style.color = '#ff4444'; // Rojo (En obra negra)
+		}
+	}
+});
 
 /* =========================================================
    1. ANIMACION DE PARTICULAS (FONDO)
    ========================================================= */
 const canvas = document.getElementById('particles');
 const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 let particlesArray = [];
 
 class Particle {
-    constructor() { this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height; this.size = Math.random()*2; this.speedX = Math.random()*1 - 0.5; this.speedY = Math.random()*1 - 0.5; }
-    update() { this.x+=this.speedX; this.y+=this.speedY; if(this.x>canvas.width||this.x<0) this.speedX*=-1; if(this.y>canvas.height||this.y<0) this.speedY*=-1; }
-    draw() { ctx.fillStyle = 'rgba(0,243,255,0.5)'; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); }
+	constructor() {
+		this.x = Math.random() * canvas.width;
+		this.y = Math.random() * canvas.height;
+		this.size = Math.random() * 2;
+		this.speedX = Math.random() * 1 - 0.5;
+		this.speedY = Math.random() * 1 - 0.5;
+	}
+	update() {
+		this.x += this.speedX;
+		this.y += this.speedY;
+		if (this.x > canvas.width || this.x < 0) this.speedX *= -1;
+		if (this.y > canvas.height || this.y < 0) this.speedY *= -1;
+	}
+	draw() {
+		ctx.fillStyle = 'rgba(0,243,255,0.5)';
+		ctx.beginPath();
+		ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+		ctx.fill();
+	}
 }
 
-function initP() { particlesArray=[]; for(let i=0; i<20; i++) particlesArray.push(new Particle()); }
+function initP() {
+	particlesArray = [];
+	for (let i = 0; i < 20; i++) particlesArray.push(new Particle());
+}
 function animP() {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    for(let i=0; i<particlesArray.length; i++) {
-        particlesArray[i].update(); particlesArray[i].draw();
-        for(let j=i; j<particlesArray.length; j++) {
-            const dx = particlesArray[i].x - particlesArray[j].x;
-            const dy = particlesArray[i].y - particlesArray[j].y;
-            const dist = Math.sqrt(dx*dx+dy*dy);
-            if(dist<100) { ctx.beginPath(); ctx.strokeStyle = `rgba(0,243,255,${1-dist/100})`; ctx.lineWidth=0.5; ctx.moveTo(particlesArray[i].x,particlesArray[i].y); ctx.lineTo(particlesArray[j].x,particlesArray[j].y); ctx.stroke(); }
-        }
-    }
-    requestAnimationFrame(animP);
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	for (let i = 0; i < particlesArray.length; i++) {
+		particlesArray[i].update();
+		particlesArray[i].draw();
+		for (let j = i; j < particlesArray.length; j++) {
+			const dx = particlesArray[i].x - particlesArray[j].x;
+			const dy = particlesArray[i].y - particlesArray[j].y;
+			const dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist < 100) {
+				ctx.beginPath();
+				ctx.strokeStyle = `rgba(0,243,255,${1 - dist / 100})`;
+				ctx.lineWidth = 0.5;
+				ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
+				ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
+				ctx.stroke();
+			}
+		}
+	}
+	requestAnimationFrame(animP);
 }
-initP(); animP();
-window.addEventListener('resize', ()=>{canvas.width=window.innerWidth; canvas.height=window.innerHeight; initP();});
-
+initP();
+animP();
+window.addEventListener('resize', () => {
+	canvas.width = window.innerWidth;
+	canvas.height = window.innerHeight;
+	initP();
+});
 
 /* =========================================================
    3. ESTADO GLOBAL (CORREGIDO)
@@ -97,26 +128,45 @@ let users = JSON.parse(localStorage.getItem('m26_users')) || [];
 // 2. USUARIO ACTUAL
 // Intentamos recuperar la sesión guardada. Si no hay, creamos uno vacío.
 let storedUser = JSON.parse(localStorage.getItem('m26_currentUser'));
-let currentUser = storedUser || { 
-    name: '', 
-    preds: {}, 
-    locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false } 
+let currentUser = storedUser || {
+	name: '',
+	preds: {},
+	locks: {
+		groups: false,
+		r32: false,
+		r16: false,
+		qf: false,
+		sf: false,
+		f: false,
+	},
 };
 
 // 3. ROL
 // Si recuperamos un usuario, usamos su rol. Si no, es 'fan'.
-let role = (currentUser && currentUser.role) ? currentUser.role : 'fan';
+let role = currentUser && currentUser.role ? currentUser.role : 'fan';
 
 // 4. EL RESTO (Igual a como lo tenía)
 let officialRes = JSON.parse(localStorage.getItem('m26_official')) || {};
 
-let rules = JSON.parse(localStorage.getItem('m26_rules')) || { 
-    exact: 5, diff: 3, winner: 1, 
-    groupExact: 10, groupMix: 5, groupOne: 2 
+let rules = JSON.parse(localStorage.getItem('m26_rules')) || {
+	exact: 5,
+	diff: 3,
+	winner: 1,
+	groupExact: 10,
+	groupMix: 5,
+	groupOne: 2,
 };
 
-let phaseControl = JSON.parse(localStorage.getItem('m26_phase_control')) || { groups: true, r32: false, r16: false, qf: false, sf: false, f: false };
-let officialTeams = JSON.parse(localStorage.getItem('m26_official_teams')) || {};
+let phaseControl = JSON.parse(localStorage.getItem('m26_phase_control')) || {
+	groups: true,
+	r32: false,
+	r16: false,
+	qf: false,
+	sf: false,
+	f: false,
+};
+let officialTeams =
+	JSON.parse(localStorage.getItem('m26_official_teams')) || {};
 
 // Variable para el Motor FIFA
 let simulatedTeams = {};
@@ -140,44 +190,44 @@ var officialOverrides = JSON.parse(localStorage.getItem('m26_overrides')) || {};
    FUNCIÓN DE GUARDADO (FIX DEFINITIVO 🛠️)
    ========================================================= */
 function overrideTeamName(matchId, side, teamName) {
-    let key = `${matchId}-${side}`;
-    
-    // 1. LÓGICA DE GUARDADO (IGUAL QUE ANTES)
-    if (teamName === "") {
-        delete officialOverrides[key]; 
-    } else {
-        // Buscamos el seed correcto (3A, 3B...)
-        let teamData = window.GLOBAL_THIRDS ? window.GLOBAL_THIRDS.find(t => t.name === teamName) : null;
-        let seed = teamData ? `3${teamData.group}` : 'MAN'; 
+	let key = `${matchId}-${side}`;
 
-        officialOverrides[key] = {
-            name: teamName,
-            seed: seed
-        };
-    }
+	// 1. LÓGICA DE GUARDADO (IGUAL QUE ANTES)
+	if (teamName === '') {
+		delete officialOverrides[key];
+	} else {
+		// Buscamos el seed correcto (3A, 3B...)
+		let teamData = window.GLOBAL_THIRDS
+			? window.GLOBAL_THIRDS.find((t) => t.name === teamName)
+			: null;
+		let seed = teamData ? `3${teamData.group}` : 'MAN';
 
-    // 2. GUARDAR EN MEMORIA
-    localStorage.setItem('m26_overrides', JSON.stringify(officialOverrides));
-    console.log(`✅ Cambio guardado: ${teamName}`);
-    
-    // =====================================================
-    // ✋ AQUÍ ESTÁ LA SOLUCIÓN MAGISTRAL ✋
-    // =====================================================
-    
-    // En lugar de location.reload(), llamamos a su función de vista:
-    // Primer parámetro: 'admin' (porque usted está editando)
-    // Segundo parámetro: 'final' (que es donde están las llaves)
-    
-    if (typeof loadView === 'function') {
-        loadView('admin', 'final'); 
-    } else {
-        // Por si acaso no la encuentra (aunque debería)
-        console.error("No encontré la función loadView, recargando a la fuerza...");
-        location.reload();
-    }
+		officialOverrides[key] = {
+			name: teamName,
+			seed: seed,
+		};
+	}
+
+	// 2. GUARDAR EN MEMORIA
+	localStorage.setItem('m26_overrides', JSON.stringify(officialOverrides));
+	console.log(`✅ Cambio guardado: ${teamName}`);
+
+	// =====================================================
+	// ✋ AQUÍ ESTÁ LA SOLUCIÓN MAGISTRAL ✋
+	// =====================================================
+
+	// En lugar de location.reload(), llamamos a su función de vista:
+	// Primer parámetro: 'admin' (porque usted está editando)
+	// Segundo parámetro: 'final' (que es donde están las llaves)
+
+	if (typeof loadView === 'function') {
+		loadView('admin', 'final');
+	} else {
+		// Por si acaso no la encuentra (aunque debería)
+		console.error('No encontré la función loadView, recargando a la fuerza...');
+		location.reload();
+	}
 }
-
-
 
 /* =========================================================
    4. FUNCIONES DE LOGIN Y MODO
@@ -186,180 +236,190 @@ function overrideTeamName(matchId, side, teamName) {
    LOGIN INTELIGENTE (VERIFICACIÓN EN NUBE ☁️)
    ========================================================= */
 function handleLogin() {
-    const uInput = document.getElementById('username');
-    const pInput = document.getElementById('password');
-    const btn = document.querySelector('.login-btn'); // Asegúrese que su botón tenga esta clase o un ID
-    
-    const u = uInput.value.trim().toLowerCase(); // Guardamos en minúsculas para evitar 'Carlos' vs 'carlos'
-    const p = pInput.value;
+	const uInput = document.getElementById('username');
+	const pInput = document.getElementById('password');
+	const btn = document.querySelector('.login-btn'); // Asegúrese que su botón tenga esta clase o un ID
 
-    if(!u) return alert("Por favor ingresa un nombre de usuario.");
+	const u = uInput.value.trim().toLowerCase(); // Guardamos en minúsculas para evitar 'Carlos' vs 'carlos'
+	const p = pInput.value;
 
-    // --- CAMINO ADMIN (Este es local y rápido) ---
-    if(p === 'admin2026') {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
-        
-        startFirebaseListener(); // Arrancamos el listener general
-        
-        // Configurar Admin
-        setupAdminMode();
-        
-        // Gestión de tableros
-        const fanDash = document.getElementById('fan-dashboard');
-        const adminDash = document.getElementById('admin-dashboard');
-        if(adminDash) adminDash.classList.remove('hidden');
-        if(fanDash) fanDash.classList.add('hidden');
-        
-        loadView('admin', 'groups');
-        return;
-    }
+	if (!u) return alert('Por favor ingresa un nombre de usuario.');
 
-    // --- CAMINO FAN (AQUÍ ESTÁ LA MAGIA 🎩) ---
-    
-    // 1. Mostrar estado de carga (Feedback visual)
-    const originalBtnText = btn ? btn.innerText : 'ENTRAR';
-    if(btn) {
-        btn.innerText = "Buscando en la nube...";
-        btn.disabled = true;
-    }
+	// --- CAMINO ADMIN (Este es local y rápido) ---
+	if (p === 'admin2026') {
+		document.getElementById('login-overlay').style.display = 'none';
+		document.getElementById('app').style.display = 'block';
 
-    console.log(`☁️ Preguntando a Firebase por: ${u}...`);
+		startFirebaseListener(); // Arrancamos el listener general
 
-    // 2. CONSULTA DIRECTA A FIREBASE (ONCE)
-    // No dependemos del listener, vamos a buscar activamente.
-    db.ref('/users').once('value')
-        .then((snapshot) => {
-            const allUsers = snapshot.val() || [];
-            
-            // Buscamos si ya existe (Búsqueda insensible a mayúsculas/minúsculas)
-            let existingUserIndex = -1;
-            let existingUser = null;
+		// Configurar Admin
+		setupAdminMode();
 
-            if (Array.isArray(allUsers)) {
-                // Si es un array
-                existingUserIndex = allUsers.findIndex(user => user.name.toLowerCase() === u);
-                if(existingUserIndex !== -1) existingUser = allUsers[existingUserIndex];
-            } else {
-                // Si Firebase lo devolvió como objeto (raro pero posible)
-                const keys = Object.keys(allUsers);
-                for(let key of keys) {
-                    if (allUsers[key].name.toLowerCase() === u) {
-                        existingUser = allUsers[key];
-                        break;
-                    }
-                }
-            }
+		// Gestión de tableros
+		const fanDash = document.getElementById('fan-dashboard');
+		const adminDash = document.getElementById('admin-dashboard');
+		if (adminDash) adminDash.classList.remove('hidden');
+		if (fanDash) fanDash.classList.add('hidden');
 
-            // 3. DECISIÓN
-            if (existingUser) {
-                // CASO A: EL USUARIO YA EXISTE -> RECUPERAMOS SUS DATOS ✅
-                console.log("✅ Usuario encontrado en la nube. Cargando datos...");
-                currentUser = existingUser;
-                // Nos aseguramos que users esté actualizado localmente también
-                users = Array.isArray(allUsers) ? allUsers : Object.values(allUsers);
-            } else {
-                // CASO B: EL USUARIO ES NUEVO -> LO CREAMOS 🆕
-                console.log("✨ Usuario nuevo. Creando perfil...");
-                currentUser = { 
-                    name: u, // Guardamos el nombre tal cual lo escribió (pero ya validamos que no existe en lowercase)
-                    preds: {}, 
-                    locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
-                    role: 'fan'
-                };
-                
-                // Agregamos a la lista local
-                if (!Array.isArray(users)) users = [];
-                users.push(currentUser);
-                
-                // Guardamos la nueva lista en la nube (Aquí sí usamos saveToCloud neutralizado)
-                saveToCloud(); 
-            }
+		loadView('admin', 'groups');
+		return;
+	}
 
-            // 4. ENTRAR AL SISTEMA
-            enterAppAsFan();
+	// --- CAMINO FAN (AQUÍ ESTÁ LA MAGIA 🎩) ---
 
-        })
-        .catch((error) => {
-            console.error("❌ Error conectando con Firebase:", error);
-            alert("Error de conexión. Intenta de nuevo.");
-            if(btn) {
-                btn.innerText = originalBtnText;
-                btn.disabled = false;
-            }
-        });
+	// 1. Mostrar estado de carga (Feedback visual)
+	const originalBtnText = btn ? btn.innerText : 'ENTRAR';
+	if (btn) {
+		btn.innerText = 'Buscando en la nube...';
+		btn.disabled = true;
+	}
+
+	console.log(`☁️ Preguntando a Firebase por: ${u}...`);
+
+	// 2. CONSULTA DIRECTA A FIREBASE (ONCE)
+	// No dependemos del listener, vamos a buscar activamente.
+	db.ref('/users')
+		.once('value')
+		.then((snapshot) => {
+			const allUsers = snapshot.val() || [];
+
+			// Buscamos si ya existe (Búsqueda insensible a mayúsculas/minúsculas)
+			let existingUserIndex = -1;
+			let existingUser = null;
+
+			if (Array.isArray(allUsers)) {
+				// Si es un array
+				existingUserIndex = allUsers.findIndex(
+					(user) => user.name.toLowerCase() === u,
+				);
+				if (existingUserIndex !== -1)
+					existingUser = allUsers[existingUserIndex];
+			} else {
+				// Si Firebase lo devolvió como objeto (raro pero posible)
+				const keys = Object.keys(allUsers);
+				for (let key of keys) {
+					if (allUsers[key].name.toLowerCase() === u) {
+						existingUser = allUsers[key];
+						break;
+					}
+				}
+			}
+
+			// 3. DECISIÓN
+			if (existingUser) {
+				// CASO A: EL USUARIO YA EXISTE -> RECUPERAMOS SUS DATOS ✅
+				console.log('✅ Usuario encontrado en la nube. Cargando datos...');
+				currentUser = existingUser;
+				// Nos aseguramos que users esté actualizado localmente también
+				users = Array.isArray(allUsers) ? allUsers : Object.values(allUsers);
+			} else {
+				// CASO B: EL USUARIO ES NUEVO -> LO CREAMOS 🆕
+				console.log('✨ Usuario nuevo. Creando perfil...');
+				currentUser = {
+					name: u, // Guardamos el nombre tal cual lo escribió (pero ya validamos que no existe en lowercase)
+					preds: {},
+					locks: {
+						groups: false,
+						r32: false,
+						r16: false,
+						qf: false,
+						sf: false,
+						f: false,
+					},
+					role: 'fan',
+				};
+
+				// Agregamos a la lista local
+				if (!Array.isArray(users)) users = [];
+				users.push(currentUser);
+
+				// Guardamos la nueva lista en la nube (Aquí sí usamos saveToCloud neutralizado)
+				saveToCloud();
+			}
+
+			// 4. ENTRAR AL SISTEMA
+			enterAppAsFan();
+		})
+		.catch((error) => {
+			console.error('❌ Error conectando con Firebase:', error);
+			alert('Error de conexión. Intenta de nuevo.');
+			if (btn) {
+				btn.innerText = originalBtnText;
+				btn.disabled = false;
+			}
+		});
 }
 
 // Función auxiliar para ordenar la entrada del Fan (Limpia el código de arriba)
 function enterAppAsFan() {
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
+	document.getElementById('login-overlay').style.display = 'none';
+	document.getElementById('app').style.display = 'block';
 
-    startFirebaseListener(); // Arrancamos el listener para seguir recibiendo actualizaciones
+	startFirebaseListener(); // Arrancamos el listener para seguir recibiendo actualizaciones
 
-    // Gestión de Tableros
-    const fanDash = document.getElementById('fan-dashboard');
-    const adminDash = document.getElementById('admin-dashboard');
-    if(fanDash) fanDash.classList.remove('hidden');
-    if(adminDash) adminDash.classList.add('hidden');
+	// Gestión de Tableros
+	const fanDash = document.getElementById('fan-dashboard');
+	const adminDash = document.getElementById('admin-dashboard');
+	if (fanDash) fanDash.classList.remove('hidden');
+	if (adminDash) adminDash.classList.add('hidden');
 
-    // Configuración visual
-    setupUserModeHelper(); // Llamamos a una versión simplificada
-    loadView('user', 'groups');
+	// Configuración visual
+	setupUserModeHelper(); // Llamamos a una versión simplificada
+	loadView('user', 'groups');
 }
 
 function setupAdminMode() {
-    // 1. Configurar Identidad
-    role = 'admin';
-    currentUser = { name: 'ADMINISTRADOR', preds: {}, role: 'admin' }; 
+	// 1. Configurar Identidad
+	role = 'admin';
+	currentUser = { name: 'ADMINISTRADOR', preds: {}, role: 'admin' };
 
-    // 2. Gestionar Barras de Estado (Header)
-    const adminBar = document.getElementById('admin-status-bar');
-    const userBar = document.getElementById('user-status-bar');
-    
-    if(adminBar) adminBar.style.display = 'block'; // Mostrar barra morada Admin
-    if(userBar) userBar.style.display = 'none';    // Ocultar barra de usuario
+	// 2. Gestionar Barras de Estado (Header)
+	const adminBar = document.getElementById('admin-status-bar');
+	const userBar = document.getElementById('user-status-bar');
 
-    // 3. Gestionar Botones de Herramientas (Toolbar)
-    // const btnSaveDraft = document.getElementById('btn-save-draft');
-    // const btnRefresh = document.getElementById('btn-refresh');
-    const adminBracketTools = document.getElementById('admin-bracket-tools');
-    
-    // El admin no guarda "borradores", guarda con botones específicos en el panel
-    // if(btnSaveDraft) btnSaveDraft.style.display = 'none';
-    // if(btnRefresh) btnRefresh.style.display = 'flex'; 
-    
-    // Herramientas extra para el bracket (botón de cargar clasificados)
-    if(adminBracketTools) adminBracketTools.style.display = 'block';
+	if (adminBar) adminBar.style.display = 'block'; // Mostrar barra morada Admin
+	if (userBar) userBar.style.display = 'none'; // Ocultar barra de usuario
 
-    // 4. Actualizar Nombre en Pantalla
-    const displayUser = document.getElementById('display-username');
-    if(displayUser) displayUser.innerText = "ADMINISTRADOR";
+	// 3. Gestionar Botones de Herramientas (Toolbar)
+	// const btnSaveDraft = document.getElementById('btn-save-draft');
+	// const btnRefresh = document.getElementById('btn-refresh');
+	const adminBracketTools = document.getElementById('admin-bracket-tools');
 
-    // 5. CARGAR VALORES EN LA PESTAÑA DE CONFIGURACIÓN ⚙️
-    // Esto es vital para que cuando entre a Configuración, los inputs tengan los valores reales
-    if(document.getElementById('rule-exact')) {
-        document.getElementById('rule-exact').value = rules.exact;
-        document.getElementById('rule-diff').value = rules.diff;
-        document.getElementById('rule-winner').value = rules.winner;
-        // Nuevos inputs
-        document.getElementById('rule-group-exact').value = rules.groupExact || 0;
-        document.getElementById('rule-group-mix').value = rules.groupMix || 0;
-        document.getElementById('rule-group-one').value = rules.groupOne || 0;
-    }
+	// El admin no guarda "borradores", guarda con botones específicos en el panel
+	// if(btnSaveDraft) btnSaveDraft.style.display = 'none';
+	// if(btnRefresh) btnRefresh.style.display = 'flex';
 
-    if(document.getElementById('check-groups')) {
-        document.getElementById('check-groups').checked = phaseControl.groups;
-        document.getElementById('check-r32').checked = phaseControl.r32;
-        document.getElementById('check-r16').checked = phaseControl.r16;
-        document.getElementById('check-qf').checked = phaseControl.qf;
-        document.getElementById('check-sf').checked = phaseControl.sf;
-        document.getElementById('check-f').checked = phaseControl.f;
-    }
+	// Herramientas extra para el bracket (botón de cargar clasificados)
+	if (adminBracketTools) adminBracketTools.style.display = 'block';
 
-    // NOTA IMPORANTE:
-    // Aquí NO tocamos los botones de navegación ni llamamos a renderGroups().
-    // De mostrar el tablero correcto se encarga la función handleLogin().
+	// 4. Actualizar Nombre en Pantalla
+	const displayUser = document.getElementById('display-username');
+	if (displayUser) displayUser.innerText = 'ADMINISTRADOR';
+
+	// 5. CARGAR VALORES EN LA PESTAÑA DE CONFIGURACIÓN ⚙️
+	// Esto es vital para que cuando entre a Configuración, los inputs tengan los valores reales
+	if (document.getElementById('rule-exact')) {
+		document.getElementById('rule-exact').value = rules.exact;
+		document.getElementById('rule-diff').value = rules.diff;
+		document.getElementById('rule-winner').value = rules.winner;
+		// Nuevos inputs
+		document.getElementById('rule-group-exact').value = rules.groupExact || 0;
+		document.getElementById('rule-group-mix').value = rules.groupMix || 0;
+		document.getElementById('rule-group-one').value = rules.groupOne || 0;
+	}
+
+	if (document.getElementById('check-groups')) {
+		document.getElementById('check-groups').checked = phaseControl.groups;
+		document.getElementById('check-r32').checked = phaseControl.r32;
+		document.getElementById('check-r16').checked = phaseControl.r16;
+		document.getElementById('check-qf').checked = phaseControl.qf;
+		document.getElementById('check-sf').checked = phaseControl.sf;
+		document.getElementById('check-f').checked = phaseControl.f;
+	}
+
+	// NOTA IMPORANTE:
+	// Aquí NO tocamos los botones de navegación ni llamamos a renderGroups().
+	// De mostrar el tablero correcto se encarga la función handleLogin().
 }
 
 // function setupUserMode(username) {
@@ -369,27 +429,27 @@ function setupAdminMode() {
 //     // 2. Gestionar Elementos de la Interfaz (Igual que como lo tenía)
 //     const adminBar = document.getElementById('admin-status-bar');
 //     if(adminBar) adminBar.style.display = 'none';
-    
+
 //     const adminTools = document.getElementById('admin-bracket-tools');
 //     if(adminTools) adminTools.style.display = 'none';
-    
+
 //     const btnSaveAdmin = document.getElementById('btn-save-admin');
 //     if(btnSaveAdmin) btnSaveAdmin.style.display = 'none';
 
 //     // Mostrar cosas de Fan
 //     const userBar = document.getElementById('user-status-bar');
-//     if(userBar) userBar.style.display = 'grid'; 
-    
+//     if(userBar) userBar.style.display = 'grid';
+
 //     // const btnSaveDraft = document.getElementById('btn-save-draft');
-//     // if(btnSaveDraft) btnSaveDraft.style.display = 'flex'; 
-    
+//     // if(btnSaveDraft) btnSaveDraft.style.display = 'flex';
+
 //     // const btnRefresh = document.getElementById('btn-refresh');
 //     // if(btnRefresh) btnRefresh.style.display = 'flex';
 
 //     // ============================================================
 //     // 3. CARGAR DATOS DEL USUARIO (MODIFICADO PARA FIREBASE ☁️)
 //     // ============================================================
-    
+
 //     // Paso A: Buscamos si el usuario ya existe en la lista global (que viene de la nube)
 //     let foundUser = users.find(u => u.name === username);
 
@@ -399,29 +459,29 @@ function setupAdminMode() {
 //         console.log(`✅ Bienvenido de nuevo, ${currentUser.name}`);
 //     } else {
 //         // SI ES NUEVO: Lo creamos desde cero
-//         currentUser = { 
-//             name: username, 
-//             preds: {}, 
+//         currentUser = {
+//             name: username,
+//             preds: {},
 //             locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
 //             role: 'fan' // Aseguramos el rol
 //         };
-        
+
 //         // ¡MAGIA AQUÍ! ✨
 //         // Lo agregamos a la lista global
 //         users.push(currentUser);
-        
+
 //         // Y guardamos en la nube inmediatamente
-//         saveToCloud(); 
-        
+//         saveToCloud();
+
 //         console.log(`✨ Nuevo usuario creado y subido a la nube: ${currentUser.name}`);
 //     }
-    
+
 //     // ============================================================
 
 //     // 4. Actualizar Nombre en Pantalla
 //     const displayUser = document.getElementById('display-username');
 //     if(displayUser) displayUser.innerText = currentUser.name.toUpperCase();
-    
+
 //     // 5. Actualizar Barra de Progreso
 //     if(typeof updateStatusUI === 'function') updateStatusUI();
 
@@ -429,125 +489,173 @@ function setupAdminMode() {
 // }
 
 function setupUserModeHelper() {
-    role = 'fan';
-    
-    // Ocultar cosas de admin
-    const adminBar = document.getElementById('admin-status-bar');
-    if(adminBar) adminBar.style.display = 'none';
-    const adminTools = document.getElementById('admin-bracket-tools');
-    if(adminTools) adminTools.style.display = 'none';
-    const btnSaveAdmin = document.getElementById('btn-save-admin');
-    if(btnSaveAdmin) btnSaveAdmin.style.display = 'none';
+	role = 'fan';
 
-    // Mostrar barra de usuario
-    const userBar = document.getElementById('user-status-bar');
-    if(userBar) userBar.style.display = 'grid';
+	// Ocultar cosas de admin
+	const adminBar = document.getElementById('admin-status-bar');
+	if (adminBar) adminBar.style.display = 'none';
+	const adminTools = document.getElementById('admin-bracket-tools');
+	if (adminTools) adminTools.style.display = 'none';
+	const btnSaveAdmin = document.getElementById('btn-save-admin');
+	if (btnSaveAdmin) btnSaveAdmin.style.display = 'none';
 
-    // Nombre en pantalla
-    const displayUser = document.getElementById('display-username');
-    if(displayUser) displayUser.innerText = currentUser.name.toUpperCase();
+	// Mostrar barra de usuario
+	const userBar = document.getElementById('user-status-bar');
+	if (userBar) userBar.style.display = 'grid';
 
-    // Actualizar estado
-    if(typeof updateStatusUI === 'function') updateStatusUI();
+	// Nombre en pantalla
+	const displayUser = document.getElementById('display-username');
+	if (displayUser) displayUser.innerText = currentUser.name.toUpperCase();
+
+	// Actualizar estado
+	if (typeof updateStatusUI === 'function') updateStatusUI();
 }
-
 
 /* =========================================================
    BARRA DE ESTADO Y PROGRESO (CORREGIDA - VERSIÓN FINAL 🛡️)
    ========================================================= */
 function updateStatusUI() {
-    // 1. BLINDAJE
-    if (!currentUser) return;
-    if (role === 'admin') return; 
+	// 1. BLINDAJE
+	if (!currentUser) return;
+	if (role === 'admin') return;
 
-    if (!currentUser.locks) {
-        currentUser.locks = { groups: false, r32: false, r16: false, qf: false, sf: false, f: false };
-    }
+	if (!currentUser.locks) {
+		currentUser.locks = {
+			groups: false,
+			r32: false,
+			r16: false,
+			qf: false,
+			sf: false,
+			f: false,
+		};
+	}
 
-    // 2. CÁLCULOS
-    let count = Object.values(currentUser.locks).filter(x => x).length;
-    let progressDisplay = document.getElementById('display-progress');
-    if(progressDisplay) progressDisplay.innerText = `Fases: ${count}/6`;
-    
-    calculatePoints();
-    
-    // 3. REFERENCIAS
-    let badge = document.getElementById('display-status');
-    let groupArea = document.getElementById('submit-groups-area');
-    let groupBtn = document.getElementById('btn-submit-groups');
-    let groupMsg = document.getElementById('groups-msg');
-    // let saveDraftBtn = document.getElementById('btn-save-draft'); // Botón de disquette
-    
-    if(!badge || !groupArea) return;
+	// 2. CÁLCULOS
+	let count = Object.values(currentUser.locks).filter((x) => x).length;
+	let progressDisplay = document.getElementById('display-progress');
+	if (progressDisplay) progressDisplay.innerText = `Fases: ${count}/6`;
 
-    // 4. LÓGICA DE ESTADO
-    if(currentUser.locks.groups) {
-        // --- CASO: YA ENVIÓ (OFICIAL) ---
-        badge.innerText = "OFICIAL";
-        badge.className = "status-badge bg-official";
-        
-        // Esconder todo porque ya envió
-        groupArea.style.display = 'none';
+	calculatePoints();
 
-        // if(saveDraftBtn) saveDraftBtn.style.display = 'none';
+	// 3. REFERENCIAS
+	let badge = document.getElementById('display-status');
+	let groupArea = document.getElementById('submit-groups-area');
+	let groupBtn = document.getElementById('btn-submit-groups');
+	let groupMsg = document.getElementById('groups-msg');
+	// let saveDraftBtn = document.getElementById('btn-save-draft'); // Botón de disquette
 
-    } else {
-        // --- CASO: BORRADOR (AÚN NO ENVÍA) ---
-        badge.innerText = "BORRADOR";
-        badge.className = "status-badge bg-draft";
-        
-        // AQUÍ ESTABA EL ERROR 🚨
-        // Antes mostrábamos la caja siempre. Ahora preguntamos:
-        // ¿Estoy en mi vista de usuario?
-        
-        if (typeof currentViewMode !== 'undefined' && currentViewMode === 'user') {
-            // SI: Muestre el panel de enviar y el disquette
-            groupArea.style.display = 'block'; 
-            groupArea.classList.remove('hidden'); 
+	if (!badge || !groupArea) return;
 
-            // if(saveDraftBtn) saveDraftBtn.style.display = 'flex';
-        } else {
-            // NO (Estoy viendo Oficiales): Escóndase, no estorbe
-            groupArea.style.display = 'none';
-            // if(saveDraftBtn) saveDraftBtn.style.display = 'none';
-        }
-        
-        // Configurar el botón grande (Habilitado/Deshabilitado según Admin)
-        if(phaseControl.groups) {
-            if(groupBtn) {
-                groupBtn.disabled = false;
-                groupBtn.className = "btn-big-submit";
-                groupBtn.innerText = "ENVIAR OFICIALMENTE";
-            }
-            if(groupMsg) groupMsg.innerHTML = "Fase de grupos habilitada.";
-        } else {
-            if(groupBtn) {
-                groupBtn.disabled = true;
-                groupBtn.className = "btn-big-submit btn-big-disabled";
-                groupBtn.innerText = "ESPERANDO ADMIN";
-            }
-            if(groupMsg) groupMsg.innerHTML = "Fase cerrada temporalmente.";
-        }
-    }
+	// 4. LÓGICA DE ESTADO
+	if (currentUser.locks.groups) {
+		// --- CASO: YA ENVIÓ (OFICIAL) ---
+		badge.innerText = 'OFICIAL';
+		badge.className = 'status-badge bg-official';
+
+		// Esconder todo porque ya envió
+		groupArea.style.display = 'none';
+
+		// if(saveDraftBtn) saveDraftBtn.style.display = 'none';
+	} else {
+		// --- CASO: BORRADOR (AÚN NO ENVÍA) ---
+		badge.innerText = 'BORRADOR';
+		badge.className = 'status-badge bg-draft';
+
+		// AQUÍ ESTABA EL ERROR 🚨
+		// Antes mostrábamos la caja siempre. Ahora preguntamos:
+		// ¿Estoy en mi vista de usuario?
+
+		if (typeof currentViewMode !== 'undefined' && currentViewMode === 'user') {
+			// SI: Muestre el panel de enviar y el disquette
+			groupArea.style.display = 'block';
+			groupArea.classList.remove('hidden');
+
+			// if(saveDraftBtn) saveDraftBtn.style.display = 'flex';
+		} else {
+			// NO (Estoy viendo Oficiales): Escóndase, no estorbe
+			groupArea.style.display = 'none';
+			// if(saveDraftBtn) saveDraftBtn.style.display = 'none';
+		}
+
+		// Configurar el botón grande (Habilitado/Deshabilitado según Admin)
+		if (phaseControl.groups) {
+			if (groupBtn) {
+				groupBtn.disabled = false;
+				groupBtn.className = 'btn-big-submit';
+				groupBtn.innerText = 'ENVIAR OFICIALMENTE';
+			}
+			if (groupMsg) groupMsg.innerHTML = 'Fase de grupos habilitada.';
+		} else {
+			if (groupBtn) {
+				groupBtn.disabled = true;
+				groupBtn.className = 'btn-big-submit btn-big-disabled';
+				groupBtn.innerText = 'ESPERANDO ADMIN';
+			}
+			if (groupMsg) groupMsg.innerHTML = 'Fase cerrada temporalmente.';
+		}
+	}
 }
 
 function switchTab(tab) {
-    document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-    
-    document.getElementById('tab-'+tab).classList.add('active');
-    
-    // Identificar qué botón se presionó para activarlo visualmente
-    let btnId = 'btn-tab-' + tab;
-    if(document.getElementById(btnId)) {
-        document.getElementById(btnId).classList.add('active');
-    }
-    
-    if(tab === 'bracket') renderBracket();
-    if(tab === 'real') {
-        renderRealResults();
-        renderRealBracket();
-    }
+	document
+		.querySelectorAll('.section')
+		.forEach((el) => el.classList.remove('active'));
+	document
+		.querySelectorAll('.tab-btn')
+		.forEach((el) => el.classList.remove('active'));
+
+	document.getElementById('tab-' + tab).classList.add('active');
+
+	// Identificar qué botón se presionó para activarlo visualmente
+	let btnId = 'btn-tab-' + tab;
+	if (document.getElementById(btnId)) {
+		document.getElementById(btnId).classList.add('active');
+	}
+
+	if (tab === 'bracket') renderBracket();
+	if (tab === 'real') {
+		renderRealResults();
+		renderRealBracket();
+	}
+}
+
+/* =========================================================
+   MEMORIA DE DESEMPATE (VERSIÓN SILENCIOSA 🤫)
+   ========================================================= */
+// Asegúrese de que esta variable esté declarada al inicio de su archivo
+var groupRankOverrides =
+	JSON.parse(localStorage.getItem('m26_group_ranks')) || {};
+
+function saveGroupRank(group, teamName, rankValue) {
+	let key = `${group}-${teamName}`;
+
+	// 1. Guardar en memoria RAM
+	if (rankValue === '') {
+		delete groupRankOverrides[key];
+	} else {
+		groupRankOverrides[key] = parseInt(rankValue);
+	}
+
+	// 2. Guardar en LocalStorage (Para que no se pierda al recargar)
+	localStorage.setItem('m26_group_ranks', JSON.stringify(groupRankOverrides));
+
+	// 3. Guardar en Firebase (Si es Admin, para que quede en la nube)
+	// Esto es clave para que, si recarga la página, el "1" y "2" sigan ahí.
+	if (
+		typeof role !== 'undefined' &&
+		role === 'admin' &&
+		typeof db !== 'undefined'
+	) {
+		// Guardamos todo el objeto de overrides para no complicarnos
+		db.ref('/groupOverrides').set(groupRankOverrides);
+	}
+
+	console.log(`⚖️ Ranking manual guardado: ${teamName} es #${rankValue}`);
+
+	// ⛔ AQUÍ ESTABA EL ERROR:
+	// Antes llamábamos a renderGroups() y eso borraba los inputs de goles.
+	// AHORA NO HACEMOS NADA VISUAL AQUÍ.
+	// Dejamos que refreshGroupTable se encargue de mover las filas.
 }
 
 /* =========================================================
@@ -557,81 +665,183 @@ function switchTab(tab) {
    RENDERIZADOR DE GRUPOS (Con ID para actualización quirúrgica 🏥)
    ========================================================= */
 function renderGroups(customData, customMode) {
-    const container = document.getElementById('groups-container');
-    if(!container) return; 
-    container.innerHTML = '';
-    
-    let modeToUse = customMode || 'user'; 
-    let dataToUse;
-    
-    if (modeToUse === 'official') {
-        dataToUse = officialRes || {}; 
-    } else {
-        dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
-    }
+	const container = document.getElementById('groups-container');
+	if (!container) return;
+	container.innerHTML = '';
 
-    let isReadOnly = false;
-    if (modeToUse === 'official') {
-        if (role !== 'admin') isReadOnly = true; 
-    } else {
-        if (role === 'fan' && currentUser.locks && currentUser.locks.groups) isReadOnly = true;
-    }
+	let modeToUse = customMode || 'user'; // 'user' (fan) o 'admin'
+	let dataToUse;
 
-    for(let g in GROUPS_CONFIG) {
-        const data = GROUPS_CONFIG[g];
-        let matchesHTML = '';
-        
-        let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
-        
-        data.matches.forEach((m, idx) => {
-            let id = `${g}-${idx}`;
-            let valH = dataToUse[`h-${id}`] || ''; 
-            let valA = dataToUse[`a-${id}`] || '';
-            let disabledAttr = isReadOnly ? 'disabled' : '';
+	// 1. Determinar datos a usar
+	if (modeToUse === 'official') {
+		dataToUse = typeof officialRes !== 'undefined' ? officialRes : {};
+	} else {
+		// Si es Fan, usa sus datos. Si es Admin simulando, usa lo que tenga.
+		dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
+	}
 
-            if(valH !== '' && valA !== '') {
-                let sH = parseInt(valH); let sA = parseInt(valA);
-                teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
-                teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
-                if(sH > sA) teamStats[m.t1].pts += 3;
-                else if(sA > sH) teamStats[m.t2].pts += 3;
-                else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
-            }
-            
-            matchesHTML += `<div class="match-row">
+	let isReadOnly = false;
+	let canEditRank = false; // 🆕 Variable para saber si pintamos el Combo Box
+
+	if (modeToUse === 'official') {
+		if (role !== 'admin') isReadOnly = true;
+		if (role === 'admin') canEditRank = true; // 🆕 Solo el Admin desempata lo oficial
+	} else {
+		// El usuario normal también puede desempatar su propia polla si quiere
+		if (role === 'fan' && currentUser.locks && currentUser.locks.groups)
+			isReadOnly = true;
+		else canEditRank = true; // 🆕 El usuario puede desempatar su simulación
+	}
+
+	// 2. Iterar Grupos
+	for (let g in GROUPS_CONFIG) {
+		const data = GROUPS_CONFIG[g];
+		let matchesHTML = '';
+
+		// Inicializar Stats
+		let teamStats = data.teams.map((n) => ({
+			name: n,
+			pts: 0,
+			dif: 0,
+			gf: 0,
+			gc: 0,
+			manualRank: 99, // 🆕 Valor por defecto alto
+		}));
+
+		// 🆕 Cargar Rankings Manuales si existen para este grupo
+		teamStats.forEach((t) => {
+			let key = `${g}-${t.name}`;
+			// Si existe un override y estamos en el modo correcto, lo cargamos
+			if (groupRankOverrides && groupRankOverrides[key]) {
+				t.manualRank = groupRankOverrides[key];
+			}
+		});
+
+		// Calcular Puntos (Su lógica original intacta)
+		data.matches.forEach((m, idx) => {
+			let id = `${g}-${idx}`;
+			let valH = dataToUse[`h-${id}`] || '';
+			let valA = dataToUse[`a-${id}`] || '';
+			let disabledAttr = isReadOnly ? 'disabled' : '';
+
+			if (valH !== '' && valA !== '') {
+				let sH = parseInt(valH);
+				let sA = parseInt(valA);
+				teamStats[m.t1].gf += sH;
+				teamStats[m.t1].gc += sA;
+				teamStats[m.t1].dif += sH - sA;
+				teamStats[m.t2].gf += sA;
+				teamStats[m.t2].gc += sH;
+				teamStats[m.t2].dif += sA - sH;
+				if (sH > sA) teamStats[m.t1].pts += 3;
+				else if (sA > sH) teamStats[m.t2].pts += 3;
+				else {
+					teamStats[m.t1].pts += 1;
+					teamStats[m.t2].pts += 1;
+				}
+			}
+
+			// Render partido (Su HTML original)
+			matchesHTML += `<div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
                 <div class="center-inputs">
                     <div class="match-info">${m.info}</div>
                     <div class="score-container">
                         <input type="number" min="0" value="${valH}" ${disabledAttr} 
-                               onchange="updateVal('${id}','h',this.value)">
+                               onchange="updateVal('${id}','h',this.value)"
+                               style="${
+																	isReadOnly
+																		? 'background:#333; color:#aaa'
+																		: ''
+																}">
                         <span>-</span>
                         <input type="number" min="0" value="${valA}" ${disabledAttr} 
-                               onchange="updateVal('${id}','a',this.value)">
+                               onchange="updateVal('${id}','a',this.value)"
+                               style="${
+																	isReadOnly
+																		? 'background:#333; color:#aaa'
+																		: ''
+																}">
                     </div>
                 </div>
                 <div class="team-name team-away">${data.teams[m.t2]}</div>
             </div>`;
-        });
+		});
 
-        teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+		// 🆕 ORDENAMIENTO SUPREMO (Incluye Manual) 🆕
+		teamStats.sort((a, b) => {
+			// 1. Puntos
+			if (b.pts !== a.pts) return b.pts - a.pts;
+			// 2. Diferencia
+			if (b.dif !== a.dif) return b.dif - a.dif;
+			// 3. Goles a Favor
+			if (b.gf !== a.gf) return b.gf - a.gf;
 
-        let tableRows = teamStats.map((t,i) => 
-            `<tr class="${i<2?'qual-zone':''}">
-                <td class="pos-num">${i+1}</td>
+			// 4. CRITERIO DE DESEMPATE MANUAL ⚖️
+			// Si todo lo anterior es igual, miramos el manualRank (menor es mejor: 1ro, 2do...)
+			if (a.manualRank !== b.manualRank) return a.manualRank - b.manualRank;
+
+			// 5. Alfabético por defecto (para que no salten locos)
+			return a.name.localeCompare(b.name);
+		});
+
+		// Generar Filas de Tabla
+		let tableRows = teamStats
+			.map((t, i, arr) => {
+				let rowClass = i < 2 ? 'qual-zone' : i === 2 ? 'third-zone' : ''; // (Opcional: estilo para terceros)
+
+				// 🆕 DETECTIVE DE EMPATES 🕵️‍♂️
+				// Un equipo está empatado si tiene los mismos stats que el de arriba O el de abajo
+				let prev = arr[i - 1];
+				let next = arr[i + 1];
+
+				let isTiedWithPrev =
+					prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
+				let isTiedWithNext =
+					next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
+
+				let showManualInput = (isTiedWithPrev || isTiedWithNext) && canEditRank;
+
+				// Columna de Posición: ¿Número o Combo Box?
+				let posDisplay = i + 1;
+
+				if (showManualInput) {
+					// Creamos el Select con opciones 1, 2, 3, 4
+					let opts = `<option value="">-</option>`;
+					[1, 2, 3, 4].forEach((num) => {
+						let sel = t.manualRank === num ? 'selected' : '';
+						opts += `<option value="${num}" ${sel}>${num}</option>`;
+					});
+
+					// Input Select Estilizado
+					posDisplay = `<select onchange="saveGroupRank('${g}', '${t.name}', this.value)" 
+                                style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0;">
+                                ${opts}
+                              </select>`;
+				} else if (t.manualRank !== 99) {
+					// Si no está empatado matemáticamente pero TIENE un rank manual guardado (raro pero posible)
+					// Le mostramos un asterisco o color para saber que está forzado
+					posDisplay = `<span style="color:#ffff00" title="Posición Manual">${
+						i + 1
+					}*</span>`;
+				}
+
+				return `<tr class="${rowClass}">
+                <td class="pos-num">${posDisplay}</td>
                 <td style="text-align:left; padding-left:5px;">${t.name}</td>
                 <td style="font-weight:bold; color:#fff;">${t.pts}</td>
                 <td style="color:#888;">${t.dif}</td>
                 <td style="color:#888;">${t.gf}</td>
                 <td style="color:#888;">${t.gc}</td>
-             </tr>`
-        ).join('');
-        
-        let titleTxt = `GRUPO ${g}`;
-        if (modeToUse === 'official') titleTxt += " [OFICIAL FIFA]";
-        else if (isReadOnly) titleTxt += " [ENVIADO]";
+             </tr>`;
+			})
+			.join('');
 
-        container.innerHTML += `
+		let titleTxt = `GRUPO ${g}`;
+		if (modeToUse === 'official') titleTxt += ' [OFICIAL FIFA]';
+		else if (isReadOnly) titleTxt += ' [ENVIADO]';
+
+		container.innerHTML += `
         <div class="card">
             <div class="group-header">${titleTxt}</div>
             <div class="card-body">
@@ -648,9 +858,8 @@ function renderGroups(customData, customMode) {
                 </table>
             </div>
         </div>`;
-    }
+	}
 }
-
 
 /* =========================================================
    ACTUALIZAR RESULTADO GRUPOS (Fusión: Seguridad + Admin + Simulación)
@@ -659,441 +868,545 @@ function renderGroups(customData, customMode) {
    ACTUALIZAR RESULTADO (SIN PERDER EL FOCO 🎯)
    ========================================================= */
 function updateVal(id, type, val) {
-    if(val < 0) val = 0;
+	if (val < 0) val = 0;
 
-    if (currentViewMode === 'official') return; 
+	// Validación de seguridad para Admin
+	if (currentViewMode === 'admin' && typeof officialRes === 'undefined') {
+		officialRes = {};
+	}
 
-    let targetDB;
-    if (currentViewMode === 'admin') {
-        targetDB = officialRes;
-    } else {
-        if(currentUser.locks && currentUser.locks.groups) return; 
-        targetDB = currentUser.preds;
-    }
+	let targetDB;
+	if (currentViewMode === 'admin') {
+		targetDB = officialRes;
+	} else {
+		// Si el usuario ya envió, no dejamos editar
+		if (currentUser && currentUser.locks && currentUser.locks.groups) return;
+		if (!currentUser) currentUser = { preds: {} };
+		if (!currentUser.preds) currentUser.preds = {};
+		targetDB = currentUser.preds;
+	}
 
-    let key = `${type}-${id}`; 
-    targetDB[key] = val;
+	let key = `${type}-${id}`;
+	targetDB[key] = val;
 
-    // --- GUARDADO ---
-    if (currentViewMode === 'admin') {
-        localStorage.setItem('m26_official', JSON.stringify(officialRes));
-        db.ref('/officialRes/' + key).set(val);
-    } else {
-        saveUsersDB(); 
-    }
+	// --- GUARDADO ---
+	if (currentViewMode === 'admin') {
+		localStorage.setItem('m26_official', JSON.stringify(officialRes));
+		// Guardado en Firebase
+		if (typeof db !== 'undefined') db.ref('/officialRes/' + key).set(val);
+	} else {
+		// Guardado local del usuario
+		if (typeof saveUsersDB === 'function') saveUsersDB();
+		else
+			localStorage.setItem('m26_user_preds', JSON.stringify(currentUser.preds));
+	}
 
-    // 🛑 AQUÍ ESTABA EL ERROR:
-    // renderGroups(targetDB, currentViewMode); <--- ESTO MATABA EL FOCO
-    
-    // ✅ LA SOLUCIÓN:
-    // 1. Identificamos qué grupo es (El ID viene como "A-0", sacamos la "A")
-    let groupID = id.split('-')[0];
-    
-    // 2. Actualizamos SOLO la tablita de ese grupo
-    if(typeof refreshGroupTable === 'function') {
-        refreshGroupTable(groupID);
-    }
-    
-    // 3. Calculamos proyecciones (Esto es invisible, no quita foco)
-    setTimeout(() => {
-        try {
-            if (typeof calculateSimulatedTeams === 'function') {
-                let projected = calculateSimulatedTeams(targetDB);
-                if (currentViewMode !== 'admin') {
-                    if(!currentUser.computed) currentUser.computed = {};
-                    currentUser.computed.r32 = projected;
-                }
-                if(typeof simulatedTeams !== 'undefined') simulatedTeams = projected;
-            }
-        } catch (e) { console.log(e); }
-    }, 0);
+	// ✅ LA SOLUCIÓN MAGISTRAL:
+	// 1. Identificamos qué grupo es (El ID viene como "A-0", sacamos la "A")
+	let groupID = id.split('-')[0];
+
+	// 2. Actualizamos SOLO la tablita de ese grupo (Sin recargar toda la página)
+	if (typeof refreshGroupTable === 'function') {
+		refreshGroupTable(groupID);
+	} else {
+		console.warn(
+			'Falta la función refreshGroupTable, la tabla no se actualizará visualmente.',
+		);
+	}
+
+	// 3. Calculamos proyecciones en segundo plano
+	setTimeout(() => {
+		try {
+			if (typeof calculateSimulatedTeams === 'function') {
+				let projected = calculateSimulatedTeams(targetDB);
+				if (currentViewMode !== 'admin') {
+					if (!currentUser.computed) currentUser.computed = {};
+					currentUser.computed.r32 = projected;
+				}
+				if (typeof simulatedTeams !== 'undefined') simulatedTeams = projected;
+			}
+		} catch (e) {
+			console.log(e);
+		}
+	}, 0);
 }
 
 function updateStats(stats, i1, i2, s1, s2) {
-    let t1=stats[i1], t2=stats[i2];
-    t1.dif += (s1-s2); t2.dif += (s2-s1);
-    if(s1>s2) t1.pts+=3; else if(s2>s1) t2.pts+=3; else {t1.pts++; t2.pts++;}
+	let t1 = stats[i1],
+		t2 = stats[i2];
+	t1.dif += s1 - s2;
+	t2.dif += s2 - s1;
+	if (s1 > s2) t1.pts += 3;
+	else if (s2 > s1) t2.pts += 3;
+	else {
+		t1.pts++;
+		t2.pts++;
+	}
 }
-
-
 
 /* =========================================================
    EL CEREBRO FIFA (V6.0 - FINAL: Soporte para 'L' Loser)
    ========================================================= */
+/* =========================================================
+   CÁLCULO DE PROYECCIONES (CON DESEMPATE MANUAL) 🧠⚖️
+   ========================================================= */
 function calculateSimulatedTeams(predsSource) {
-    const standings = {};
-    
-    // 1. CALCULAR POSICIONES DE GRUPOS
-    Object.keys(GROUPS_CONFIG).forEach(gid => {
-        const groupData = GROUPS_CONFIG[gid];
-        let teamsMap = groupData.teams.map((name, idx) => ({ 
-            name: name, group: gid,
-            pts: 0, dif: 0, gf: 0, gc: 0
-        }));
+	const standings = {};
 
-        groupData.matches.forEach((m, idx) => {
-            let id = `${gid}-${idx}`;
-            let vH = predsSource[`h-${id}`] || predsSource[`k-${id}-h`];
-            let vA = predsSource[`a-${id}`] || predsSource[`k-${id}-a`];
+	// 🆕 1. LEER LA MEMORIA DE DESEMPATES (Ranking Manual)
+	// Nos aseguramos de tener la última versión guardada
+	let manualRanks = {};
+	if (typeof groupRankOverrides !== 'undefined') {
+		manualRanks = groupRankOverrides;
+	} else {
+		try {
+			manualRanks = JSON.parse(localStorage.getItem('m26_group_ranks')) || {};
+		} catch (e) {
+			manualRanks = {};
+		}
+	}
 
-            if(vH && vA) { 
-                let sH = parseInt(vH); let sA = parseInt(vA);
-                teamsMap[m.t1].gf += sH; teamsMap[m.t1].gc += sA; teamsMap[m.t1].dif += (sH-sA);
-                teamsMap[m.t2].gf += sA; teamsMap[m.t2].gc += sH; teamsMap[m.t2].dif += (sA-sH);
-                if(sH > sA) teamsMap[m.t1].pts += 3;
-                else if(sA > sH) teamsMap[m.t2].pts += 3;
-                else { teamsMap[m.t1].pts += 1; teamsMap[m.t2].pts += 1; }
-            }
-        });
-        teamsMap.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
-        standings[gid] = teamsMap;
-    });
+	// 2. CALCULAR POSICIONES DE GRUPOS
+	Object.keys(GROUPS_CONFIG).forEach((gid) => {
+		const groupData = GROUPS_CONFIG[gid];
 
-    // 2. OBTENER LOS 8 MEJORES TERCEROS
-    let allThirds = [];
-    Object.keys(standings).forEach(g => { if(standings[g][2]) allThirds.push(standings[g][2]); });
-    allThirds.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
-    const qualifiedThirds = allThirds.slice(0, 8);
+		let teamsMap = groupData.teams.map((name, idx) => ({
+			name: name,
+			group: gid,
+			pts: 0,
+			dif: 0,
+			gf: 0,
+			gc: 0,
+			manualRank: 99, // 🆕 Valor por defecto (último)
+		}));
 
-    // Esto hace que la lista de terceros esté disponible para el Dropdown
-    window.GLOBAL_THIRDS = qualifiedThirds;
-    
-    // =========================================================
-    // 3. PRE-ASIGNACIÓN DE TERCEROS (Lógica Alfabética Estricta) 🧠
-    // =========================================================
-    const thirdAllocations = {}; 
-    const allocatedNames = new Set(); 
+		// 🆕 Asignar Ranking Manual si existe
+		teamsMap.forEach((t) => {
+			let key = `${gid}-${t.name}`;
+			if (manualRanks[key]) {
+				t.manualRank = manualRanks[key];
+			}
+		});
 
-    const priorityOrder = [
-        { winner: 'A', allowed: 'CEFHI' },
-        { winner: 'B', allowed: 'EFGIJ' },
-        { winner: 'D', allowed: 'BEFIJ' },
-        { winner: 'E', allowed: 'ABCDF' },
-        { winner: 'G', allowed: 'AEHIJ' },
-        { winner: 'I', allowed: 'CDFGH' },
-        { winner: 'K', allowed: 'DEIJL' },
-        { winner: 'L', allowed: 'EHIJK' }
-    ];
+		// Sumar Puntos y Goles
+		groupData.matches.forEach((m, idx) => {
+			let id = `${gid}-${idx}`;
+			// Soportamos nomenclatura h-A-0 o k-A-0-h dependiendo de su estructura de datos
+			let vH = predsSource[`h-${id}`] || predsSource[`k-${id}-h`];
+			let vA = predsSource[`a-${id}`] || predsSource[`k-${id}-a`];
 
-    priorityOrder.forEach(item => {
-        let found = null;
-        
-        // CORRECCIÓN AQUÍ: Iteramos letra por letra de la cadena 'allowed'
-        // Esto fuerza a que si la cadena es 'EFGIJ', busque PRIMERO 'E', luego 'F'...
-        let preferredGroups = item.allowed.split(''); 
-        
-        for (let groupChar of preferredGroups) {
-            // Buscamos si el tercero de ese grupo específico clasificó y está libre
-            let candidate = qualifiedThirds.find(t => t.group === groupChar && !allocatedNames.has(t.name));
-            
-            if (candidate) {
-                found = candidate;
-                break; // ¡Encontramos la prioridad más alta! Deje de buscar.
-            }
-        }
+			if (vH && vA) {
+				let sH = parseInt(vH);
+				let sA = parseInt(vA);
+				teamsMap[m.t1].gf += sH;
+				teamsMap[m.t1].gc += sA;
+				teamsMap[m.t1].dif += sH - sA;
+				teamsMap[m.t2].gf += sA;
+				teamsMap[m.t2].gc += sH;
+				teamsMap[m.t2].dif += sA - sH;
+				if (sH > sA) teamsMap[m.t1].pts += 3;
+				else if (sA > sH) teamsMap[m.t2].pts += 3;
+				else {
+					teamsMap[m.t1].pts += 1;
+					teamsMap[m.t2].pts += 1;
+				}
+			}
+		});
 
-        // Si no encontró por alfabeto (Plan B: Emergencia), busca cualquiera libre
-        if (!found) found = qualifiedThirds.find(t => !allocatedNames.has(t.name));
+		// 🆕 ORDENAMIENTO SUPREMO (Igual que en la tabla visual)
+		teamsMap.sort((a, b) => {
+			if (b.pts !== a.pts) return b.pts - a.pts; // Puntos
+			if (b.dif !== a.dif) return b.dif - a.dif; // Diferencia
+			if (b.gf !== a.gf) return b.gf - a.gf; // Goles Favor
 
-        if (found) {
-            thirdAllocations[item.winner] = found;
-            allocatedNames.add(found.name);
-        }
-    });
-    // =========================================================
+			// Si todo es igual, manda el MANUAL
+			if (a.manualRank !== b.manualRank) return a.manualRank - b.manualRank;
 
-    // 4. RESOLVER LLAVES
-    const projected = {};
+			// Si no hay manual, alfabeto
+			return a.name.localeCompare(b.name); // Alfabeto (para consistencia)
+		});
 
-    const getMatchWinner = (matchId) => {
-        if (!projected[matchId]) return null; 
-        let vH = predsSource[`k-${matchId}-h`] || predsSource[`h-${matchId}`];
-        let vA = predsSource[`k-${matchId}-a`] || predsSource[`a-${matchId}`];
-        let winnerCode = predsSource[`w-${matchId}`];
-        if (vH && vA) {
-            let sH = parseInt(vH); let sA = parseInt(vA);
-            if (sH > sA) return projected[matchId].home;
-            if (sA > sH) return projected[matchId].away;
-            if (sH === sA) {
-                if (winnerCode === 'h') return projected[matchId].home;
-                if (winnerCode === 'a') return projected[matchId].away;
-            }
-        }
-        return { name: `Ganador M${matchId}`, seed: `W${matchId}` };
-    };
+		standings[gid] = teamsMap;
+	});
 
-    const resolveTeamData = (code) => { 
-        if(!code) return { name: '...', seed: '' };
+	// 3. OBTENER LOS 8 MEJORES TERCEROS
+	let allThirds = [];
+	Object.keys(standings).forEach((g) => {
+		if (standings[g][2]) allThirds.push(standings[g][2]);
+	});
 
-        // A) GRUPOS
-        if (code.match(/^[A-L][1-2]$/)) {
-            let g = code.charAt(0); let pos = parseInt(code.charAt(1)) - 1;
-            if(standings[g] && standings[g][pos]) return { name: standings[g][pos].name, seed: code };
-        }
+	// También ordenamos los terceros con la misma lógica (por si hay empate técnico entre terceros)
+	allThirds.sort(
+		(a, b) =>
+			b.pts - a.pts ||
+			b.dif - a.dif ||
+			b.gf - a.gf ||
+			a.manualRank - b.manualRank,
+	);
 
-        // B) MEJORES TERCEROS
-        if (code.startsWith('T_')) {
-            let allowed = code.split('_')[1];
-            
-            // INTENTO 1: Buscar en la Tabla de Asignación (Ya priorizada alfabéticamente)
-            // Normalizamos strings para evitar errores tontos
-            let sortStr = (s) => s.split('').sort().join('');
-            let ownerGroup = priorityOrder.find(p => sortStr(p.allowed) === sortStr(allowed));
-            
-            if (ownerGroup && thirdAllocations[ownerGroup.winner]) {
-                let t = thirdAllocations[ownerGroup.winner];
-                return { name: t.name, seed: `3${t.group}` };
-            }
-            
-            // INTENTO 2 (EL PARACAÍDAS): 
-            let panicFallback = qualifiedThirds.find(t => allowed.includes(t.group) && !Object.values(thirdAllocations).some(u => u.name === t.name));
-            
-            if (!panicFallback) {
-                 let assignedNames = Object.values(thirdAllocations).map(u => u.name);
-                 panicFallback = qualifiedThirds.find(t => !assignedNames.includes(t.name));
-            }
+	const qualifiedThirds = allThirds.slice(0, 8);
+	// Exportamos para el combo box de 16avos (Admin)
+	window.GLOBAL_THIRDS = qualifiedThirds;
 
-            if (panicFallback) {
-                return { name: panicFallback.name, seed: `3${panicFallback.group}` };
-            }
+	// 4. PRE-ASIGNACIÓN DE TERCEROS (Lógica Alfabética Estricta)
+	// (Esta parte ya la teníamos perfecta, la dejo igual)
+	const thirdAllocations = {};
+	const allocatedNames = new Set();
 
-            return { name: 'TBD', seed: '3?' };
-        }
+	const priorityOrder = [
+		{ winner: 'A', allowed: 'CEFHI' },
+		{ winner: 'B', allowed: 'EFGIJ' },
+		{ winner: 'D', allowed: 'BEFIJ' },
+		{ winner: 'E', allowed: 'ABCDF' },
+		{ winner: 'G', allowed: 'AEHIJ' },
+		{ winner: 'I', allowed: 'CDFGH' },
+		{ winner: 'K', allowed: 'DEIJL' },
+		{ winner: 'L', allowed: 'EHIJK' },
+	];
 
-        // C) REFERENCIA PARTIDOS
-        let type = 'W'; 
-        let cleanId = code;
-        if (code.startsWith('W')) cleanId = code.substring(1);
-        else if (code.startsWith('L')) { type = 'L'; cleanId = code.substring(1); }
+	priorityOrder.forEach((item) => {
+		let found = null;
+		let preferredGroups = item.allowed.split('');
+		for (let groupChar of preferredGroups) {
+			let candidate = qualifiedThirds.find(
+				(t) => t.group === groupChar && !allocatedNames.has(t.name),
+			);
+			if (candidate) {
+				found = candidate;
+				break;
+			}
+		}
+		if (!found)
+			found = qualifiedThirds.find((t) => !allocatedNames.has(t.name));
+		if (found) {
+			thirdAllocations[item.winner] = found;
+			allocatedNames.add(found.name);
+		}
+	});
 
-        if (projected[cleanId]) {
-            let winner = getMatchWinner(cleanId);
-            if(winner && !winner.name.startsWith('Ganador')) {
-                if(type === 'W') return { name: winner.name, seed: code };
-                if(type === 'L') {
-                    let match = projected[cleanId];
-                    let loser = (match.home.name === winner.name) ? match.away : match.home;
-                    return { name: loser.name, seed: code };
-                }
-            }
-            return { name: (type === 'L' ? `Perdedor M${cleanId}` : `Ganador M${cleanId}`), seed: code };
-        }
-        
-        if (projected[code]) {
-             let winner = getMatchWinner(code);
-             if(winner) return { name: winner.name, seed: code };
-        }
-        return { name: '...', seed: '' };
-    };
+	// 5. RESOLVER LLAVES
+	const projected = {};
 
-    // 5. EJECUTAR EN CASCADA (CON LA MANO DE DIOS 🖐️)
-    const phases = [
-        (typeof R32_MATCHUPS !== 'undefined' ? R32_MATCHUPS : []),
-        (typeof R16_MATCHUPS !== 'undefined' ? R16_MATCHUPS : []),
-        (typeof QF_MATCHUPS !== 'undefined' ? QF_MATCHUPS : []),
-        (typeof SF_MATCHUPS !== 'undefined' ? SF_MATCHUPS : []),
-        (typeof F_MATCHUPS !== 'undefined' ? F_MATCHUPS : [])
-    ];
+	const getMatchWinner = (matchId) => {
+		if (!projected[matchId]) return null;
+		let vH = predsSource[`k-${matchId}-h`] || predsSource[`h-${matchId}`];
+		let vA = predsSource[`k-${matchId}-a`] || predsSource[`a-${matchId}`];
+		let winnerCode = predsSource[`w-${matchId}`];
+		if (vH && vA) {
+			let sH = parseInt(vH);
+			let sA = parseInt(vA);
+			if (sH > sA) return projected[matchId].home;
+			if (sA > sH) return projected[matchId].away;
+			if (sH === sA) {
+				if (winnerCode === 'h') return projected[matchId].home;
+				if (winnerCode === 'a') return projected[matchId].away;
+			}
+		}
+		return { name: `Ganador M${matchId}`, seed: `W${matchId}` };
+	};
 
-    phases.forEach(phase => {
-        phase.forEach(m => {
-            // 1. Calculamos lo que dice la matemática (La lógica automática)
-            let homeTeam = resolveTeamData(m.h);
-            let awayTeam = resolveTeamData(m.a);
+	const resolveTeamData = (code) => {
+		if (!code) return { name: '...', seed: '' };
 
-            // 2. LA MANO DE DIOS: Revisamos si hay una corrección manual 🖐️
-            // officialOverrides debe estar definida globalmente (como hicimos en el Paso 1)
-            if (typeof officialOverrides !== 'undefined') {
-                let ovH = officialOverrides[`${m.id}-h`];
-                let ovA = officialOverrides[`${m.id}-a`];
+		// A) GRUPOS (Aquí es donde ahora sí respetará el orden manual)
+		if (code.match(/^[A-L][1-2]$/)) {
+			let g = code.charAt(0);
+			let pos = parseInt(code.charAt(1)) - 1;
+			// standings[g] YA ESTÁ ORDENADO MANUALMENTE GRACIAS AL PASO 2
+			if (standings[g] && standings[g][pos])
+				return { name: standings[g][pos].name, seed: code };
+		}
 
-                if (ovH) {
-                    // Si es objeto (nuevo formato) o string (viejo formato por si acaso)
-                    let ovName = (typeof ovH === 'object') ? ovH.name : ovH;
-                    let ovSeed = (typeof ovH === 'object') ? ovH.seed : 'MAN';
-                    homeTeam = { name: ovName, seed: ovSeed, group: '?' };
-                }
-                if (ovA) {
-                    let ovName = (typeof ovA === 'object') ? ovA.name : ovA;
-                    let ovSeed = (typeof ovA === 'object') ? ovA.seed : 'MAN';
-                    awayTeam = { name: ovName, seed: ovSeed, group: '?' };
-                }
-            }
+		// B) MEJORES TERCEROS
+		if (code.startsWith('T_')) {
+			let allowed = code.split('_')[1];
+			let sortStr = (s) => s.split('').sort().join('');
+			let ownerGroup = priorityOrder.find(
+				(p) => sortStr(p.allowed) === sortStr(allowed),
+			);
 
-            // 3. Guardamos el resultado (sea automático o manual)
-            projected[m.id] = {
-                home: homeTeam,
-                away: awayTeam
-            };
-        });
-    });
+			if (ownerGroup && thirdAllocations[ownerGroup.winner]) {
+				let t = thirdAllocations[ownerGroup.winner];
+				return { name: t.name, seed: `3${t.group}` };
+			}
+			// Fallback (Pánico)
+			let panicFallback = qualifiedThirds.find(
+				(t) =>
+					allowed.includes(t.group) &&
+					!Object.values(thirdAllocations).some((u) => u.name === t.name),
+			);
+			if (!panicFallback) {
+				let assignedNames = Object.values(thirdAllocations).map((u) => u.name);
+				panicFallback = qualifiedThirds.find(
+					(t) => !assignedNames.includes(t.name),
+				);
+			}
+			if (panicFallback)
+				return { name: panicFallback.name, seed: `3${panicFallback.group}` };
+			return { name: 'TBD', seed: '3?' };
+		}
 
-    return projected;
+		// C) REFERENCIA PARTIDOS
+		let type = 'W';
+		let cleanId = code;
+		if (code.startsWith('W')) cleanId = code.substring(1);
+		else if (code.startsWith('L')) {
+			type = 'L';
+			cleanId = code.substring(1);
+		}
+
+		if (projected[cleanId]) {
+			let winner = getMatchWinner(cleanId);
+			if (winner && !winner.name.startsWith('Ganador')) {
+				if (type === 'W') return { name: winner.name, seed: code };
+				if (type === 'L') {
+					let match = projected[cleanId];
+					let loser = match.home.name === winner.name ? match.away : match.home;
+					return { name: loser.name, seed: code };
+				}
+			}
+			return {
+				name: type === 'L' ? `Perdedor M${cleanId}` : `Ganador M${cleanId}`,
+				seed: code,
+			};
+		}
+
+		if (projected[code]) {
+			let winner = getMatchWinner(code);
+			if (winner) return { name: winner.name, seed: code };
+		}
+		return { name: '...', seed: '' };
+	};
+
+	// 6. EJECUTAR FASES (Con Mano de Dios)
+	const phases = [
+		typeof R32_MATCHUPS !== 'undefined' ? R32_MATCHUPS : [],
+		typeof R16_MATCHUPS !== 'undefined' ? R16_MATCHUPS : [],
+		typeof QF_MATCHUPS !== 'undefined' ? QF_MATCHUPS : [],
+		typeof SF_MATCHUPS !== 'undefined' ? SF_MATCHUPS : [],
+		typeof F_MATCHUPS !== 'undefined' ? F_MATCHUPS : [],
+	];
+
+	phases.forEach((phase) => {
+		phase.forEach((m) => {
+			let homeTeam = resolveTeamData(m.h);
+			let awayTeam = resolveTeamData(m.a);
+
+			// STICKER / MANO DE DIOS
+			if (typeof officialOverrides !== 'undefined') {
+				let ovH = officialOverrides[`${m.id}-h`];
+				let ovA = officialOverrides[`${m.id}-a`];
+				if (ovH) {
+					let ovName = typeof ovH === 'object' ? ovH.name : ovH;
+					let ovSeed = typeof ovH === 'object' ? ovH.seed : 'MAN';
+					homeTeam = { name: ovName, seed: ovSeed, group: '?' };
+				}
+				if (ovA) {
+					let ovName = typeof ovA === 'object' ? ovA.name : ovA;
+					let ovSeed = typeof ovA === 'object' ? ovA.seed : 'MAN';
+					awayTeam = { name: ovName, seed: ovSeed, group: '?' };
+				}
+			}
+
+			projected[m.id] = {
+				home: homeTeam,
+				away: awayTeam,
+			};
+		});
+	});
+
+	return projected;
 }
 
-
 function autoFillOfficialQualifiers() {
-    if(role !== 'admin') return;
-    let realQualifiers = calculateSimulatedTeams(officialRes);
-    R32_MATCHUPS.forEach(m => {
-        if(realQualifiers[m.h]) officialTeams[`${m.id}-h`] = realQualifiers[m.h];
-        if(realQualifiers[m.a]) officialTeams[`${m.id}-a`] = realQualifiers[m.a];
-    });
-    localStorage.setItem('m26_official_teams', JSON.stringify(officialTeams));
-    alert("Clasificados cargados.");
-    renderBracket();
+	if (role !== 'admin') return;
+	let realQualifiers = calculateSimulatedTeams(officialRes);
+	R32_MATCHUPS.forEach((m) => {
+		if (realQualifiers[m.h]) officialTeams[`${m.id}-h`] = realQualifiers[m.h];
+		if (realQualifiers[m.a]) officialTeams[`${m.id}-a`] = realQualifiers[m.a];
+	});
+	localStorage.setItem('m26_official_teams', JSON.stringify(officialTeams));
+	alert('Clasificados cargados.');
+	renderBracket();
 }
 
 function renderBracket() {
-    const container = document.getElementById('bracket-container');
-    if (!container) return;
-    container.innerHTML = '';
-    simulatedTeams = calculateSimulatedTeams(role === 'admin' ? officialRes : currentUser.preds);
-    let html = '';
-    html += renderRoundColumn('16avos', R32_MATCHUPS, '32', 'r32');
-    html += renderRoundColumn('Octavos', R16_MATCHUPS, '16', 'r16');
-    html += renderRoundColumn('Cuartos', QF_MATCHUPS, '8', 'qf');
-    html += renderRoundColumn('Semis', SF_MATCHUPS, '4', 'sf');
-    html += renderRoundColumn('Final', F_MATCHUPS, '2', 'f');
-    container.innerHTML = html;
+	const container = document.getElementById('bracket-container');
+	if (!container) return;
+	container.innerHTML = '';
+	simulatedTeams = calculateSimulatedTeams(
+		role === 'admin' ? officialRes : currentUser.preds,
+	);
+	let html = '';
+	html += renderRoundColumn('16avos', R32_MATCHUPS, '32', 'r32');
+	html += renderRoundColumn('Octavos', R16_MATCHUPS, '16', 'r16');
+	html += renderRoundColumn('Cuartos', QF_MATCHUPS, '8', 'qf');
+	html += renderRoundColumn('Semis', SF_MATCHUPS, '4', 'sf');
+	html += renderRoundColumn('Final', F_MATCHUPS, '2', 'f');
+	container.innerHTML = html;
 }
 
+function renderRoundColumn(
+	title,
+	matchups,
+	prefix,
+	phaseKey,
+	sourceData,
+	mode,
+) {
+	// 1. LÓGICA DE CANDADO 🔒
+	let isLocked = false;
 
-function renderRoundColumn(title, matchups, prefix, phaseKey, sourceData, mode) {
-    
-    // 1. LÓGICA DE CANDADO 🔒
-    let isLocked = false;
-    
-    // Si el modo es 'official' (Fan viendo), nadie edita.
-    // Si el modo es 'admin' (Admin editando), el candado queda abierto (false).
-    if (mode === 'official') {
-        if (role !== 'admin') isLocked = true;
-    } else if (mode === 'user') {
-        // En user, se bloquea si ya envió
-        if (role === 'fan' && currentUser.locks && currentUser.locks[phaseKey]) isLocked = true;
-    }
-    
-    // 2. ESTILOS VISUALES PARA EL INPUT 🎨
-    // Si está bloqueado: Oscuro y gris.
-    // Si está libre (Admin): Blanco y letra negra (para que se note que puede escribir).
-    let inputStyle = isLocked 
-        ? 'background:#333; color:#aaa; border:1px solid #444;' 
-        : 'background:#fff; color:#000; border:1px solid #ccc;';
+	// Si el modo es 'official' (Fan viendo), nadie edita.
+	// Si el modo es 'admin' (Admin editando), el candado queda abierto (false).
+	if (mode === 'official') {
+		if (role !== 'admin') isLocked = true;
+	} else if (mode === 'user') {
+		// En user, se bloquea si ya envió
+		if (role === 'fan' && currentUser.locks && currentUser.locks[phaseKey])
+			isLocked = true;
+	}
 
-    let isEnabled = phaseControl[phaseKey];
-    
-    // Header y Botones
-    let btnHTML = '';
-    // En modo oficial o admin, mostramos etiqueta simple
-    if (mode === 'official' || mode === 'admin') {
-        btnHTML = `<span style="font-size:0.7rem; color:${mode==='official'?'#ffd700':'#fff'}">${mode.toUpperCase()}</span>`;
-    } 
-    else if(role === 'fan') {
-        if(isLocked) btnHTML = `<button class="round-action-btn btn-done">ENVIADO</button>`;
-        else if (!isEnabled) btnHTML = `<button class="round-action-btn btn-wait">ESPERANDO</button>`;
-        else btnHTML = `<button class="round-action-btn btn-go" onclick="submitPhase('${phaseKey}')">ENVIAR</button>`;
-    } else {
-        btnHTML = `<span style="font-size:0.7rem; color:${isEnabled?'#0f0':'#f00'}">${isEnabled ? 'OPEN' : 'CLOSED'}</span>`;
-    }
+	// 2. ESTILOS VISUALES PARA EL INPUT 🎨
+	// Si está bloqueado: Oscuro y gris.
+	// Si está libre (Admin): Blanco y letra negra (para que se note que puede escribir).
+	let inputStyle = isLocked
+		? 'background:#333; color:#aaa; border:1px solid #444;'
+		: 'background:#fff; color:#000; border:1px solid #ccc;';
 
-    let html = `<div class="round-column" id="col-${phaseKey}">
+	let isEnabled = phaseControl[phaseKey];
+
+	// Header y Botones
+	let btnHTML = '';
+	// En modo oficial o admin, mostramos etiqueta simple
+	if (mode === 'official' || mode === 'admin') {
+		btnHTML = `<span style="font-size:0.7rem; color:${
+			mode === 'official' ? '#ffd700' : '#fff'
+		}">${mode.toUpperCase()}</span>`;
+	} else if (role === 'fan') {
+		if (isLocked)
+			btnHTML = `<button class="round-action-btn btn-done">ENVIADO</button>`;
+		else if (!isEnabled)
+			btnHTML = `<button class="round-action-btn btn-wait">ESPERANDO</button>`;
+		else
+			btnHTML = `<button class="round-action-btn btn-go" onclick="submitPhase('${phaseKey}')">ENVIAR</button>`;
+	} else {
+		btnHTML = `<span style="font-size:0.7rem; color:${
+			isEnabled ? '#0f0' : '#f00'
+		}">${isEnabled ? 'OPEN' : 'CLOSED'}</span>`;
+	}
+
+	let html = `<div class="round-column" id="col-${phaseKey}">
                     <div class="round-header"><span class="round-title">${title}</span>${btnHTML}</div>`;
 
-    matchups.forEach(m => {
-        // --- LOGICA DE CEREBRO ---
-        let simData = (typeof simulatedTeams !== 'undefined' && simulatedTeams[m.id]) ? simulatedTeams[m.id] : null;
-        let nameH = simData ? simData.home.name : resolveTeamName(m.id, 'h', m.h);
-        let seedH = simData ? simData.home.seed : m.h;
-        let nameA = simData ? simData.away.name : resolveTeamName(m.id, 'a', m.a);
-        let seedA = simData ? simData.away.seed : m.a;
-        
-        // LEER DATOS
-        let kH = `k-${m.id}-h`; let kA = `k-${m.id}-a`; let kW = `w-${m.id}`;
-        let scH = (sourceData && sourceData[kH]) ? sourceData[kH] : '';
-        let scA = (sourceData && sourceData[kA]) ? sourceData[kA] : '';
-        let penWinner = (sourceData && sourceData[kW]) ? sourceData[kW] : null;
+	matchups.forEach((m) => {
+		// --- LOGICA DE CEREBRO ---
+		let simData =
+			typeof simulatedTeams !== 'undefined' && simulatedTeams[m.id]
+				? simulatedTeams[m.id]
+				: null;
+		let nameH = simData ? simData.home.name : resolveTeamName(m.id, 'h', m.h);
+		let seedH = simData ? simData.home.seed : m.h;
+		let nameA = simData ? simData.away.name : resolveTeamName(m.id, 'a', m.a);
+		let seedA = simData ? simData.away.seed : m.a;
 
-        let isTie = (scH !== '' && scA !== '' && parseInt(scH) === parseInt(scA));
-        let checkStyle = isTie ? 'visibility:visible;' : 'visibility:hidden;'; 
-        
-        let disabled = isLocked ? 'disabled' : '';
+		// LEER DATOS
+		let kH = `k-${m.id}-h`;
+		let kA = `k-${m.id}-a`;
+		let kW = `w-${m.id}`;
+		let scH = sourceData && sourceData[kH] ? sourceData[kH] : '';
+		let scA = sourceData && sourceData[kA] ? sourceData[kA] : '';
+		let penWinner = sourceData && sourceData[kW] ? sourceData[kW] : null;
 
-        // ETIQUETAS Y FLUJO
-        let sourceTag = '';
-        if(phaseKey !== 'r32') {
-            sourceTag = `<div class="match-source-label">${m.h} <span style="color:#666">vs</span> ${m.a}</div>`;
-        }
+		let isTie = scH !== '' && scA !== '' && parseInt(scH) === parseInt(scA);
+		let checkStyle = isTie ? 'visibility:visible;' : 'visibility:hidden;';
 
-        let flowClass = '';
-        if(phaseKey === 'r32') flowClass = 'flow-start'; 
-        else if(phaseKey === 'f') flowClass = 'flow-end'; 
-        else flowClass = 'flow-mid'; 
+		let disabled = isLocked ? 'disabled' : '';
 
-        // HELPER RENDER TEAM (MODIFICADO CON LA MANO DE DIOS 🖐️)
-        // HELPER RENDER TEAM (VERSIÓN DROPDOWN DE LUJO 🔽)
-        // HELPER RENDER TEAM (MODO FANTASMA PRO 👻)
-        let renderTeam = (slot, name, seed, type) => {
-            let isChecked = (penWinner === type) ? 'checked' : '';
-            let checkHTML = `<input type="checkbox" class="pen-check" ${isChecked} ${disabled} style="${checkStyle} margin-left:5px; cursor:pointer;" onchange="updateWinner('${m.id}', '${type}', this.checked)">`;
-            
-            // Lógica del Seed (Igual que antes)
-            let finalSeed = seed;
-            if (role === 'admin' && officialOverrides && officialOverrides[`${m.id}-${type}`]) {
-                finalSeed = officialOverrides[`${m.id}-${type}`].seed;
-            }
-            
-            let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${finalSeed}</span>`;
+		// ETIQUETAS Y FLUJO
+		let sourceTag = '';
+		if (phaseKey !== 'r32') {
+			sourceTag = `<div class="match-source-label">${m.h} <span style="color:#666">vs</span> ${m.a}</div>`;
+		}
 
-            let nameDisplay;
-            let isThirdPlaceSlot = (seed.startsWith('3') || seed.startsWith('T') || seed === 'MAN');
+		let flowClass = '';
+		if (phaseKey === 'r32') flowClass = 'flow-start';
+		else if (phaseKey === 'f') flowClass = 'flow-end';
+		else flowClass = 'flow-mid';
 
-            // --- AQUÍ EMPIEZA LA MAGIA VISUAL ---
-            if (role === 'admin' && phaseKey === 'r32' && isThirdPlaceSlot) {
-                
-                // 1. Construimos las opciones con "3A - Nombre"
-                let options = `<option value="">-- Seleccionar --</option>`;
-                if (window.GLOBAL_THIRDS) {
-                    window.GLOBAL_THIRDS.forEach(t => {
-                        let selected = (t.name === name) ? 'selected' : '';
-                        options += `<option value="${t.name}" ${selected}>3${t.group} - ${t.name}</option>`;
-                    });
-                }
+		// HELPER RENDER TEAM (MODIFICADO CON LA MANO DE DIOS 🖐️)
+		// HELPER RENDER TEAM (VERSIÓN DROPDOWN DE LUJO 🔽)
+		// HELPER RENDER TEAM (MODO FANTASMA PRO 👻)
+		let renderTeam = (slot, name, seed, type) => {
+			let isChecked = penWinner === type ? 'checked' : '';
+			let checkHTML = `<input type="checkbox" class="pen-check" ${isChecked} ${disabled} style="${checkStyle} margin-left:5px; cursor:pointer;" onchange="updateWinner('${m.id}', '${type}', this.checked)">`;
 
-                // 2. EL TRUCO FANTASMA 👻
-                // Un DIV contenedor relativo
-                // Un DIV absoluto abajo (Muestra solo el nombre: "Sudáfrica")
-                // Un SELECT absoluto arriba (Invisible, tiene la lista completa)
-                
-                nameDisplay = `
+			// Lógica del Seed (Igual que antes)
+			let finalSeed = seed;
+			if (
+				role === 'admin' &&
+				officialOverrides &&
+				officialOverrides[`${m.id}-${type}`]
+			) {
+				finalSeed = officialOverrides[`${m.id}-${type}`].seed;
+			}
+
+			let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${finalSeed}</span>`;
+
+			let nameDisplay;
+			let isThirdPlaceSlot =
+				seed.startsWith('3') || seed.startsWith('T') || seed === 'MAN';
+
+			// --- AQUÍ EMPIEZA LA MAGIA VISUAL ---
+			if (role === 'admin' && phaseKey === 'r32' && isThirdPlaceSlot) {
+				// 1. Construimos las opciones con "3A - Nombre"
+				let options = `<option value="">-- Seleccionar --</option>`;
+				if (window.GLOBAL_THIRDS) {
+					window.GLOBAL_THIRDS.forEach((t) => {
+						let selected = t.name === name ? 'selected' : '';
+						options += `<option value="${t.name}" ${selected}>3${t.group} - ${t.name}</option>`;
+					});
+				}
+
+				// 2. EL TRUCO FANTASMA 👻
+				// Un DIV contenedor relativo
+				// Un DIV absoluto abajo (Muestra solo el nombre: "Sudáfrica")
+				// Un SELECT absoluto arriba (Invisible, tiene la lista completa)
+
+				nameDisplay = `
                     <div style="position:relative; width:130px; height:22px; display:inline-block; vertical-align:middle;">
                         
                         <div style="position:absolute; top:0; left:0; width:100%; height:100%; 
                                     background:#000; color:#ffff00; border:1px solid #555; 
                                     font-size:0.8rem; padding:2px 4px; white-space:nowrap; overflow:hidden; pointer-events:none; z-index:1;">
-                            ${name || '<span style="color:#777">Seleccione...</span>'} <span style="float:right; opacity:0.5;">▼</span>
+                            ${
+															name ||
+															'<span style="color:#777">Seleccione...</span>'
+														} <span style="float:right; opacity:0.5;">▼</span>
                         </div>
                         
-                        <select onchange="overrideTeamName('${m.id}', '${type}', this.value)"
+                        <select onchange="overrideTeamName('${
+													m.id
+												}', '${type}', this.value)"
                                 style="position:absolute; top:0; left:0; width:100%; height:100%; 
                                        opacity:0; z-index:10; cursor:pointer;">
                             ${options}
                         </select>
                     </div>`;
+			} else {
+				// Vista normal
+				nameDisplay = `<span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>`;
+			}
 
-            } else {
-                // Vista normal
-                nameDisplay = `<span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>`;
-            }
-
-            return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
+			return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
                         ${badgeHTML}
                         ${nameDisplay}
                         ${checkHTML}
                     </div>`;
-        };
-        // --- CONSTRUCCIÓN DE LA TARJETA ---
-        // Aplicamos style="${inputStyle}" a los inputs de números
-        html += `<div class="bracket-match ${flowClass}" id="match-${m.id}">
+		};
+		// --- CONSTRUCCIÓN DE LA TARJETA ---
+		// Aplicamos style="${inputStyle}" a los inputs de números
+		html += `<div class="bracket-match ${flowClass}" id="match-${m.id}">
                     <div class="match-top-bar">
                         <span class="match-id-badge">M${m.id}</span>
                         ${sourceTag}
@@ -1101,73 +1414,76 @@ function renderRoundColumn(title, matchups, prefix, phaseKey, sourceData, mode) 
 
                     <div class="bracket-row">
                         ${renderTeam('h', nameH, seedH, 'h')}
-                        <input type="number" min="0" class="bracket-input" value="${scH}" style="${inputStyle}" ${disabled} onchange="updateBracketScore('${m.id}','h',this.value, '${phaseKey}')">
+                        <input type="number" min="0" class="bracket-input" value="${scH}" style="${inputStyle}" ${disabled} onchange="updateBracketScore('${
+			m.id
+		}','h',this.value, '${phaseKey}')">
                     </div>
                     <div class="bracket-row">
                         ${renderTeam('a', nameA, seedA, 'a')}
-                        <input type="number" min="0" class="bracket-input" value="${scA}" style="${inputStyle}" ${disabled} onchange="updateBracketScore('${m.id}','a',this.value, '${phaseKey}')">
+                        <input type="number" min="0" class="bracket-input" value="${scA}" style="${inputStyle}" ${disabled} onchange="updateBracketScore('${
+			m.id
+		}','a',this.value, '${phaseKey}')">
                     </div>
                  </div>`;
-    });
-    return html + `</div>`;
+	});
+	return html + `</div>`;
 }
-
-
 
 /* =========================================================
    EL PUENTE (Resuelve qué nombre mostrar en la llave)
    Conecta el cálculo matemático con la pantalla.
    ========================================================= */
 function resolveTeamName(matchId, side, defaultCode) {
-    // 1. Verificamos si el Motor ya calculó este partido
-    if (simulatedTeams && simulatedTeams[matchId]) {
-        return side === 'h' ? simulatedTeams[matchId].home : simulatedTeams[matchId].away;
-    }
-    
-    // 2. Si no hay cálculo (o es una fase futura vacía), devolvemos puntos suspensivos
-    return '...'; 
+	// 1. Verificamos si el Motor ya calculó este partido
+	if (simulatedTeams && simulatedTeams[matchId]) {
+		return side === 'h'
+			? simulatedTeams[matchId].home
+			: simulatedTeams[matchId].away;
+	}
+
+	// 2. Si no hay cálculo (o es una fase futura vacía), devolvemos puntos suspensivos
+	return '...';
 }
 
 function updateOfficialTeamName(matchId, slot, newName) {
-    officialTeams[`${matchId}-${slot}`] = newName;
+	officialTeams[`${matchId}-${slot}`] = newName;
 }
 
 /* =========================================================
    ACTUALIZAR RESULTADO BRACKET (Versión Blindada 🛡️)
    ========================================================= */
 function updateBracketScore(matchId, side, val, phaseKey) {
-    if(val < 0) val = 0;
+	if (val < 0) val = 0;
 
-    if (currentViewMode === 'official') return;
+	if (currentViewMode === 'official') return;
 
-    let targetDB;
-    if (currentViewMode === 'admin') {
-        targetDB = officialRes;
-    } else {
-        if (currentUser.locks && currentUser.locks[phaseKey]) return;
-        targetDB = currentUser.preds;
-    }
+	let targetDB;
+	if (currentViewMode === 'admin') {
+		targetDB = officialRes;
+	} else {
+		if (currentUser.locks && currentUser.locks[phaseKey]) return;
+		targetDB = currentUser.preds;
+	}
 
-    let key = `k-${matchId}-${side}`;
-    targetDB[key] = val;
+	let key = `k-${matchId}-${side}`;
+	targetDB[key] = val;
 
-    // 4. PERSISTIR (CIRUGÍA LÁSER 🔫)
-    if (currentViewMode === 'admin') {
-        localStorage.setItem('m26_official', JSON.stringify(officialRes));
-        
-        // Guardado directo y específico
-        db.ref('/officialRes/' + key).set(val);
-        
-    } else {
-        if (typeof saveUsersDB === 'function') saveUsersDB();
-        else localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
-    }
+	// 4. PERSISTIR (CIRUGÍA LÁSER 🔫)
+	if (currentViewMode === 'admin') {
+		localStorage.setItem('m26_official', JSON.stringify(officialRes));
 
-    if (typeof renderBracketView === 'function') {
-        renderBracketView(targetDB, currentViewMode);
-    } else if (typeof renderBracket === 'function') {
-        renderBracket(targetDB, currentViewMode);
-    }
+		// Guardado directo y específico
+		db.ref('/officialRes/' + key).set(val);
+	} else {
+		if (typeof saveUsersDB === 'function') saveUsersDB();
+		else localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
+	}
+
+	if (typeof renderBracketView === 'function') {
+		renderBracketView(targetDB, currentViewMode);
+	} else if (typeof renderBracket === 'function') {
+		renderBracket(targetDB, currentViewMode);
+	}
 }
 
 /* =========================================================
@@ -1195,237 +1511,290 @@ function updateBracketScore(matchId, side, val, phaseKey) {
 // }
 
 function saveUser(silent) {
-    localStorage.setItem(`m26_data_${currentUser.name}`, JSON.stringify(currentUser));
-    if(!silent) alert("Datos Guardados.");
-    updateStatusUI();
+	localStorage.setItem(
+		`m26_data_${currentUser.name}`,
+		JSON.stringify(currentUser),
+	);
+	if (!silent) alert('Datos Guardados.');
+	updateStatusUI();
 }
 
 function submitPhase(phase) {
-    if(!phaseControl[phase]) return alert("Fase cerrada por Admin.");
-    let missing = false;
-    if(phase === 'groups') {
-        for(let g in GROUPS_CONFIG) {
-            for(let i=0; i<GROUPS_CONFIG[g].matches.length; i++) {
-                let id = `${g}-${i}`;
-                let h = currentUser.preds[`h-${id}`]; let a = currentUser.preds[`a-${id}`];
-                if(h === undefined || h === "" || a === undefined || a === "") { missing = true; break; }
-            }
-        }
-    } else {
-        let map = { 'r32': R32_MATCHUPS, 'r16': R16_MATCHUPS, 'qf': QF_MATCHUPS, 'sf': SF_MATCHUPS, 'f': F_MATCHUPS };
-        let matches = map[phase];
-        if(matches) for(let m of matches) {
-            let h = currentUser.preds[`k-${m.id}-h`]; let a = currentUser.preds[`k-${m.id}-a`];
-            if(h === undefined || h === "" || a === undefined || a === "") missing = true;
-        }
-    }
-    if(missing) return alert("⚠️ Faltan marcadores. Debes llenar todo.");
-    if(confirm(`¿Confirmar envío de ${phase.toUpperCase()}?`)) {
-        currentUser.locks[phase] = true;
-        saveUser(true);
-        renderGroups(); renderBracket();
-    }
+	if (!phaseControl[phase]) return alert('Fase cerrada por Admin.');
+	let missing = false;
+	if (phase === 'groups') {
+		for (let g in GROUPS_CONFIG) {
+			for (let i = 0; i < GROUPS_CONFIG[g].matches.length; i++) {
+				let id = `${g}-${i}`;
+				let h = currentUser.preds[`h-${id}`];
+				let a = currentUser.preds[`a-${id}`];
+				if (h === undefined || h === '' || a === undefined || a === '') {
+					missing = true;
+					break;
+				}
+			}
+		}
+	} else {
+		let map = {
+			r32: R32_MATCHUPS,
+			r16: R16_MATCHUPS,
+			qf: QF_MATCHUPS,
+			sf: SF_MATCHUPS,
+			f: F_MATCHUPS,
+		};
+		let matches = map[phase];
+		if (matches)
+			for (let m of matches) {
+				let h = currentUser.preds[`k-${m.id}-h`];
+				let a = currentUser.preds[`k-${m.id}-a`];
+				if (h === undefined || h === '' || a === undefined || a === '')
+					missing = true;
+			}
+	}
+	if (missing) return alert('⚠️ Faltan marcadores. Debes llenar todo.');
+	if (confirm(`¿Confirmar envío de ${phase.toUpperCase()}?`)) {
+		currentUser.locks[phase] = true;
+		saveUser(true);
+		renderGroups();
+		renderBracket();
+	}
 }
 
 function saveAdminData(showMsg) {
-    // Leer reglas básicas
-    if(document.getElementById('rule-exact')) {
-        rules.exact = parseInt(document.getElementById('rule-exact').value) || 0;
-        rules.diff = parseInt(document.getElementById('rule-diff').value) || 0;
-        rules.winner = parseInt(document.getElementById('rule-winner').value) || 0;
-        rules.groupExact = parseInt(document.getElementById('rule-group-exact').value) || 0;
-        rules.groupMix = parseInt(document.getElementById('rule-group-mix').value) || 0;
-        rules.groupOne = parseInt(document.getElementById('rule-group-one').value) || 0;
-    }
+	// Leer reglas básicas
+	if (document.getElementById('rule-exact')) {
+		rules.exact = parseInt(document.getElementById('rule-exact').value) || 0;
+		rules.diff = parseInt(document.getElementById('rule-diff').value) || 0;
+		rules.winner = parseInt(document.getElementById('rule-winner').value) || 0;
+		rules.groupExact =
+			parseInt(document.getElementById('rule-group-exact').value) || 0;
+		rules.groupMix =
+			parseInt(document.getElementById('rule-group-mix').value) || 0;
+		rules.groupOne =
+			parseInt(document.getElementById('rule-group-one').value) || 0;
+	}
 
-    // Actualizar LocalStorage
-    localStorage.setItem('m26_rules', JSON.stringify(rules));
-    localStorage.setItem('m26_official', JSON.stringify(officialRes));
-    localStorage.setItem('m26_official_teams', JSON.stringify(officialTeams));
+	// Actualizar LocalStorage
+	localStorage.setItem('m26_rules', JSON.stringify(rules));
+	localStorage.setItem('m26_official', JSON.stringify(officialRes));
+	localStorage.setItem('m26_official_teams', JSON.stringify(officialTeams));
 
-    // Leer Checkboxes
-    if(document.getElementById('check-groups')) {
-        phaseControl.groups = document.getElementById('check-groups').checked;
-        phaseControl.r32 = document.getElementById('check-r32').checked;
-        phaseControl.r16 = document.getElementById('check-r16').checked;
-        phaseControl.qf = document.getElementById('check-qf').checked;
-        phaseControl.sf = document.getElementById('check-sf').checked;
-        phaseControl.f = document.getElementById('check-f').checked;
-        localStorage.setItem('m26_phase_control', JSON.stringify(phaseControl));
-    }
-    
-    // 👇 GUARDADO LÁSER DE CONFIGURACIÓN (Seguro y Específico) 👇
-    // En lugar de 'saveToCloud()', guardamos cada cosa en su cajón.
-    db.ref('/m26_rules').set(rules);
-    db.ref('/phaseControl').set(phaseControl);
-    db.ref('/officialTeams').set(officialTeams); // Por si cargó clasificados
+	// Leer Checkboxes
+	if (document.getElementById('check-groups')) {
+		phaseControl.groups = document.getElementById('check-groups').checked;
+		phaseControl.r32 = document.getElementById('check-r32').checked;
+		phaseControl.r16 = document.getElementById('check-r16').checked;
+		phaseControl.qf = document.getElementById('check-qf').checked;
+		phaseControl.sf = document.getElementById('check-sf').checked;
+		phaseControl.f = document.getElementById('check-f').checked;
+		localStorage.setItem('m26_phase_control', JSON.stringify(phaseControl));
+	}
 
-    if(showMsg) alert("Admin: Configuración Guardada en la Nube ☁️");
-    renderBracket();
+	// 👇 GUARDADO LÁSER DE CONFIGURACIÓN (Seguro y Específico) 👇
+	// En lugar de 'saveToCloud()', guardamos cada cosa en su cajón.
+	db.ref('/m26_rules').set(rules);
+	db.ref('/phaseControl').set(phaseControl);
+	db.ref('/officialTeams').set(officialTeams); // Por si cargó clasificados
+
+	if (showMsg) alert('Admin: Configuración Guardada en la Nube ☁️');
+	renderBracket();
 }
 
 function calculatePoints(preds, locks) {
-    let p = preds || currentUser.preds;
-    let l = locks || currentUser.locks;
-    let total = 0;
+	let p = preds || currentUser.preds;
+	let l = locks || currentUser.locks;
+	let total = 0;
 
-    // 1. PUNTOS POR PARTIDOS (GRUPOS)
-    if(l.groups) {
-        for(let g in GROUPS_CONFIG) {
-            GROUPS_CONFIG[g].matches.forEach((m,i) => {
-                let id = `${g}-${i}`;
-                total += calcMatchPts(p[`h-${id}`], p[`a-${id}`], officialRes[`h-${id}`], officialRes[`a-${id}`]);
-            });
-        }
-    }
+	// 1. PUNTOS POR PARTIDOS (GRUPOS)
+	if (l.groups) {
+		for (let g in GROUPS_CONFIG) {
+			GROUPS_CONFIG[g].matches.forEach((m, i) => {
+				let id = `${g}-${i}`;
+				total += calcMatchPts(
+					p[`h-${id}`],
+					p[`a-${id}`],
+					officialRes[`h-${id}`],
+					officialRes[`a-${id}`],
+				);
+			});
+		}
+	}
 
-    // 2. PUNTOS POR PARTIDOS (FASES FINALES)
-    let phaseMap = { '32': 'r32', '16': 'r16', '8': 'qf', '4': 'sf', '2': 'f' };
-    let allKeys = Object.keys(officialRes).filter(k => k.startsWith('k-'));
-    let processedMatches = new Set();
-    allKeys.forEach(k => {
-        let parts = k.split('-');
-        let matchId = parts[1] + '-' + parts[2];
-        let phaseKey = phaseMap[parts[1]];
-        if(l[phaseKey] && !processedMatches.has(matchId)) {
-            processedMatches.add(matchId);
-            total += calcMatchPts(p[`k-${matchId}-h`], p[`k-${matchId}-a`], officialRes[`k-${matchId}-h`], officialRes[`k-${matchId}-a`]);
-        }
-    });
+	// 2. PUNTOS POR PARTIDOS (FASES FINALES)
+	let phaseMap = { 32: 'r32', 16: 'r16', 8: 'qf', 4: 'sf', 2: 'f' };
+	let allKeys = Object.keys(officialRes).filter((k) => k.startsWith('k-'));
+	let processedMatches = new Set();
+	allKeys.forEach((k) => {
+		let parts = k.split('-');
+		let matchId = parts[1] + '-' + parts[2];
+		let phaseKey = phaseMap[parts[1]];
+		if (l[phaseKey] && !processedMatches.has(matchId)) {
+			processedMatches.add(matchId);
+			total += calcMatchPts(
+				p[`k-${matchId}-h`],
+				p[`k-${matchId}-a`],
+				officialRes[`k-${matchId}-h`],
+				officialRes[`k-${matchId}-a`],
+			);
+		}
+	});
 
-    // 3. BONUS DE CLASIFICADOS (GRUPOS) - NUEVA LÓGICA
-    if(l.groups) {
-        // Calculamos las posiciones simuladas del USUARIO y del OFICIAL
-        let userSim = calculateSimulatedTeams(p); 
-        let officialSim = calculateSimulatedTeams(officialRes); 
+	// 3. BONUS DE CLASIFICADOS (GRUPOS) - NUEVA LÓGICA
+	if (l.groups) {
+		// Calculamos las posiciones simuladas del USUARIO y del OFICIAL
+		let userSim = calculateSimulatedTeams(p);
+		let officialSim = calculateSimulatedTeams(officialRes);
 
-        for(let g in GROUPS_CONFIG) {
-            // Equipos del usuario (1ro y 2do)
-            let u1 = userSim[g+'1']; 
-            let u2 = userSim[g+'2'];
-            
-            // Equipos oficiales (1ro y 2do)
-            let o1 = officialSim[g+'1']; 
-            let o2 = officialSim[g+'2'];
+		for (let g in GROUPS_CONFIG) {
+			// Equipos del usuario (1ro y 2do)
+			let u1 = userSim[g + '1'];
+			let u2 = userSim[g + '2'];
 
-            // Solo damos puntos si el grupo oficial YA se definió (no es undefined ni "3er")
-            // y si los equipos son nombres reales
-            if(o1 && o2 && !o1.includes('3er') && !o2.includes('3er')) {
-                if (u1 === o1 && u2 === o2) {
-                    // Acierto EXACTO (Orden perfecto)
-                    total += (rules.groupExact || 0);
-                } else if ((u1 === o2 && u2 === o1)) {
-                    // Acierto MIXTO (Están los dos, pero orden invertido)
-                    total += (rules.groupMix || 0);
-                } else if (u1 === o1 || u1 === o2 || u2 === o1 || u2 === o2) {
-                    // Acierto PARCIAL (Le pegó a uno de los dos)
-                    total += (rules.groupOne || 0);
-                }
-            }
-        }
-    }
+			// Equipos oficiales (1ro y 2do)
+			let o1 = officialSim[g + '1'];
+			let o2 = officialSim[g + '2'];
 
-    if(!preds) {
-        if(l.groups || l.f) document.getElementById('total-points').innerText = total;
-        else document.getElementById('total-points').innerText = "--";
-    }
-    return total;
+			// Solo damos puntos si el grupo oficial YA se definió (no es undefined ni "3er")
+			// y si los equipos son nombres reales
+			if (o1 && o2 && !o1.includes('3er') && !o2.includes('3er')) {
+				if (u1 === o1 && u2 === o2) {
+					// Acierto EXACTO (Orden perfecto)
+					total += rules.groupExact || 0;
+				} else if (u1 === o2 && u2 === o1) {
+					// Acierto MIXTO (Están los dos, pero orden invertido)
+					total += rules.groupMix || 0;
+				} else if (u1 === o1 || u1 === o2 || u2 === o1 || u2 === o2) {
+					// Acierto PARCIAL (Le pegó a uno de los dos)
+					total += rules.groupOne || 0;
+				}
+			}
+		}
+	}
+
+	if (!preds) {
+		if (l.groups || l.f)
+			document.getElementById('total-points').innerText = total;
+		else document.getElementById('total-points').innerText = '--';
+	}
+	return total;
 }
 
 function calcMatchPts(uH, uA, oH, oA) {
-    if(!uH || !uA || !oH || !oA) return 0;
-    uH=parseInt(uH); uA=parseInt(uA); oH=parseInt(oH); oA=parseInt(oA);
-    if(uH===oH && uA===oA) return rules.exact;
-    let uS = Math.sign(uH-uA), oS = Math.sign(oH-oA);
-    if(uS!==oS) return 0;
-    if(uS!==0 && (uH-uA === oH-oA)) return rules.diff;
-    return rules.winner;
+	if (!uH || !uA || !oH || !oA) return 0;
+	uH = parseInt(uH);
+	uA = parseInt(uA);
+	oH = parseInt(oH);
+	oA = parseInt(oA);
+	if (uH === oH && uA === oA) return rules.exact;
+	let uS = Math.sign(uH - uA),
+		oS = Math.sign(oH - oA);
+	if (uS !== oS) return 0;
+	if (uS !== 0 && uH - uA === oH - oA) return rules.diff;
+	return rules.winner;
 }
 
 /* =========================================================
    8. REPORTES Y MODALES
    ========================================================= */
 function showReport() {
-    document.getElementById('modal-title').innerText = "TABLA DE LIDERES";
-    document.getElementById('modal-overlay').style.display = 'flex';
-    let players = [];
-    for(let i=0; i<localStorage.length; i++) {
-        let k = localStorage.key(i);
-        if(k.startsWith('m26_data_')) players.push(JSON.parse(localStorage.getItem(k)));
-    }
-    let active = players.filter(p => p.locks && p.locks.groups);
-    active.forEach(p => p.pts = calculatePoints(p.preds, p.locks));
-    active.sort((a,b) => b.pts - a.pts);
-    
-    let html = `<table class="ranking-table"><tr><th>#</th><th>JUGADOR</th><th>PTS</th></tr>`;
-    active.forEach((r,i) => html+=`<tr class="${r.name===currentUser.name?'my-row':''}"><td>${i+1}</td><td>${r.name}</td><td>${r.pts}</td></tr>`);
-    document.getElementById('report-content').innerHTML = html + "</table>";
+	document.getElementById('modal-title').innerText = 'TABLA DE LIDERES';
+	document.getElementById('modal-overlay').style.display = 'flex';
+	let players = [];
+	for (let i = 0; i < localStorage.length; i++) {
+		let k = localStorage.key(i);
+		if (k.startsWith('m26_data_'))
+			players.push(JSON.parse(localStorage.getItem(k)));
+	}
+	let active = players.filter((p) => p.locks && p.locks.groups);
+	active.forEach((p) => (p.pts = calculatePoints(p.preds, p.locks)));
+	active.sort((a, b) => b.pts - a.pts);
+
+	let html = `<table class="ranking-table"><tr><th>#</th><th>JUGADOR</th><th>PTS</th></tr>`;
+	active.forEach(
+		(r, i) =>
+			(html += `<tr class="${
+				r.name === currentUser.name ? 'my-row' : ''
+			}"><td>${i + 1}</td><td>${r.name}</td><td>${r.pts}</td></tr>`),
+	);
+	document.getElementById('report-content').innerHTML = html + '</table>';
 }
 
 function openUserManagement() {
-    document.getElementById('modal-title').innerText = "GESTION USUARIOS";
-    document.getElementById('modal-overlay').style.display = 'flex';
-    let players = [];
-    for(let i=0; i<localStorage.length; i++) {
-        let k = localStorage.key(i);
-        if(k.startsWith('m26_data_')) players.push(JSON.parse(localStorage.getItem(k)));
-    }
-    let html = `<table class="ranking-table"><tr><th>JUGADOR</th><th>ESTADO</th><th>ACCIÓN</th></tr>`;
-    players.forEach(p => {
-        let isLocked = (p.locks && (p.locks.groups));
-        let status = isLocked ? '<span style="color:var(--neon-green)">OFICIAL</span>' : '<span style="color:var(--neon-gold)">BORRADOR</span>';
-        let btn = isLocked ? `<button class="btn-enter" style="padding:5px; font-size:0.7rem; width:auto;" onclick="unlockPlayer('${p.name}')">RESET</button>` : '-';
-        html += `<tr><td>${p.name}</td><td>${status}</td><td>${btn}</td></tr>`;
-    });
-    document.getElementById('report-content').innerHTML = html + "</table>";
+	document.getElementById('modal-title').innerText = 'GESTION USUARIOS';
+	document.getElementById('modal-overlay').style.display = 'flex';
+	let players = [];
+	for (let i = 0; i < localStorage.length; i++) {
+		let k = localStorage.key(i);
+		if (k.startsWith('m26_data_'))
+			players.push(JSON.parse(localStorage.getItem(k)));
+	}
+	let html = `<table class="ranking-table"><tr><th>JUGADOR</th><th>ESTADO</th><th>ACCIÓN</th></tr>`;
+	players.forEach((p) => {
+		let isLocked = p.locks && p.locks.groups;
+		let status = isLocked
+			? '<span style="color:var(--neon-green)">OFICIAL</span>'
+			: '<span style="color:var(--neon-gold)">BORRADOR</span>';
+		let btn = isLocked
+			? `<button class="btn-enter" style="padding:5px; font-size:0.7rem; width:auto;" onclick="unlockPlayer('${p.name}')">RESET</button>`
+			: '-';
+		html += `<tr><td>${p.name}</td><td>${status}</td><td>${btn}</td></tr>`;
+	});
+	document.getElementById('report-content').innerHTML = html + '</table>';
 }
 
 function unlockPlayer(name) {
-    if(confirm(`¿Resetear a ${name}?`)) {
-        const key = `m26_data_${name}`;
-        let p = JSON.parse(localStorage.getItem(key));
-        if(p) {
-            p.locks = { groups: false, r32: false, r16: false, qf: false, sf: false, f: false };
-            localStorage.setItem(key, JSON.stringify(p));
-            alert("Reset OK");
-            openUserManagement();
-        }
-    }
+	if (confirm(`¿Resetear a ${name}?`)) {
+		const key = `m26_data_${name}`;
+		let p = JSON.parse(localStorage.getItem(key));
+		if (p) {
+			p.locks = {
+				groups: false,
+				r32: false,
+				r16: false,
+				qf: false,
+				sf: false,
+				f: false,
+			};
+			localStorage.setItem(key, JSON.stringify(p));
+			alert('Reset OK');
+			openUserManagement();
+		}
+	}
 }
 
 /* =========================================================
    NUEVA FUNCION: RENDERIZADO DE RESULTADOS REALES
    ========================================================= */
 function renderRealResults() {
-    const container = document.getElementById('real-container');
-    container.innerHTML = '';
-    
-    // Recorremos los grupos igual que antes
-    for(let g in GROUPS_CONFIG) {
-        const data = GROUPS_CONFIG[g];
-        let matchesHTML = '';
-        
-        // Tabla de posiciones REAL (solo con datos oficiales)
-        let teamStats = data.teams.map(n => ({ name: n, pts: 0, dif: 0 }));
-        
-        data.matches.forEach((m, idx) => {
-            let id = `${g}-${idx}`;
-            
-            // AQUI ESTA EL CAMBIO: Solo leemos officialRes
-            let oH = officialRes[`h-${id}`]; 
-            let oA = officialRes[`a-${id}`];
-            
-            // Si el admin no ha puesto nada, mostramos vacio
-            let valH = (oH !== undefined) ? oH : '';
-            let valA = (oA !== undefined) ? oA : '';
+	const container = document.getElementById('real-container');
+	container.innerHTML = '';
 
-            // Solo calculamos tabla si hay dato oficial
-            if(valH !== '' && valA !== '') {
-                updateStats(teamStats, m.t1, m.t2, parseInt(valH), parseInt(valA));
-            }
-            
-            // Inputs DESHABILITADOS (disabled) para que nadie edite aquí
-            matchesHTML += `
+	// Recorremos los grupos igual que antes
+	for (let g in GROUPS_CONFIG) {
+		const data = GROUPS_CONFIG[g];
+		let matchesHTML = '';
+
+		// Tabla de posiciones REAL (solo con datos oficiales)
+		let teamStats = data.teams.map((n) => ({ name: n, pts: 0, dif: 0 }));
+
+		data.matches.forEach((m, idx) => {
+			let id = `${g}-${idx}`;
+
+			// AQUI ESTA EL CAMBIO: Solo leemos officialRes
+			let oH = officialRes[`h-${id}`];
+			let oA = officialRes[`a-${id}`];
+
+			// Si el admin no ha puesto nada, mostramos vacio
+			let valH = oH !== undefined ? oH : '';
+			let valA = oA !== undefined ? oA : '';
+
+			// Solo calculamos tabla si hay dato oficial
+			if (valH !== '' && valA !== '') {
+				updateStats(teamStats, m.t1, m.t2, parseInt(valH), parseInt(valA));
+			}
+
+			// Inputs DESHABILITADOS (disabled) para que nadie edite aquí
+			matchesHTML += `
             <div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
                 <div class="center-inputs">
@@ -1438,16 +1807,22 @@ function renderRealResults() {
                 </div>
                 <div class="team-name team-away">${data.teams[m.t2]}</div>
             </div>`;
-        });
+		});
 
-        // Ordenar tabla real
-        teamStats.sort((a,b) => b.pts - a.pts || b.dif - a.dif);
-        let tableRows = teamStats.map((t,i) => `<tr class="${i<2?'qual-zone':''}">
-            <td class="pos-num">${i+1}</td><td>${t.name}</td><td>${t.pts}</td><td>${t.dif}</td>
-        </tr>`).join('');
-        
-        // Agregar tarjeta al grid (Note el título con [OFICIAL])
-        container.innerHTML += `
+		// Ordenar tabla real
+		teamStats.sort((a, b) => b.pts - a.pts || b.dif - a.dif);
+		let tableRows = teamStats
+			.map(
+				(t, i) => `<tr class="${i < 2 ? 'qual-zone' : ''}">
+            <td class="pos-num">${i + 1}</td><td>${t.name}</td><td>${
+					t.pts
+				}</td><td>${t.dif}</td>
+        </tr>`,
+			)
+			.join('');
+
+		// Agregar tarjeta al grid (Note el título con [OFICIAL])
+		container.innerHTML += `
         <div class="card" style="border-color:var(--neon-green);">
             <div class="group-header" style="color:var(--neon-green);">GRUPO ${g} [OFICIAL]</div>
             <div class="card-body">
@@ -1455,7 +1830,7 @@ function renderRealResults() {
                 <table><tr><th>#</th><th>EQ</th><th>PTS</th><th>DIF</th></tr>${tableRows}</table>
             </div>
         </div>`;
-    }
+	}
 }
 
 /* =========================================================
@@ -1464,42 +1839,43 @@ function renderRealResults() {
    ========================================================= */
 
 function renderRealBracket() {
-    const container = document.getElementById('real-bracket-container');
-    if (!container) return;
-    container.innerHTML = '';
-    
-    // Calculamos los equipos simulados basados EXCLUSIVAMENTE en resultados oficiales
-    let officialSim = calculateSimulatedTeams(officialRes);
-    
-    let html = '';
-    // Aquí es donde la "Jefa" llama a la "Obrera" (renderRealRoundColumn)
-    html += renderRealRoundColumn('16avos', R32_MATCHUPS, officialSim);
-    html += renderRealRoundColumn('Octavos', R16_MATCHUPS, officialSim);
-    html += renderRealRoundColumn('Cuartos', QF_MATCHUPS, officialSim);
-    html += renderRealRoundColumn('Semis', SF_MATCHUPS, officialSim);
-    html += renderRealRoundColumn('Final', F_MATCHUPS, officialSim);
-    
-    container.innerHTML = html;
+	const container = document.getElementById('real-bracket-container');
+	if (!container) return;
+	container.innerHTML = '';
+
+	// Calculamos los equipos simulados basados EXCLUSIVAMENTE en resultados oficiales
+	let officialSim = calculateSimulatedTeams(officialRes);
+
+	let html = '';
+	// Aquí es donde la "Jefa" llama a la "Obrera" (renderRealRoundColumn)
+	html += renderRealRoundColumn('16avos', R32_MATCHUPS, officialSim);
+	html += renderRealRoundColumn('Octavos', R16_MATCHUPS, officialSim);
+	html += renderRealRoundColumn('Cuartos', QF_MATCHUPS, officialSim);
+	html += renderRealRoundColumn('Semis', SF_MATCHUPS, officialSim);
+	html += renderRealRoundColumn('Final', F_MATCHUPS, officialSim);
+
+	container.innerHTML = html;
 }
 
 function renderRealRoundColumn(title, matchups, simTeams) {
-    let html = `<div class="round-column"><div class="round-header" style="border-color:var(--neon-green); color:var(--neon-green);"><span class="round-title">${title}</span></div>`;
-    
-    matchups.forEach(m => {
-        // Resolvemos nombres usando SOLO datos oficiales
-        let resolveName = (slot, code) => {
-            if (officialTeams[`${m.id}-${slot}`]) return officialTeams[`${m.id}-${slot}`];
-            if (simTeams[code]) return simTeams[code];
-            return code;
-        };
+	let html = `<div class="round-column"><div class="round-header" style="border-color:var(--neon-green); color:var(--neon-green);"><span class="round-title">${title}</span></div>`;
 
-        let nameH = resolveName('h', m.h);
-        let nameA = resolveName('a', m.a);
-        
-        let scH = officialRes[`k-${m.id}-h`] || ''; 
-        let scA = officialRes[`k-${m.id}-a`] || '';
+	matchups.forEach((m) => {
+		// Resolvemos nombres usando SOLO datos oficiales
+		let resolveName = (slot, code) => {
+			if (officialTeams[`${m.id}-${slot}`])
+				return officialTeams[`${m.id}-${slot}`];
+			if (simTeams[code]) return simTeams[code];
+			return code;
+		};
 
-        html += `
+		let nameH = resolveName('h', m.h);
+		let nameA = resolveName('a', m.a);
+
+		let scH = officialRes[`k-${m.id}-h`] || '';
+		let scA = officialRes[`k-${m.id}-a`] || '';
+
+		html += `
         <div class="bracket-match" style="border-color:var(--neon-green);">
             <div class="bracket-row">
                 <span class="b-team" title="${nameH}">${nameH}</span>
@@ -1510,8 +1886,8 @@ function renderRealRoundColumn(title, matchups, simTeams) {
                 <input type="number" class="bracket-input" value="${scA}" disabled style="background:#222; color:#fff; border:1px solid #444;">
             </div>
         </div>`;
-    });
-    return html + `</div>`;
+	});
+	return html + `</div>`;
 }
 
 /* =========================================================
@@ -1520,36 +1896,44 @@ function renderRealRoundColumn(title, matchups, simTeams) {
 
 // Función principal que abre el modal y renderiza
 function showThirdsTable() {
-    // 1. Determinar fuente de datos
-    let sourceData;
-    
-    // CORRECCIÓN: Si soy Admin, SIEMPRE uso officialRes.
-    if (role === 'admin') {
-        sourceData = officialRes;
-    } else {
-        // Si soy Fan, dependo de qué pestaña estoy viendo
-        let isOfficialView = document.getElementById('tab-real').classList.contains('active');
-        sourceData = isOfficialView ? officialRes : currentUser.preds;
-    }
+	// 1. Determinar fuente de datos
+	let sourceData;
 
-    // 2. Calcular los terceros
-    let thirdsList = calculateThirdsList(sourceData);
+	// CORRECCIÓN: Si soy Admin, SIEMPRE uso officialRes.
+	if (role === 'admin') {
+		sourceData = officialRes;
+	} else {
+		// Si soy Fan, dependo de qué pestaña estoy viendo
+		let isOfficialView = document
+			.getElementById('tab-real')
+			.classList.contains('active');
+		sourceData = isOfficialView ? officialRes : currentUser.preds;
+	}
 
-    // 3. Generar HTML
-    let tbody = document.querySelector('#thirds-table-content tbody');
-    tbody.innerHTML = '';
+	// 2. Calcular los terceros
+	let thirdsList = calculateThirdsList(sourceData);
 
-    thirdsList.forEach((team, index) => {
-        // Los primeros 8 clasifican (Verde), los otros 4 eliminados (Rojo oscuro)
-        let isQualified = index < 8;
-        let rowColor = isQualified ? 'rgba(0, 255, 136, 0.15)' : 'rgba(255, 0, 85, 0.1)';
-        let fontColor = isQualified ? '#fff' : '#777';
-        let qualIndicator = isQualified ? '✅' : '❌';
+	// 3. Generar HTML
+	let tbody = document.querySelector('#thirds-table-content tbody');
+	tbody.innerHTML = '';
 
-        let html = `
+	thirdsList.forEach((team, index) => {
+		// Los primeros 8 clasifican (Verde), los otros 4 eliminados (Rojo oscuro)
+		let isQualified = index < 8;
+		let rowColor = isQualified
+			? 'rgba(0, 255, 136, 0.15)'
+			: 'rgba(255, 0, 85, 0.1)';
+		let fontColor = isQualified ? '#fff' : '#777';
+		let qualIndicator = isQualified ? '✅' : '❌';
+
+		let html = `
             <tr style="background:${rowColor}; color:${fontColor}; border-bottom:1px solid #333;">
-                <td style="font-weight:bold; color:${isQualified ? 'var(--neon-green)' : 'var(--neon-pink)'}">${index + 1}</td>
-                <td style="color:var(--neon-gold); font-weight:bold;">${team.group}</td>
+                <td style="font-weight:bold; color:${
+									isQualified ? 'var(--neon-green)' : 'var(--neon-pink)'
+								}">${index + 1}</td>
+                <td style="color:var(--neon-gold); font-weight:bold;">${
+									team.group
+								}</td>
                 <td style="font-weight:bold;">${team.name} ${qualIndicator}</td>
                 <td style="font-weight:900; color:white;">${team.pts}</td>
                 <td>${team.pj}</td>
@@ -1558,67 +1942,92 @@ function showThirdsTable() {
                 <td>${team.pp}</td>
                 <td>${team.gf}</td>
                 <td>${team.gc}</td>
-                <td>${team.dif > 0 ? '+'+team.dif : team.dif}</td>
+                <td>${team.dif > 0 ? '+' + team.dif : team.dif}</td>
             </tr>
         `;
-        tbody.innerHTML += html;
-    });
+		tbody.innerHTML += html;
+	});
 
-    // 4. Mostrar Modal
-    document.getElementById('modal-thirds-overlay').style.display = 'flex';
+	// 4. Mostrar Modal
+	document.getElementById('modal-thirds-overlay').style.display = 'flex';
 }
 
 // Función auxiliar para calcular estadísticas completas
 function calculateThirdsList(sourceData) {
-    let allThirds = [];
+	let allThirds = [];
 
-    // Recorremos cada grupo para encontrar su 3ro
-    for(let g in GROUPS_CONFIG) {
-        let teams = GROUPS_CONFIG[g].teams;
-        let stats = teams.map(name => ({
-            name: name, group: g, 
-            pts: 0, pj: 0, pg: 0, pe: 0, pp: 0, gf: 0, gc: 0, dif: 0
-        }));
+	// Recorremos cada grupo para encontrar su 3ro
+	for (let g in GROUPS_CONFIG) {
+		let teams = GROUPS_CONFIG[g].teams;
+		let stats = teams.map((name) => ({
+			name: name,
+			group: g,
+			pts: 0,
+			pj: 0,
+			pg: 0,
+			pe: 0,
+			pp: 0,
+			gf: 0,
+			gc: 0,
+			dif: 0,
+		}));
 
-        GROUPS_CONFIG[g].matches.forEach((m, idx) => {
-            let id = `${g}-${idx}`;
-            let h = sourceData[`h-${id}`];
-            let a = sourceData[`a-${id}`];
+		GROUPS_CONFIG[g].matches.forEach((m, idx) => {
+			let id = `${g}-${idx}`;
+			let h = sourceData[`h-${id}`];
+			let a = sourceData[`a-${id}`];
 
-            if(h !== undefined && h !== "" && a !== undefined && a !== "") {
-                h = parseInt(h); a = parseInt(a);
-                let t1 = stats[m.t1];
-                let t2 = stats[m.t2];
-                
-                t1.pj++; t2.pj++;
-                t1.gf += h; t1.gc += a; t1.dif = t1.gf - t1.gc;
-                t2.gf += a; t2.gc += h; t2.dif = t2.gf - t2.gc;
+			if (h !== undefined && h !== '' && a !== undefined && a !== '') {
+				h = parseInt(h);
+				a = parseInt(a);
+				let t1 = stats[m.t1];
+				let t2 = stats[m.t2];
 
-                if(h > a) { t1.pts += 3; t1.pg++; t2.pp++; }
-                else if(a > h) { t2.pts += 3; t2.pg++; t1.pp++; }
-                else { t1.pts++; t2.pts++; t1.pe++; t2.pe++; }
-            }
-        });
+				t1.pj++;
+				t2.pj++;
+				t1.gf += h;
+				t1.gc += a;
+				t1.dif = t1.gf - t1.gc;
+				t2.gf += a;
+				t2.gc += h;
+				t2.dif = t2.gf - t2.gc;
 
-        // Ordenar tabla del grupo (Pts > Dif > GF)
-        stats.sort((a,b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
+				if (h > a) {
+					t1.pts += 3;
+					t1.pg++;
+					t2.pp++;
+				} else if (a > h) {
+					t2.pts += 3;
+					t2.pg++;
+					t1.pp++;
+				} else {
+					t1.pts++;
+					t2.pts++;
+					t1.pe++;
+					t2.pe++;
+				}
+			}
+		});
 
-        // Tomamos el 3ro (índice 2)
-        // OJO: Si el grupo no tiene datos, igual tomamos el nombre del equipo en pos 3
-        let thirdTeam = stats[2];
-        allThirds.push(thirdTeam);
-    }
+		// Ordenar tabla del grupo (Pts > Dif > GF)
+		stats.sort((a, b) => b.pts - a.pts || b.dif - a.dif || b.gf - a.gf);
 
-    // AHORA ORDENAMOS LA TABLA DE TERCEROS (Reglas FIFA)
-    // 1. Puntos, 2. Diferencia, 3. Goles a Favor, 4. Partidos Ganados
-    allThirds.sort((a,b) => {
-        if (b.pts !== a.pts) return b.pts - a.pts;
-        if (b.dif !== a.dif) return b.dif - a.dif;
-        if (b.gf !== a.gf) return b.gf - a.gf;
-        return b.pg - a.pg;
-    });
+		// Tomamos el 3ro (índice 2)
+		// OJO: Si el grupo no tiene datos, igual tomamos el nombre del equipo en pos 3
+		let thirdTeam = stats[2];
+		allThirds.push(thirdTeam);
+	}
 
-    return allThirds;
+	// AHORA ORDENAMOS LA TABLA DE TERCEROS (Reglas FIFA)
+	// 1. Puntos, 2. Diferencia, 3. Goles a Favor, 4. Partidos Ganados
+	allThirds.sort((a, b) => {
+		if (b.pts !== a.pts) return b.pts - a.pts;
+		if (b.dif !== a.dif) return b.dif - a.dif;
+		if (b.gf !== a.gf) return b.gf - a.gf;
+		return b.pg - a.pg;
+	});
+
+	return allThirds;
 }
 
 /* =========================================================
@@ -1627,20 +2036,20 @@ function calculateThirdsList(sourceData) {
 
 // Función para SALIR (Recarga la página y vuelve al login)
 function logout() {
-    location.reload();
+	location.reload();
 }
 
 // Función GUARDAR INTELIGENTE
 // Detecta si el panel de admin está visible para saber qué guardar
 function smartSave() {
-    const adminBar = document.getElementById('admin-status-bar');
-    
-    // Si la barra de admin se ve, es porque soy Admin
-    if (adminBar && adminBar.style.display !== 'none') {
-        saveAdminData(true); // Guarda Config y Resultados
-    } else {
-        saveUser(false); // Guarda Pronósticos del Fan
-    }
+	const adminBar = document.getElementById('admin-status-bar');
+
+	// Si la barra de admin se ve, es porque soy Admin
+	if (adminBar && adminBar.style.display !== 'none') {
+		saveAdminData(true); // Guarda Config y Resultados
+	} else {
+		saveUser(false); // Guarda Pronósticos del Fan
+	}
 }
 
 /* =========================================================
@@ -1649,33 +2058,33 @@ function smartSave() {
 
 // 1. Función para mostrar/ocultar contraseña
 function togglePass() {
-    const passInput = document.getElementById('password');
-    const icon = document.getElementById('eye-icon');
-    
-    if (passInput.type === 'password') {
-        passInput.type = 'text'; // Mostrar texto
-        icon.innerText = '🙈';   // Cambiar icono a "monito tapándose"
-    } else {
-        passInput.type = 'password'; // Ocultar
-        icon.innerText = '👁️';   // Volver al ojo normal
-    }
+	const passInput = document.getElementById('password');
+	const icon = document.getElementById('eye-icon');
+
+	if (passInput.type === 'password') {
+		passInput.type = 'text'; // Mostrar texto
+		icon.innerText = '🙈'; // Cambiar icono a "monito tapándose"
+	} else {
+		passInput.type = 'password'; // Ocultar
+		icon.innerText = '👁️'; // Volver al ojo normal
+	}
 }
 
 // 2. Escuchar la tecla ENTER en los campos de texto
 // Esto se ejecuta apenas carga el archivo
 document.addEventListener('DOMContentLoaded', () => {
-    const inputUser = document.getElementById('username');
-    const inputPass = document.getElementById('password');
+	const inputUser = document.getElementById('username');
+	const inputPass = document.getElementById('password');
 
-    // Función auxiliar para activar el login con Enter
-    const triggerLogin = (event) => {
-        if (event.key === 'Enter') {
-            handleLogin(); // Llamamos a su función original de entrar
-        }
-    };
+	// Función auxiliar para activar el login con Enter
+	const triggerLogin = (event) => {
+		if (event.key === 'Enter') {
+			handleLogin(); // Llamamos a su función original de entrar
+		}
+	};
 
-    if(inputUser) inputUser.addEventListener('keypress', triggerLogin);
-    if(inputPass) inputPass.addEventListener('keypress', triggerLogin);
+	if (inputUser) inputUser.addEventListener('keypress', triggerLogin);
+	if (inputPass) inputPass.addEventListener('keypress', triggerLogin);
 });
 
 /* =========================================================
@@ -1683,239 +2092,339 @@ document.addEventListener('DOMContentLoaded', () => {
    Calcula posiciones, mejores terceros y llena las llaves.
    ========================================================= */
 function updateGlobalProjections() {
-    console.log("🔄 Calculando proyecciones FIFA...");
+	console.log('🔄 Calculando proyecciones FIFA...');
 
-    const standings = {};
-    // Decidimos qué fuente de datos usar (Fan u Oficial)
-    const predsSource = role === 'admin' ? officialRes : currentUser.preds;
+	const standings = {};
+	// Decidimos qué fuente de datos usar (Fan u Oficial)
+	const predsSource = role === 'admin' ? officialRes : currentUser.preds;
 
-    // 1. CALCULAR TABLAS DE TODOS LOS GRUPOS
-    Object.keys(GROUPS_CONFIG).forEach(gid => {
-        const groupData = GROUPS_CONFIG[gid];
-        // Estructura temporal para cálculo
-        let teamsMap = groupData.teams.map((name, idx) => ({ 
-            name: name, 
-            group: gid,
-            pts: 0, dif: 0, gf: 0, gc: 0 
-        }));
+	// 1. CALCULAR TABLAS DE TODOS LOS GRUPOS
+	Object.keys(GROUPS_CONFIG).forEach((gid) => {
+		const groupData = GROUPS_CONFIG[gid];
+		// Estructura temporal para cálculo
+		let teamsMap = groupData.teams.map((name, idx) => ({
+			name: name,
+			group: gid,
+			pts: 0,
+			dif: 0,
+			gf: 0,
+			gc: 0,
+		}));
 
-        groupData.matches.forEach((m, idx) => {
-            let id = `${gid}-${idx}`;
-            // Buscar predicción H y A (ajuste las claves según como las guarde su app)
-            // NOTA: Su app usa claves tipo 'h-A-0'.
-            let vH = predsSource[`h-${id}`];
-            let vA = predsSource[`a-${id}`];
+		groupData.matches.forEach((m, idx) => {
+			let id = `${gid}-${idx}`;
+			// Buscar predicción H y A (ajuste las claves según como las guarde su app)
+			// NOTA: Su app usa claves tipo 'h-A-0'.
+			let vH = predsSource[`h-${id}`];
+			let vA = predsSource[`a-${id}`];
 
-            if(vH && vA && vH !== '' && vA !== '') { 
-                let sH = parseInt(vH); let sA = parseInt(vA);
-                
-                // Sumar stats
-                teamsMap[m.t1].gf += sH; teamsMap[m.t1].gc += sA; teamsMap[m.t1].dif += (sH-sA);
-                teamsMap[m.t2].gf += sA; teamsMap[m.t2].gc += sH; teamsMap[m.t2].dif += (sA-sH);
-                
-                if(sH > sA) teamsMap[m.t1].pts+=3;
-                else if(sA > sH) teamsMap[m.t2].pts+=3;
-                else { teamsMap[m.t1].pts+=1; teamsMap[m.t2].pts+=1; }
-            }
-        });
+			if (vH && vA && vH !== '' && vA !== '') {
+				let sH = parseInt(vH);
+				let sA = parseInt(vA);
 
-        // ORDENAMIENTO FIFA (PTS > DIF > GF)
-        teamsMap.sort((a,b) => {
-            if(b.pts !== a.pts) return b.pts - a.pts;
-            if(b.dif !== a.dif) return b.dif - a.dif;
-            return b.gf - a.gf;
-        });
+				// Sumar stats
+				teamsMap[m.t1].gf += sH;
+				teamsMap[m.t1].gc += sA;
+				teamsMap[m.t1].dif += sH - sA;
+				teamsMap[m.t2].gf += sA;
+				teamsMap[m.t2].gc += sH;
+				teamsMap[m.t2].dif += sA - sH;
 
-        standings[gid] = teamsMap;
-    });
+				if (sH > sA) teamsMap[m.t1].pts += 3;
+				else if (sA > sH) teamsMap[m.t2].pts += 3;
+				else {
+					teamsMap[m.t1].pts += 1;
+					teamsMap[m.t2].pts += 1;
+				}
+			}
+		});
 
-    // 2. ENCONTRAR MEJORES TERCEROS
-    let thirds = [];
-    Object.keys(standings).forEach(g => {
-        // El equipo en índice 2 es el 3ro del grupo
-        let t = standings[g][2]; 
-        if(t) thirds.push(t);
-    });
+		// ORDENAMIENTO FIFA (PTS > DIF > GF)
+		teamsMap.sort((a, b) => {
+			if (b.pts !== a.pts) return b.pts - a.pts;
+			if (b.dif !== a.dif) return b.dif - a.dif;
+			return b.gf - a.gf;
+		});
 
-    // Ordenar los terceros entre sí para sacar los Top 8
-    thirds.sort((a,b) => {
-        if(b.pts !== a.pts) return b.pts - a.pts;
-        if(b.dif !== a.dif) return b.dif - a.dif;
-        return b.gf - a.gf;
-    });
-    
-    // Tomamos los 8 mejores
-    let bestThirds = thirds.slice(0, 8); 
+		standings[gid] = teamsMap;
+	});
 
-    // 3. MAPEAR A LAS LLAVES (Round of 32)
-    const projectedR32 = {};
-    
-    // Función auxiliar para traducir códigos (Ej: "A1" -> "México")
-    const resolveTeam = (code) => {
-        if(!code) return '...';
-        let type = code.charAt(0); // 'A', 'B' ... o 'T' (Tercero)
-        let idx = parseInt(code.charAt(1)) - 1; // 1 -> 0
+	// 2. ENCONTRAR MEJORES TERCEROS
+	let thirds = [];
+	Object.keys(standings).forEach((g) => {
+		// El equipo en índice 2 es el 3ro del grupo
+		let t = standings[g][2];
+		if (t) thirds.push(t);
+	});
 
-        // Caso Clasificado Directo (A1, A2...)
-        if(type !== 'T') {
-            if(standings[type] && standings[type][idx]) {
-                return standings[type][idx].name;
-            }
-        } 
-        // Caso Mejor Tercero (T1, T2...)
-        else {
-            // T1 es el mejor tercero #1. 
-            if(bestThirds[idx]) {
-                return `(3${bestThirds[idx].group}) ${bestThirds[idx].name}`;
-            }
-        }
-        return '...'; // Si no hay datos aún
-    };
+	// Ordenar los terceros entre sí para sacar los Top 8
+	thirds.sort((a, b) => {
+		if (b.pts !== a.pts) return b.pts - a.pts;
+		if (b.dif !== a.dif) return b.dif - a.dif;
+		return b.gf - a.gf;
+	});
 
-    // Usamos la configuración de data.js
-    if(typeof R32_MATCHUPS !== 'undefined') {
-        R32_MATCHUPS.forEach(m => {
-            projectedR32[m.id] = {
-                homeTeam: resolveTeam(m.h),
-                awayTeam: resolveTeam(m.a)
-            };
-        });
-    }
+	// Tomamos los 8 mejores
+	let bestThirds = thirds.slice(0, 8);
 
-    // 4. GUARDAR EN MEMORIA DEL USUARIO
-    if(!currentUser.computed) currentUser.computed = {};
-    currentUser.computed.r32 = projectedR32;
-    
-    // Nota: No llamamos a renderBracket() aquí porque estamos en la vista de Grupos.
-    // Cuando el usuario cambie de pestaña, el renderBracket leerá 'currentUser.computed.r32'.
+	// 3. MAPEAR A LAS LLAVES (Round of 32)
+	const projectedR32 = {};
+
+	// Función auxiliar para traducir códigos (Ej: "A1" -> "México")
+	const resolveTeam = (code) => {
+		if (!code) return '...';
+		let type = code.charAt(0); // 'A', 'B' ... o 'T' (Tercero)
+		let idx = parseInt(code.charAt(1)) - 1; // 1 -> 0
+
+		// Caso Clasificado Directo (A1, A2...)
+		if (type !== 'T') {
+			if (standings[type] && standings[type][idx]) {
+				return standings[type][idx].name;
+			}
+		}
+		// Caso Mejor Tercero (T1, T2...)
+		else {
+			// T1 es el mejor tercero #1.
+			if (bestThirds[idx]) {
+				return `(3${bestThirds[idx].group}) ${bestThirds[idx].name}`;
+			}
+		}
+		return '...'; // Si no hay datos aún
+	};
+
+	// Usamos la configuración de data.js
+	if (typeof R32_MATCHUPS !== 'undefined') {
+		R32_MATCHUPS.forEach((m) => {
+			projectedR32[m.id] = {
+				homeTeam: resolveTeam(m.h),
+				awayTeam: resolveTeam(m.a),
+			};
+		});
+	}
+
+	// 4. GUARDAR EN MEMORIA DEL USUARIO
+	if (!currentUser.computed) currentUser.computed = {};
+	currentUser.computed.r32 = projectedR32;
+
+	// Nota: No llamamos a renderBracket() aquí porque estamos en la vista de Grupos.
+	// Cuando el usuario cambie de pestaña, el renderBracket leerá 'currentUser.computed.r32'.
 }
 
 /* =========================================================
    REFRESCO QUIRÚRGICO DE TABLA (Solo actualiza un grupo)
    ========================================================= */
+/* =========================================================
+   ACTUALIZAR TABLA (CON DESEMPATE MANUAL) ⚖️
+   ========================================================= */
 function refreshGroupTable(gid) {
-    const groupData = GROUPS_CONFIG[gid];
-    if(!groupData) return;
+	const groupData = GROUPS_CONFIG[gid];
+	if (!groupData) return;
 
-    // 1. Recalcular Stats solo de este grupo
-    let teamStats = groupData.teams.map(n => ({ name: n, pts: 0, dif: 0, gf: 0, gc: 0 }));
-    const predsSource = role === 'admin' ? officialRes : currentUser.preds;
+	// 1. Recalcular Stats
+	let teamStats = groupData.teams.map((n) => ({
+		name: n,
+		pts: 0,
+		dif: 0,
+		gf: 0,
+		gc: 0,
+		manualRank: 99, // Valor alto por defecto
+	}));
 
-    groupData.matches.forEach((m, idx) => {
-        let id = `${gid}-${idx}`;
-        let vH = predsSource[`h-${id}`];
-        let vA = predsSource[`a-${id}`];
+	// Determinar fuente de datos
+	// Usamos 'currentViewMode' para saber si estamos en Admin o User
+	let predsSource;
+	if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin') {
+		predsSource = typeof officialRes !== 'undefined' ? officialRes : {};
+	} else {
+		predsSource = currentUser && currentUser.preds ? currentUser.preds : {};
+	}
 
-        if(vH && vA && vH !== '' && vA !== '') { 
-            let sH = parseInt(vH); let sA = parseInt(vA);
-            teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += (sH - sA);
-            teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += (sA - sH);
-            if(sH > sA) teamStats[m.t1].pts += 3;
-            else if(sA > sH) teamStats[m.t2].pts += 3;
-            else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
-        }
-    });
+	// 🆕 Cargar Rankings Manuales (Si existen)
+	teamStats.forEach((t) => {
+		let key = `${gid}-${t.name}`;
+		if (typeof groupRankOverrides !== 'undefined' && groupRankOverrides[key]) {
+			t.manualRank = groupRankOverrides[key];
+		}
+	});
 
-    // 2. Ordenar FIFA
-    teamStats.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
+	// Sumar Puntos y Goles
+	groupData.matches.forEach((m, idx) => {
+		let id = `${gid}-${idx}`;
+		let vH = predsSource[`h-${id}`];
+		let vA = predsSource[`a-${id}`];
 
-    // 3. Generar HTML de las filas
-    let newRows = teamStats.map((t,i) => 
-        `<tr class="${i<2?'qual-zone':''}">
-            <td class="pos-num">${i+1}</td>
+		if (vH && vA && vH !== '' && vA !== '') {
+			let sH = parseInt(vH);
+			let sA = parseInt(vA);
+			teamStats[m.t1].gf += sH;
+			teamStats[m.t1].gc += sA;
+			teamStats[m.t1].dif += sH - sA;
+			teamStats[m.t2].gf += sA;
+			teamStats[m.t2].gc += sH;
+			teamStats[m.t2].dif += sA - sH;
+			if (sH > sA) teamStats[m.t1].pts += 3;
+			else if (sA > sH) teamStats[m.t2].pts += 3;
+			else {
+				teamStats[m.t1].pts += 1;
+				teamStats[m.t2].pts += 1;
+			}
+		}
+	});
+
+	// 2. ORDENAR (Incluyendo criterio manual)
+	teamStats.sort((a, b) => {
+		if (b.pts !== a.pts) return b.pts - a.pts;
+		if (b.dif !== a.dif) return b.dif - a.dif;
+		if (b.gf !== a.gf) return b.gf - a.gf;
+		// Si todo es igual, desempate manual
+		if (a.manualRank !== b.manualRank) return a.manualRank - b.manualRank;
+		// Si no hay manual, alfabético
+		return a.name.localeCompare(b.name);
+	});
+
+	// Determinar si puede editar (Solo Admin o Fan desbloqueado)
+	let canEditRank = false;
+	if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin')
+		canEditRank = true;
+	else if (
+		role === 'fan' &&
+		currentUser &&
+		(!currentUser.locks || !currentUser.locks.groups)
+	)
+		canEditRank = true;
+
+	// 3. Generar HTML
+	let newRows = teamStats
+		.map((t, i, arr) => {
+			let rowClass = i < 2 ? 'qual-zone' : '';
+
+			// 🆕 DETECTAR EMPATES
+			let prev = arr[i - 1];
+			let next = arr[i + 1];
+			let isTiedWithPrev =
+				prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
+			let isTiedWithNext =
+				next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
+
+			let showManualInput = (isTiedWithPrev || isTiedWithNext) && canEditRank;
+
+			// Renderizar Posición (Número o Combo Box)
+			let posDisplay = i + 1;
+
+			if (showManualInput) {
+				let opts = `<option value="">-</option>`;
+				[1, 2, 3, 4].forEach((num) => {
+					let sel = t.manualRank === num ? 'selected' : '';
+					opts += `<option value="${num}" ${sel}>${num}</option>`;
+				});
+				// Al cambiar, guardamos y volvemos a llamar a refreshGroupTable para que se reordene
+				posDisplay = `<select onchange="saveGroupRank('${gid}', '${t.name}', this.value); setTimeout(() => refreshGroupTable('${gid}'), 50);" 
+                            style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">
+                            ${opts}
+                          </select>`;
+			} else if (t.manualRank !== 99) {
+				// Indicador visual de que hubo mano negra (manual)
+				posDisplay = `<span style="color:#ffff00; font-weight:bold;" title="Posición Manual">${
+					i + 1
+				}*</span>`;
+			}
+
+			return `<tr class="${rowClass}">
+            <td class="pos-num">${posDisplay}</td>
             <td style="text-align:left; padding-left:5px;">${t.name}</td>
             <td style="font-weight:bold; color:#fff; font-size:0.95rem;">${t.pts}</td>
             <td style="color:#888;">${t.dif}</td>
             <td style="color:#888;">${t.gf}</td>
             <td style="color:#888;">${t.gc}</td>
-         </tr>`
-    ).join('');
+         </tr>`;
+		})
+		.join('');
 
-    // 4. Inyectar SOLO en el cuerpo de la tabla (No toca los inputs)
-    let tbody = document.getElementById(`tbody-${gid}`);
-    if(tbody) tbody.innerHTML = newRows;
+	// 4. Inyectar
+	let tbody = document.getElementById(`tbody-${gid}`);
+	if (tbody) tbody.innerHTML = newRows;
 }
 
 /* =========================================================
    PERSISTENCIA DE DATOS (CORREGIDO CON FIREBASE ☁️)
    ========================================================= */
 function saveUsersDB() {
-    if(role === 'admin') {
-        // Si por error entra aquí siendo admin, guardamos oficiales
-        localStorage.setItem('m26_official', JSON.stringify(officialRes));
-    } else {
-        // Buscar y actualizar usuario en la lista global
-        let idx = users.findIndex(u => u.name === currentUser.name); // Ojo: usé .name, no .username
-        
-        if(idx !== -1) {
-            users[idx] = currentUser;
-        } else {
-            // Si no está, lo agregamos
-            if(currentUser.name) users.push(currentUser);
-        }
-        
-        // Guardar backup local
-        localStorage.setItem('m26_users', JSON.stringify(users));
-        localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
-    }
+	if (role === 'admin') {
+		// Si por error entra aquí siendo admin, guardamos oficiales
+		localStorage.setItem('m26_official', JSON.stringify(officialRes));
+	} else {
+		// Buscar y actualizar usuario en la lista global
+		let idx = users.findIndex((u) => u.name === currentUser.name); // Ojo: usé .name, no .username
 
-    // 👇 LA LÍNEA MÁGICA: ¡SUBIR A LA NUBE! 👇
-    saveToCloud(); 
-    
-    console.log("💾 Datos guardados y sincronizados con la nube.");
+		if (idx !== -1) {
+			users[idx] = currentUser;
+		} else {
+			// Si no está, lo agregamos
+			if (currentUser.name) users.push(currentUser);
+		}
+
+		// Guardar backup local
+		localStorage.setItem('m26_users', JSON.stringify(users));
+		localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
+	}
+
+	// 👇 LA LÍNEA MÁGICA: ¡SUBIR A LA NUBE! 👇
+	saveToCloud();
+
+	console.log('💾 Datos guardados y sincronizados con la nube.');
 }
 
 /* =========================================================
    ACTUALIZAR GANADOR (PENALES) - BLINDADO 🛡️
    ========================================================= */
 function updateWinner(matchId, type, isChecked) {
-    // 1. Si es modo oficial (Fan mirando), no hace nada.
-    if (currentViewMode === 'official') return;
+	// 1. Si es modo oficial (Fan mirando), no hace nada.
+	if (currentViewMode === 'official') return;
 
-    // 2. Seleccionar qué base de datos modificar
-    let targetDB;
-    if (currentViewMode === 'admin') {
-        targetDB = officialRes;
-    } else {
-        targetDB = currentUser.preds;
-    }
+	// 2. Seleccionar qué base de datos modificar
+	let targetDB;
+	if (currentViewMode === 'admin') {
+		targetDB = officialRes;
+	} else {
+		targetDB = currentUser.preds;
+	}
 
-    let key = `w-${matchId}`;
+	let key = `w-${matchId}`;
 
-    // 3. LÓGICA DE GUARDADO (AQUÍ ESTÁ EL CAMBIO "LÁSER" 🔫)
-    if (isChecked) {
-        // --- CASO A: MARCAR (GUARDAR) ---
-        targetDB[key] = type; // Actualiza memoria local
+	// 3. LÓGICA DE GUARDADO (AQUÍ ESTÁ EL CAMBIO "LÁSER" 🔫)
+	if (isChecked) {
+		// --- CASO A: MARCAR (GUARDAR) ---
+		targetDB[key] = type; // Actualiza memoria local
 
-        if (currentViewMode === 'admin') {
-            // Guardar en LocalStorage
-            localStorage.setItem('m26_official', JSON.stringify(officialRes));
-            
-            // 🔥 GUARDADO LÁSER EN NUBE: Solo actualiza este dato específico
-            db.ref('/officialRes/' + key).set(type); 
-        }
+		if (currentViewMode === 'admin') {
+			// Guardar en LocalStorage
+			localStorage.setItem('m26_official', JSON.stringify(officialRes));
 
-    } else {
-        // --- CASO B: DESMARCAR (BORRAR) ---
-        delete targetDB[key]; // Borra de memoria local
+			// 🔥 GUARDADO LÁSER EN NUBE: Solo actualiza este dato específico
+			db.ref('/officialRes/' + key).set(type);
+		}
+	} else {
+		// --- CASO B: DESMARCAR (BORRAR) ---
+		delete targetDB[key]; // Borra de memoria local
 
-        if (currentViewMode === 'admin') {
-            // Guardar en LocalStorage
-            localStorage.setItem('m26_official', JSON.stringify(officialRes));
-            
-            // 🔥 BORRADO LÁSER EN NUBE: Elimina solo este dato
-            db.ref('/officialRes/' + key).remove();
-        }
-    }
+		if (currentViewMode === 'admin') {
+			// Guardar en LocalStorage
+			localStorage.setItem('m26_official', JSON.stringify(officialRes));
 
-    // 4. Persistencia para el Fan (Sigue igual)
-    if (currentViewMode !== 'admin') {
-        if (typeof saveUsersDB === 'function') saveUsersDB();
-    }
+			// 🔥 BORRADO LÁSER EN NUBE: Elimina solo este dato
+			db.ref('/officialRes/' + key).remove();
+		}
+	}
 
-    // 5. Refrescar Pantalla
-    if (typeof renderBracketView === 'function') renderBracketView(targetDB, currentViewMode);
-    else renderBracket(targetDB, currentViewMode);
+	// 4. Persistencia para el Fan (Sigue igual)
+	if (currentViewMode !== 'admin') {
+		if (typeof saveUsersDB === 'function') saveUsersDB();
+	}
+
+	// 5. Refrescar Pantalla
+	if (typeof renderBracketView === 'function')
+		renderBracketView(targetDB, currentViewMode);
+	else renderBracket(targetDB, currentViewMode);
 }
 
 /* =========================================================
@@ -1927,98 +2436,102 @@ let currentPhase = 'groups';
 
 // Esta es la función que llaman los botones nuevos
 function loadView(mode, phase) {
-    currentViewMode = mode; 
-    currentPhase = phase;
-    console.log(`Cargando vista: ${mode} - ${phase}`);
+	currentViewMode = mode;
+	currentPhase = phase;
+	console.log(`Cargando vista: ${mode} - ${phase}`);
 
-    // 1. TÍTULOS DINÁMICOS Y COLORES
-    const titleEl = document.getElementById('view-title');
-    if(titleEl) {
-        if (phase === 'settings') {
-            titleEl.innerText = "⚙️ CONFIGURACIÓN DEL SISTEMA";
-            titleEl.style.color = "#ff4444"; // Rojo Admin
-        } else {
-            // Títulos normales
-            let titleText = (mode === 'user') ? "👤 Mis Pronósticos" : "🏆 Resultados Oficiales";
-            if(mode === 'admin') titleText = "📝 Ingreso de Resultados (Admin)";
-            
-            titleText += (phase === 'groups') ? " - Fase de Grupos" : " - Fase Final";
-            titleEl.innerText = titleText;
-            
-            // Colores: User (Blanco), Oficial (Dorado), Admin (Dorado también o Rojo si prefiere)
-            if (mode === 'user') titleEl.style.color = "#fff";
-            else titleEl.style.color = "#ffd700"; 
-        }
-    }
+	// 1. TÍTULOS DINÁMICOS Y COLORES
+	const titleEl = document.getElementById('view-title');
+	if (titleEl) {
+		if (phase === 'settings') {
+			titleEl.innerText = '⚙️ CONFIGURACIÓN DEL SISTEMA';
+			titleEl.style.color = '#ff4444'; // Rojo Admin
+		} else {
+			// Títulos normales
+			let titleText =
+				mode === 'user' ? '👤 Mis Pronósticos' : '🏆 Resultados Oficiales';
+			if (mode === 'admin') titleText = '📝 Ingreso de Resultados (Admin)';
 
-    // 2. GESTIONAR BOTONES ACTIVOS (ILUMINAR) 💡
-    document.querySelectorAll('.dash-btn').forEach(b => b.classList.remove('active'));
-    
-    let btnId = '';
-    // Lógica Fan
-    if (mode === 'user' && phase === 'groups') btnId = 'btn-user-groups';
-    if (mode === 'user' && phase === 'final') btnId = 'btn-user-final';
-    
-    // Lógica Admin (NUEVO)
-    if (mode === 'admin' && phase === 'groups') btnId = 'btn-admin-groups';
-    if (mode === 'admin' && phase === 'final')  btnId = 'btn-admin-final';
-    if (mode === 'admin' && phase === 'settings') btnId = 'btn-admin-settings';
-    
-    // Lógica Oficial (Fan viendo resultados)
-    if (mode === 'official' && phase === 'groups') btnId = 'btn-off-groups';
-    if (mode === 'official' && phase === 'final') btnId = 'btn-off-final';
+			titleText += phase === 'groups' ? ' - Fase de Grupos' : ' - Fase Final';
+			titleEl.innerText = titleText;
 
-    const activeBtn = document.getElementById(btnId);
-    if(activeBtn) activeBtn.classList.add('active');
+			// Colores: User (Blanco), Oficial (Dorado), Admin (Dorado también o Rojo si prefiere)
+			if (mode === 'user') titleEl.style.color = '#fff';
+			else titleEl.style.color = '#ffd700';
+		}
+	}
 
-    // 3. OCULTAR TODOS LOS CONTENEDORES 🙈
-    // Usamos sus IDs: tab-groups, tab-bracket
-    const grpCont = document.getElementById('tab-groups'); 
-    const brkCont = document.getElementById('tab-bracket');
-    const setCont = document.getElementById('tab-settings'); // El de configuración
-    const realCont = document.getElementById('tab-real');    // El viejo (por si acaso)
-    
-    if(grpCont) grpCont.style.display = 'none';
-    if(brkCont) brkCont.style.display = 'none';
-    if(setCont) setCont.style.display = 'none'; 
-    if(realCont) realCont.style.display = 'none';
+	// 2. GESTIONAR BOTONES ACTIVOS (ILUMINAR) 💡
+	document
+		.querySelectorAll('.dash-btn')
+		.forEach((b) => b.classList.remove('active'));
 
-    // 4. CONTROL DE CAJA DE ENVIAR (Solo Fan en Grupos)
-    const submitArea = document.getElementById('submit-groups-area');
-    if (submitArea) {
-        if (mode === 'user' && phase === 'groups') submitArea.style.display = 'block';
-        else submitArea.style.display = 'none';
-    }
+	let btnId = '';
+	// Lógica Fan
+	if (mode === 'user' && phase === 'groups') btnId = 'btn-user-groups';
+	if (mode === 'user' && phase === 'final') btnId = 'btn-user-final';
 
-    // ============================================================
-    // 5. CASO ESPECIAL: CONFIGURACIÓN ⚙️
-    // ============================================================
-    if (phase === 'settings') {
-        if(setCont) setCont.style.display = 'block';
-        // Si es config, terminamos aquí. No cargamos partidos.
-        return; 
-    }
+	// Lógica Admin (NUEVO)
+	if (mode === 'admin' && phase === 'groups') btnId = 'btn-admin-groups';
+	if (mode === 'admin' && phase === 'final') btnId = 'btn-admin-final';
+	if (mode === 'admin' && phase === 'settings') btnId = 'btn-admin-settings';
 
-    // 6. SELECCIÓN DE DATOS
-    // Si es 'user' -> currentUser.preds
-    // Si es 'admin' u 'official' -> officialRes
-    // 6. SELECCIÓN DE DATOS (BLINDADO 🛡️)
-    let dataSource;
-    if (mode === 'user') {
-        // Si currentUser.preds es undefined, usamos {}
-        dataSource = (currentUser && currentUser.preds) ? currentUser.preds : {};
-    } else {
-        dataSource = officialRes || {};
-    }
+	// Lógica Oficial (Fan viendo resultados)
+	if (mode === 'official' && phase === 'groups') btnId = 'btn-off-groups';
+	if (mode === 'official' && phase === 'final') btnId = 'btn-off-final';
 
-    // 7. RENDERIZAR VISTAS
-    if (phase === 'groups') {
-        if(grpCont) grpCont.style.display = 'block';
-        renderGroups(dataSource, mode);
-    } else {
-        if(brkCont) brkCont.style.display = 'block'; // O 'flex' según su CSS
-        renderBracketView(dataSource, mode);
-    }
+	const activeBtn = document.getElementById(btnId);
+	if (activeBtn) activeBtn.classList.add('active');
+
+	// 3. OCULTAR TODOS LOS CONTENEDORES 🙈
+	// Usamos sus IDs: tab-groups, tab-bracket
+	const grpCont = document.getElementById('tab-groups');
+	const brkCont = document.getElementById('tab-bracket');
+	const setCont = document.getElementById('tab-settings'); // El de configuración
+	const realCont = document.getElementById('tab-real'); // El viejo (por si acaso)
+
+	if (grpCont) grpCont.style.display = 'none';
+	if (brkCont) brkCont.style.display = 'none';
+	if (setCont) setCont.style.display = 'none';
+	if (realCont) realCont.style.display = 'none';
+
+	// 4. CONTROL DE CAJA DE ENVIAR (Solo Fan en Grupos)
+	const submitArea = document.getElementById('submit-groups-area');
+	if (submitArea) {
+		if (mode === 'user' && phase === 'groups')
+			submitArea.style.display = 'block';
+		else submitArea.style.display = 'none';
+	}
+
+	// ============================================================
+	// 5. CASO ESPECIAL: CONFIGURACIÓN ⚙️
+	// ============================================================
+	if (phase === 'settings') {
+		if (setCont) setCont.style.display = 'block';
+		// Si es config, terminamos aquí. No cargamos partidos.
+		return;
+	}
+
+	// 6. SELECCIÓN DE DATOS
+	// Si es 'user' -> currentUser.preds
+	// Si es 'admin' u 'official' -> officialRes
+	// 6. SELECCIÓN DE DATOS (BLINDADO 🛡️)
+	let dataSource;
+	if (mode === 'user') {
+		// Si currentUser.preds es undefined, usamos {}
+		dataSource = currentUser && currentUser.preds ? currentUser.preds : {};
+	} else {
+		dataSource = officialRes || {};
+	}
+
+	// 7. RENDERIZAR VISTAS
+	if (phase === 'groups') {
+		if (grpCont) grpCont.style.display = 'block';
+		renderGroups(dataSource, mode);
+	} else {
+		if (brkCont) brkCont.style.display = 'block'; // O 'flex' según su CSS
+		renderBracketView(dataSource, mode);
+	}
 }
 
 // Adaptador para el Árbol
@@ -2026,171 +2539,218 @@ function loadView(mode, phase) {
    RENDERIZADOR DEL ÁRBOL (Fase Final) - INTELIGENTE 🧠
    ========================================================= */
 function renderBracketView(customData, customMode) {
-    // 1. Apuntar al contenedor correcto
-    // OJO AQUÍ: Asegúrate de que en tu HTML tengas <div id="bracket-container"> dentro de tab-bracket
-    const container = document.getElementById('bracket-container'); 
-    if(!container) return;
-    
-    container.innerHTML = ''; // Limpiar pizarra
+	// 1. Apuntar al contenedor correcto
+	// OJO AQUÍ: Asegúrate de que en tu HTML tengas <div id="bracket-container"> dentro de tab-bracket
+	const container = document.getElementById('bracket-container');
+	if (!container) return;
 
-    // 2. Definir Datos y Modo
-    let dataToUse = customData || currentUser.preds;
-    let modeToUse = customMode || 'user';
+	container.innerHTML = ''; // Limpiar pizarra
 
-    // Si es Admin en modo oficial, forzamos officialRes
-    if (role === 'admin' && modeToUse === 'official') {
-        dataToUse = officialRes;
-    }
+	// 2. Definir Datos y Modo
+	let dataToUse = customData || currentUser.preds;
+	let modeToUse = customMode || 'user';
 
-    // 3. CALCULAR LOS EQUIPOS QUE PASAN (Simulación)
-    // Importante: Calculamos quién juega contra quién basado en LA DATA QUE ELEGIMOS
-    simulatedTeams = calculateSimulatedTeams(dataToUse); 
+	// Si es Admin en modo oficial, forzamos officialRes
+	if (role === 'admin' && modeToUse === 'official') {
+		dataToUse = officialRes;
+	}
 
-    // 4. DIBUJAR LAS COLUMNAS (Pasando la data y el modo hacia abajo) 👇
-    // Fíjate que al final de cada línea pasamos (dataToUse, modeToUse)
-    
-    container.innerHTML += renderRoundColumn('16avos', R32_MATCHUPS, 'r32', 'r32', dataToUse, modeToUse);
-    container.innerHTML += renderRoundColumn('Octavos', R16_MATCHUPS, 'r16', 'r16', dataToUse, modeToUse);
-    container.innerHTML += renderRoundColumn('Cuartos', QF_MATCHUPS, 'qf', 'qf', dataToUse, modeToUse);
-    container.innerHTML += renderRoundColumn('Semis', SF_MATCHUPS, 'sf', 'sf', dataToUse, modeToUse);
-    container.innerHTML += renderRoundColumn('Final', F_MATCHUPS, 'f', 'f', dataToUse, modeToUse);
-    
-    // Si tienes partido de 3er puesto, agrégalo aquí también
+	// 3. CALCULAR LOS EQUIPOS QUE PASAN (Simulación)
+	// Importante: Calculamos quién juega contra quién basado en LA DATA QUE ELEGIMOS
+	simulatedTeams = calculateSimulatedTeams(dataToUse);
+
+	// 4. DIBUJAR LAS COLUMNAS (Pasando la data y el modo hacia abajo) 👇
+	// Fíjate que al final de cada línea pasamos (dataToUse, modeToUse)
+
+	container.innerHTML += renderRoundColumn(
+		'16avos',
+		R32_MATCHUPS,
+		'r32',
+		'r32',
+		dataToUse,
+		modeToUse,
+	);
+	container.innerHTML += renderRoundColumn(
+		'Octavos',
+		R16_MATCHUPS,
+		'r16',
+		'r16',
+		dataToUse,
+		modeToUse,
+	);
+	container.innerHTML += renderRoundColumn(
+		'Cuartos',
+		QF_MATCHUPS,
+		'qf',
+		'qf',
+		dataToUse,
+		modeToUse,
+	);
+	container.innerHTML += renderRoundColumn(
+		'Semis',
+		SF_MATCHUPS,
+		'sf',
+		'sf',
+		dataToUse,
+		modeToUse,
+	);
+	container.innerHTML += renderRoundColumn(
+		'Final',
+		F_MATCHUPS,
+		'f',
+		'f',
+		dataToUse,
+		modeToUse,
+	);
+
+	// Si tienes partido de 3er puesto, agrégalo aquí también
 }
 
 /* =========================================================
    ☁️ CEREBRO DE FIREBASE (SINCRONIZACIÓN)
    ========================================================= */
 
-
 // 1. ESCUCHAR CAMBIOS (Bajar datos de la nube) 📡
 // VERSIÓN BLINDADA FINAL 🛡️
 // 1. ESCUCHAR CAMBIOS (VERSIÓN FINAL CON BANDERA isEditing 🚩)
 function startFirebaseListener() {
-    console.log("📡 Conectando antena al satélite...");
-    
-    db.ref('/').on('value', (snapshot) => {
-        const data = snapshot.val();
-        if (!data) return console.log("☁️ Nube vacía.");
+	console.log('📡 Conectando antena al satélite...');
 
-        // 1. Carga de datos
-        if (data.users) users = data.users;
-        officialRes = data.officialRes || {}; 
-        if (data.phaseControl) phaseControl = data.phaseControl;
-        if (data.officialTeams) officialTeams = data.officialTeams;
-        if (data.simulatedTeams) simulatedTeams = data.simulatedTeams;
+	db.ref('/').on('value', (snapshot) => {
+		const data = snapshot.val();
+		if (!data) return console.log('☁️ Nube vacía.');
 
-        // 2. Actualizar Usuario Local
-        if (currentUser && currentUser.name) {
-            const foundUser = users.find(u => u.name === currentUser.name);
-            if (foundUser) {
-                currentUser = foundUser;
-                if (!currentUser.preds) currentUser.preds = {};
-                if (!currentUser.locks) currentUser.locks = { groups: false, r32: false, r16: false, qf: false, sf: false, f: false };
-                localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
-            }
-        }
+		// 1. Carga de datos
+		if (data.users) users = data.users;
+		officialRes = data.officialRes || {};
+		if (data.phaseControl) phaseControl = data.phaseControl;
+		if (data.officialTeams) officialTeams = data.officialTeams;
+		if (data.simulatedTeams) simulatedTeams = data.simulatedTeams;
 
-        // 🛑 BLOQUEO TOTAL SI ESTÁ EDITANDO 🛑
-        // Si la bandera está arriba, NO REPINTAMOS NADA VISUAL.
-        if (isEditing) {
-            console.log("🤫 Usuario editando. Silenciando repintado.");
-            // Solo actualizamos cálculos de fondo, pero no tocamos el HTML
-            if (typeof updateStatusUI === 'function') updateStatusUI();
-            return; 
-        }
+		// 2. Actualizar Usuario Local
+		if (currentUser && currentUser.name) {
+			const foundUser = users.find((u) => u.name === currentUser.name);
+			if (foundUser) {
+				currentUser = foundUser;
+				if (!currentUser.preds) currentUser.preds = {};
+				if (!currentUser.locks)
+					currentUser.locks = {
+						groups: false,
+						r32: false,
+						r16: false,
+						qf: false,
+						sf: false,
+						f: false,
+					};
+				localStorage.setItem('m26_currentUser', JSON.stringify(currentUser));
+			}
+		}
 
-        // 3. Refresco Visual (Solo si la bandera está abajo)
-        if (typeof loadView === 'function') {
-            if (currentViewMode === 'official') {
-                loadView('official', currentPhase || 'groups');
-            }
-            else if (currentViewMode === 'user') {
-                loadView('user', currentPhase || 'groups');
-            }
-        }
-        
-        if (typeof updateStatusUI === 'function') updateStatusUI();
-        if (typeof renderRanking === 'function') renderRanking();
-    });
+		// 🛑 BLOQUEO TOTAL SI ESTÁ EDITANDO 🛑
+		// Si la bandera está arriba, NO REPINTAMOS NADA VISUAL.
+		if (isEditing) {
+			console.log('🤫 Usuario editando. Silenciando repintado.');
+			// Solo actualizamos cálculos de fondo, pero no tocamos el HTML
+			if (typeof updateStatusUI === 'function') updateStatusUI();
+			return;
+		}
+
+		// 3. Refresco Visual (Solo si la bandera está abajo)
+		if (typeof loadView === 'function') {
+			if (currentViewMode === 'official') {
+				loadView('official', currentPhase || 'groups');
+			} else if (currentViewMode === 'user') {
+				loadView('user', currentPhase || 'groups');
+			}
+		}
+
+		if (typeof updateStatusUI === 'function') updateStatusUI();
+		if (typeof renderRanking === 'function') renderRanking();
+	});
 }
 
 // 2. GUARDAR CAMBIOS (NEUTRALIZADO PARA NO BORRAR RESULTADOS 🛡️)
 function saveToCloud() {
-    console.log("☁️ Sincronizando usuarios con la nube...");
-    
-    // SOLO enviamos lo que es seguro sobrescribir masivamente (Usuarios)
-    // Quitamos officialRes, officialTeams y phaseControl de aquí para evitar accidentes.
-    const payload = {
-        users: users,
-        lastUpdate: new Date().toISOString()
-    };
+	console.log('☁️ Sincronizando usuarios con la nube...');
 
-    db.ref('/').update(payload)
-        .then(() => console.log("✅ Usuarios sincronizados."))
-        .catch((e) => console.error("❌ Error guardando:", e));
+	// SOLO enviamos lo que es seguro sobrescribir masivamente (Usuarios)
+	// Quitamos officialRes, officialTeams y phaseControl de aquí para evitar accidentes.
+	const payload = {
+		users: users,
+		lastUpdate: new Date().toISOString(),
+	};
+
+	db.ref('/')
+		.update(payload)
+		.then(() => console.log('✅ Usuarios sincronizados.'))
+		.catch((e) => console.error('❌ Error guardando:', e));
 }
 
 /* =========================================================
    🚀 TURBO NAVEGACIÓN (ENTER PARA SALTAR)
    Permite llenar la quiniela rápido usando la tecla Enter.
    ========================================================= */
-document.addEventListener('keydown', function(event) {
-    // Solo nos interesa si presiona ENTER
-    if (event.key === 'Enter') {
-        const target = event.target;
+document.addEventListener('keydown', function (event) {
+	// Solo nos interesa si presiona ENTER
+	if (event.key === 'Enter') {
+		const target = event.target;
 
-        // Verificamos que sea uno de nuestros inputs de goles
-        // (Son inputs tipo número y que NO estén deshabilitados)
-        if (target.tagName === 'INPUT' && target.type === 'number' && !target.disabled) {
-            
-            event.preventDefault(); // Evitamos comportamientos raros del navegador
-            
-            // 1. Buscamos TODOS los inputs válidos en la pantalla
-            // Esto crea una lista ordenada: [P1-Local, P1-Visitante, P2-Local, P2-Visitante...]
-            const allInputs = Array.from(document.querySelectorAll('input[type="number"]:not([disabled])'));
-            
-            // 2. Encontramos dónde estamos parados
-            const currentIndex = allInputs.indexOf(target);
-            
-            // 3. Si no somos el último, saltamos al siguiente
-            if (currentIndex !== -1 && currentIndex < allInputs.length - 1) {
-                const nextInput = allInputs[currentIndex + 1];
-                
-                // A. Poner el foco en el siguiente
-                nextInput.focus(); 
-                
-                // B. ¡TRUCAZO! Seleccionar el texto para sobreescribir rápido
-                // (Así no tiene que borrar el 0, solo escribe el número encima)
-                nextInput.select(); 
-            } else {
-                // Si es el último input, quitamos el foco para indicar que acabó
-                target.blur();
-            }
-        }
-    }
+		// Verificamos que sea uno de nuestros inputs de goles
+		// (Son inputs tipo número y que NO estén deshabilitados)
+		if (
+			target.tagName === 'INPUT' &&
+			target.type === 'number' &&
+			!target.disabled
+		) {
+			event.preventDefault(); // Evitamos comportamientos raros del navegador
+
+			// 1. Buscamos TODOS los inputs válidos en la pantalla
+			// Esto crea una lista ordenada: [P1-Local, P1-Visitante, P2-Local, P2-Visitante...]
+			const allInputs = Array.from(
+				document.querySelectorAll('input[type="number"]:not([disabled])'),
+			);
+
+			// 2. Encontramos dónde estamos parados
+			const currentIndex = allInputs.indexOf(target);
+
+			// 3. Si no somos el último, saltamos al siguiente
+			if (currentIndex !== -1 && currentIndex < allInputs.length - 1) {
+				const nextInput = allInputs[currentIndex + 1];
+
+				// A. Poner el foco en el siguiente
+				nextInput.focus();
+
+				// B. ¡TRUCAZO! Seleccionar el texto para sobreescribir rápido
+				// (Así no tiene que borrar el 0, solo escribe el número encima)
+				nextInput.select();
+			} else {
+				// Si es el último input, quitamos el foco para indicar que acabó
+				target.blur();
+			}
+		}
+	}
 });
 
 /* =========================================================
    VIGILANTES DE FOCO (Para que no se cierre el teclado) 🕵️‍♂️
    ========================================================= */
 document.addEventListener('focusin', (e) => {
-    // Si entró a un input de números, ALZAR BANDERA
-    if(e.target.matches('input[type="number"]')) {
-        isEditing = true;
-    }
+	// Si entró a un input de números, ALZAR BANDERA
+	if (e.target.matches('input[type="number"]')) {
+		isEditing = true;
+	}
 });
 
 document.addEventListener('focusout', (e) => {
-    // Si salió, esperamos un poquito antes de bajar la bandera
-    // por si acaso solo está saltando al siguiente input con Enter/Tab
-    setTimeout(() => {
-        // Solo bajamos la bandera si el nuevo elemento NO es un input
-        const active = document.activeElement;
-        if (!active || active.tagName !== 'INPUT' || active.type !== 'number') {
-            isEditing = false;
-        }
-    }, 500); // 0.5 segundos de gracia
+	// Si salió, esperamos un poquito antes de bajar la bandera
+	// por si acaso solo está saltando al siguiente input con Enter/Tab
+	setTimeout(() => {
+		// Solo bajamos la bandera si el nuevo elemento NO es un input
+		const active = document.activeElement;
+		if (!active || active.tagName !== 'INPUT' || active.type !== 'number') {
+			isEditing = false;
+		}
+	}, 500); // 0.5 segundos de gracia
 });
 
 /* =========================================================
@@ -2210,57 +2770,61 @@ document.addEventListener('focusout', (e) => {
    ☢️ FUNCIÓN "TERMINATOR" (SIN LOGOUT) ☢️
    ========================================================= */
 function wipeOfficialData() {
-    let confirmacion = confirm("⚠️ CONFIRMACIÓN FINAL ⚠️\n\nVamos a borrar:\n1. Goles Oficiales\n2. Correcciones Manuales\n3. La 'Foto' de los Clasificados\n\n¿Desea dejar el sistema TOTALMENTE VACÍO?");
+	let confirmacion = confirm(
+		"⚠️ CONFIRMACIÓN FINAL ⚠️\n\nVamos a borrar:\n1. Goles Oficiales\n2. Correcciones Manuales\n3. La 'Foto' de los Clasificados\n\n¿Desea dejar el sistema TOTALMENTE VACÍO?",
+	);
 
-    if (!confirmacion) return;
+	if (!confirmacion) return;
 
-    // 1. BOMBARDEO LOCAL 🧹
-    Object.keys(localStorage).forEach(key => {
-        if (key.startsWith('m26_official') || key.startsWith('m26_overrides')) {
-            localStorage.removeItem(key);
-        }
-    });
+	// 1. BOMBARDEO LOCAL 🧹
+	Object.keys(localStorage).forEach((key) => {
+		if (key.startsWith('m26_official') || key.startsWith('m26_overrides')) {
+			localStorage.removeItem(key);
+		}
+	});
 
-    // 2. BOMBARDEO A LA NUBE (FIREBASE) ☁️💥
-    if (typeof firebase !== 'undefined' && firebase.database) {
-        let db = firebase.database();
-        
-        let borrados = [
-            db.ref('/officialRes').set(null),        
-            db.ref('/officialTeams').set(null),      
-            db.ref('/officialOverrides').set(null),  
-            db.ref('/officialPenalties').set(null),  
-            db.ref('/m26_overrides').set(null)       
-        ];
+	// 2. BOMBARDEO A LA NUBE (FIREBASE) ☁️💥
+	if (typeof firebase !== 'undefined' && firebase.database) {
+		let db = firebase.database();
 
-        Promise.all(borrados)
-            .then(() => {
-                // --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
-                
-                // A) Limpiamos las variables en memoria RAM manualmente
-                // (Para que la web sepa que están vacías sin recargar la página)
-                if (typeof officialRes !== 'undefined') officialRes = {};
-                if (typeof officialTeams !== 'undefined') officialTeams = null; 
-                if (typeof officialOverrides !== 'undefined') officialOverrides = {};
-                if (typeof officialPenalties !== 'undefined') officialPenalties = {};
+		let borrados = [
+			db.ref('/officialRes').set(null),
+			db.ref('/officialTeams').set(null),
+			db.ref('/officialOverrides').set(null),
+			db.ref('/officialPenalties').set(null),
+			db.ref('/m26_overrides').set(null),
+		];
 
-                alert("✅ ¡LIMPIEZA EXITOSA!\n\nEl sistema ha quedado en ceros.\nVamos a repintar la pantalla.");
-                
-                // B) EN LUGAR DE RELOAD, USAMOS loadView 🎨
-                // Lo mandamos a la vista de Grupos para que vea todo vacío (0-0)
-                if (typeof loadView === 'function') {
-                    loadView('admin', 'groups'); 
-                } else {
-                    console.error("No encontré loadView, pero los datos ya se borraron.");
-                }
-            })
-            .catch((error) => {
-                alert("❌ Error en Firebase: " + error.message);
-            });
-    } else {
-        // Fallback si no hay nube
-        localStorage.removeItem('m26_official'); 
-        alert("⚠️ Solo se borró lo local.");
-        if (typeof loadView === 'function') loadView('admin', 'groups');
-    }
+		Promise.all(borrados)
+			.then(() => {
+				// --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
+
+				// A) Limpiamos las variables en memoria RAM manualmente
+				// (Para que la web sepa que están vacías sin recargar la página)
+				if (typeof officialRes !== 'undefined') officialRes = {};
+				if (typeof officialTeams !== 'undefined') officialTeams = null;
+				if (typeof officialOverrides !== 'undefined') officialOverrides = {};
+				if (typeof officialPenalties !== 'undefined') officialPenalties = {};
+
+				alert(
+					'✅ ¡LIMPIEZA EXITOSA!\n\nEl sistema ha quedado en ceros.\nVamos a repintar la pantalla.',
+				);
+
+				// B) EN LUGAR DE RELOAD, USAMOS loadView 🎨
+				// Lo mandamos a la vista de Grupos para que vea todo vacío (0-0)
+				if (typeof loadView === 'function') {
+					loadView('admin', 'groups');
+				} else {
+					console.error('No encontré loadView, pero los datos ya se borraron.');
+				}
+			})
+			.catch((error) => {
+				alert('❌ Error en Firebase: ' + error.message);
+			});
+	} else {
+		// Fallback si no hay nube
+		localStorage.removeItem('m26_official');
+		alert('⚠️ Solo se borró lo local.');
+		if (typeof loadView === 'function') loadView('admin', 'groups');
+	}
 }
