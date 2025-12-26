@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-    version: "v2.2",           // El número de la versión
+    version: "v2.3",           // El número de la versión
     environment: "BETA",       // Estado: DEV, BETA, PROD
     buildDate: "25-Dic-2025"   // Fecha de la última actualización
 };
@@ -125,6 +125,59 @@ let simulatedTeams = {};
    VARIALBES GLOBALES EXTRA
    ========================================================= */
 let isEditing = false; // Bandera para saber si el usuario está escribiendo
+
+/* =========================================================
+   VARIABLES GLOBALES PARA LA "MANO DE DIOS" 🖐️
+   ========================================================= */
+// Intentamos leer del LocalStorage si ya hay correcciones guardadas
+var officialOverrides = JSON.parse(localStorage.getItem('m26_overrides')) || {};
+
+// Función para guardar el "Sticker" (El cambio manual)
+/* =========================================================
+   FUNCIÓN DE GUARDADO 2.0 (Sin Logout y con Datos Reales)
+   ========================================================= */
+/* =========================================================
+   FUNCIÓN DE GUARDADO (FIX DEFINITIVO 🛠️)
+   ========================================================= */
+function overrideTeamName(matchId, side, teamName) {
+    let key = `${matchId}-${side}`;
+    
+    // 1. LÓGICA DE GUARDADO (IGUAL QUE ANTES)
+    if (teamName === "") {
+        delete officialOverrides[key]; 
+    } else {
+        // Buscamos el seed correcto (3A, 3B...)
+        let teamData = window.GLOBAL_THIRDS ? window.GLOBAL_THIRDS.find(t => t.name === teamName) : null;
+        let seed = teamData ? `3${teamData.group}` : 'MAN'; 
+
+        officialOverrides[key] = {
+            name: teamName,
+            seed: seed
+        };
+    }
+
+    // 2. GUARDAR EN MEMORIA
+    localStorage.setItem('m26_overrides', JSON.stringify(officialOverrides));
+    console.log(`✅ Cambio guardado: ${teamName}`);
+    
+    // =====================================================
+    // ✋ AQUÍ ESTÁ LA SOLUCIÓN MAGISTRAL ✋
+    // =====================================================
+    
+    // En lugar de location.reload(), llamamos a su función de vista:
+    // Primer parámetro: 'admin' (porque usted está editando)
+    // Segundo parámetro: 'final' (que es donde están las llaves)
+    
+    if (typeof loadView === 'function') {
+        loadView('admin', 'final'); 
+    } else {
+        // Por si acaso no la encuentra (aunque debería)
+        console.error("No encontré la función loadView, recargando a la fuerza...");
+        location.reload();
+    }
+}
+
+
 
 /* =========================================================
    4. FUNCIONES DE LOGIN Y MODO
@@ -701,6 +754,9 @@ function calculateSimulatedTeams(predsSource) {
     Object.keys(standings).forEach(g => { if(standings[g][2]) allThirds.push(standings[g][2]); });
     allThirds.sort((a,b) => (b.pts - a.pts) || (b.dif - a.dif) || (b.gf - a.gf));
     const qualifiedThirds = allThirds.slice(0, 8);
+
+    // Esto hace que la lista de terceros esté disponible para el Dropdown
+    window.GLOBAL_THIRDS = qualifiedThirds;
     
     // =========================================================
     // 3. PRE-ASIGNACIÓN DE TERCEROS (Lógica Alfabética Estricta) 🧠
@@ -830,7 +886,7 @@ function calculateSimulatedTeams(predsSource) {
         return { name: '...', seed: '' };
     };
 
-    // 5. EJECUTAR
+    // 5. EJECUTAR EN CASCADA (CON LA MANO DE DIOS 🖐️)
     const phases = [
         (typeof R32_MATCHUPS !== 'undefined' ? R32_MATCHUPS : []),
         (typeof R16_MATCHUPS !== 'undefined' ? R16_MATCHUPS : []),
@@ -841,9 +897,33 @@ function calculateSimulatedTeams(predsSource) {
 
     phases.forEach(phase => {
         phase.forEach(m => {
+            // 1. Calculamos lo que dice la matemática (La lógica automática)
+            let homeTeam = resolveTeamData(m.h);
+            let awayTeam = resolveTeamData(m.a);
+
+            // 2. LA MANO DE DIOS: Revisamos si hay una corrección manual 🖐️
+            // officialOverrides debe estar definida globalmente (como hicimos en el Paso 1)
+            if (typeof officialOverrides !== 'undefined') {
+                let ovH = officialOverrides[`${m.id}-h`];
+                let ovA = officialOverrides[`${m.id}-a`];
+
+                if (ovH) {
+                    // Si es objeto (nuevo formato) o string (viejo formato por si acaso)
+                    let ovName = (typeof ovH === 'object') ? ovH.name : ovH;
+                    let ovSeed = (typeof ovH === 'object') ? ovH.seed : 'MAN';
+                    homeTeam = { name: ovName, seed: ovSeed, group: '?' };
+                }
+                if (ovA) {
+                    let ovName = (typeof ovA === 'object') ? ovA.name : ovA;
+                    let ovSeed = (typeof ovA === 'object') ? ovA.seed : 'MAN';
+                    awayTeam = { name: ovName, seed: ovSeed, group: '?' };
+                }
+            }
+
+            // 3. Guardamos el resultado (sea automático o manual)
             projected[m.id] = {
-                home: resolveTeamData(m.h),
-                away: resolveTeamData(m.a)
+                home: homeTeam,
+                away: awayTeam
             };
         });
     });
@@ -949,21 +1029,68 @@ function renderRoundColumn(title, matchups, prefix, phaseKey, sourceData, mode) 
         else if(phaseKey === 'f') flowClass = 'flow-end'; 
         else flowClass = 'flow-mid'; 
 
-        // HELPER RENDER TEAM (SIMPLIFICADO) 🧹
-        // Aquí quitamos el if(role === 'admin'...) para que siempre muestre texto y no input
+        // HELPER RENDER TEAM (MODIFICADO CON LA MANO DE DIOS 🖐️)
+        // HELPER RENDER TEAM (VERSIÓN DROPDOWN DE LUJO 🔽)
+        // HELPER RENDER TEAM (MODO FANTASMA PRO 👻)
         let renderTeam = (slot, name, seed, type) => {
             let isChecked = (penWinner === type) ? 'checked' : '';
             let checkHTML = `<input type="checkbox" class="pen-check" ${isChecked} ${disabled} style="${checkStyle} margin-left:5px; cursor:pointer;" onchange="updateWinner('${m.id}', '${type}', this.checked)">`;
-            let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${seed}</span>`;
+            
+            // Lógica del Seed (Igual que antes)
+            let finalSeed = seed;
+            if (role === 'admin' && officialOverrides && officialOverrides[`${m.id}-${type}`]) {
+                finalSeed = officialOverrides[`${m.id}-${type}`].seed;
+            }
+            
+            let badgeHTML = `<span class="seed-badge" style="display:inline-block; width:28px; font-size:0.7rem; font-weight:bold; color:#ffd700; margin-right:4px; text-align:left;">${finalSeed}</span>`;
 
-            // Siempre retornamos la versión de lectura (span)
+            let nameDisplay;
+            let isThirdPlaceSlot = (seed.startsWith('3') || seed.startsWith('T') || seed === 'MAN');
+
+            // --- AQUÍ EMPIEZA LA MAGIA VISUAL ---
+            if (role === 'admin' && phaseKey === 'r32' && isThirdPlaceSlot) {
+                
+                // 1. Construimos las opciones con "3A - Nombre"
+                let options = `<option value="">-- Seleccionar --</option>`;
+                if (window.GLOBAL_THIRDS) {
+                    window.GLOBAL_THIRDS.forEach(t => {
+                        let selected = (t.name === name) ? 'selected' : '';
+                        options += `<option value="${t.name}" ${selected}>3${t.group} - ${t.name}</option>`;
+                    });
+                }
+
+                // 2. EL TRUCO FANTASMA 👻
+                // Un DIV contenedor relativo
+                // Un DIV absoluto abajo (Muestra solo el nombre: "Sudáfrica")
+                // Un SELECT absoluto arriba (Invisible, tiene la lista completa)
+                
+                nameDisplay = `
+                    <div style="position:relative; width:130px; height:22px; display:inline-block; vertical-align:middle;">
+                        
+                        <div style="position:absolute; top:0; left:0; width:100%; height:100%; 
+                                    background:#000; color:#ffff00; border:1px solid #555; 
+                                    font-size:0.8rem; padding:2px 4px; white-space:nowrap; overflow:hidden; pointer-events:none; z-index:1;">
+                            ${name || '<span style="color:#777">Seleccione...</span>'} <span style="float:right; opacity:0.5;">▼</span>
+                        </div>
+                        
+                        <select onchange="overrideTeamName('${m.id}', '${type}', this.value)"
+                                style="position:absolute; top:0; left:0; width:100%; height:100%; 
+                                       opacity:0; z-index:10; cursor:pointer;">
+                            ${options}
+                        </select>
+                    </div>`;
+
+            } else {
+                // Vista normal
+                nameDisplay = `<span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>`;
+            }
+
             return `<div style="display:flex; align-items:center; width:100%; overflow:hidden;">
                         ${badgeHTML}
-                        <span class="b-team" title="${name}" style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${name}</span>
+                        ${nameDisplay}
                         ${checkHTML}
                     </div>`;
         };
-
         // --- CONSTRUCCIÓN DE LA TARJETA ---
         // Aplicamos style="${inputStyle}" a los inputs de números
         html += `<div class="bracket-match ${flowClass}" id="match-${m.id}">
@@ -2065,3 +2192,75 @@ document.addEventListener('focusout', (e) => {
         }
     }, 500); // 0.5 segundos de gracia
 });
+
+/* =========================================================
+   ☢️ FUNCIÓN DE RESETEO (SOLO ADMIN)
+   Borra todos los marcadores oficiales y correcciones manuales
+   ========================================================= */
+/* =========================================================
+   ☢️ FUNCIÓN DE RESETEO NUCLEAR (RUTA CORREGIDA ✅)
+   ========================================================= */
+/* =========================================================
+   ☢️ FUNCIÓN DE RESETEO NUCLEAR (VERSIÓN CAZAFANTASMAS 👻)
+   ========================================================= */
+/* =========================================================
+   ☢️ FUNCIÓN "TERMINATOR" (BORRADO ABSOLUTO) ☢️
+   ========================================================= */
+/* =========================================================
+   ☢️ FUNCIÓN "TERMINATOR" (SIN LOGOUT) ☢️
+   ========================================================= */
+function wipeOfficialData() {
+    let confirmacion = confirm("⚠️ CONFIRMACIÓN FINAL ⚠️\n\nVamos a borrar:\n1. Goles Oficiales\n2. Correcciones Manuales\n3. La 'Foto' de los Clasificados\n\n¿Desea dejar el sistema TOTALMENTE VACÍO?");
+
+    if (!confirmacion) return;
+
+    // 1. BOMBARDEO LOCAL 🧹
+    Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('m26_official') || key.startsWith('m26_overrides')) {
+            localStorage.removeItem(key);
+        }
+    });
+
+    // 2. BOMBARDEO A LA NUBE (FIREBASE) ☁️💥
+    if (typeof firebase !== 'undefined' && firebase.database) {
+        let db = firebase.database();
+        
+        let borrados = [
+            db.ref('/officialRes').set(null),        
+            db.ref('/officialTeams').set(null),      
+            db.ref('/officialOverrides').set(null),  
+            db.ref('/officialPenalties').set(null),  
+            db.ref('/m26_overrides').set(null)       
+        ];
+
+        Promise.all(borrados)
+            .then(() => {
+                // --- AQUÍ ESTÁ EL CAMBIO CLAVE ---
+                
+                // A) Limpiamos las variables en memoria RAM manualmente
+                // (Para que la web sepa que están vacías sin recargar la página)
+                if (typeof officialRes !== 'undefined') officialRes = {};
+                if (typeof officialTeams !== 'undefined') officialTeams = null; 
+                if (typeof officialOverrides !== 'undefined') officialOverrides = {};
+                if (typeof officialPenalties !== 'undefined') officialPenalties = {};
+
+                alert("✅ ¡LIMPIEZA EXITOSA!\n\nEl sistema ha quedado en ceros.\nVamos a repintar la pantalla.");
+                
+                // B) EN LUGAR DE RELOAD, USAMOS loadView 🎨
+                // Lo mandamos a la vista de Grupos para que vea todo vacío (0-0)
+                if (typeof loadView === 'function') {
+                    loadView('admin', 'groups'); 
+                } else {
+                    console.error("No encontré loadView, pero los datos ya se borraron.");
+                }
+            })
+            .catch((error) => {
+                alert("❌ Error en Firebase: " + error.message);
+            });
+    } else {
+        // Fallback si no hay nube
+        localStorage.removeItem('m26_official'); 
+        alert("⚠️ Solo se borró lo local.");
+        if (typeof loadView === 'function') loadView('admin', 'groups');
+    }
+}
