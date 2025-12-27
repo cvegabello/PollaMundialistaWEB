@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v4.2', // El número de la versión
+	version: 'v4.3', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
 	buildDate: '27-Dic-2025', // Fecha de la última actualización
 };
@@ -2956,21 +2956,31 @@ function startFirebaseListener() {
     });
 }
 
-// 2. GUARDAR CAMBIOS (NEUTRALIZADO PARA NO BORRAR RESULTADOS 🛡️)
+// 2. GUARDAR CAMBIOS (VERSIÓN BLINDADA 🛡️)
 function saveToCloud() {
-	console.log('☁️ Sincronizando usuarios con la nube...');
+    // 1. Candado de seguridad: Si no hay usuario logueado, NO TOQUE NADA.
+    if (!currentUser || !currentUser.uid) {
+        console.error("❌ ERROR CRÍTICO: Intentando guardar sin usuario logueado.");
+        return;
+    }
 
-	// SOLO enviamos lo que es seguro sobrescribir masivamente (Usuarios)
-	// Quitamos officialRes, officialTeams y phaseControl de aquí para evitar accidentes.
-	const payload = {
-		users: users,
-		lastUpdate: new Date().toISOString(),
-	};
+    console.log(`☁️ Guardando datos EXCLUSIVAMENTE de: ${currentUser.name}...`);
 
-	db.ref('/')
-		.update(payload)
-		.then(() => console.log('✅ Usuarios sincronizados.'))
-		.catch((e) => console.error('❌ Error guardando:', e));
+    // 2. Preparamos el paquete de actualización
+    // Usamos 'updates' para hacer varios cambios atómicos a la vez
+    let updates = {};
+
+    // A) Guardamos SOLO a este usuario en su casilla específica (RESPETANDO SU ID)
+    updates['/users/' + currentUser.uid] = currentUser;
+
+    // B) Actualizamos la fecha global (Opcional, pero útil)
+    updates['/lastUpdate'] = new Date().toISOString();
+
+    // 3. Enviamos el cohete a la nube 🚀
+    // Note que usamos db.ref().update(updates) en la raíz para mandar rutas específicas
+    db.ref().update(updates)
+        .then(() => console.log('✅ Tu usuario se guardó correctamente (Sin dañar a los demás).'))
+        .catch((e) => console.error('❌ Error guardando:', e));
 }
 
 /* =========================================================
