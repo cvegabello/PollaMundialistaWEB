@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v4.3', // El número de la versión
+	version: 'v4.4', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
 	buildDate: '27-Dic-2025', // Fecha de la última actualización
 };
@@ -254,7 +254,11 @@ function overrideTeamName(matchId, side, teamName) {
    LOGIN: MANEJO DE INICIO DE SESIÓN 🔐
    ========================================================= */
 
-// 🚦 SEMÁFORO DE SEGURIDAD (Para evitar doble click o Enter+Click)
+/* =========================================================
+   LOGIN: MANEJO DE INICIO DE SESIÓN 🔐
+   ========================================================= */
+
+// 🚦 SEMÁFORO DE SEGURIDAD
 let isLoggingIn = false; 
 
 function handleLogin() {
@@ -270,10 +274,8 @@ function handleLogin() {
 
     if (!u) return alert('Por favor ingresa un nombre de usuario.');
 
-    // 2. ACTIVAMOS EL SEMÁFORO (OCUPADO) 🔴
+    // 2. ACTIVAMOS EL SEMÁFORO 🔴
     isLoggingIn = true;
-
-    // Deshabilitamos visualmente el botón también
     if (btn) {
         btn.innerText = 'Procesando...';
         btn.disabled = true;
@@ -281,51 +283,88 @@ function handleLogin() {
         btn.style.cursor = "not-allowed";
     }
 
-    // --- CAMINO ADMIN ---
+    // --- CAMINO ADMIN (RECUPERADO DEL PASADO + SEMÁFORO) ---
     if (p === 'admin2026') {
-        // ... (Tu lógica de admin igual) ...
-        isLoggingIn = false; // Liberamos semáforo si es admin (aunque cambie de vista)
-        // ... resto del código admin ...
+        console.log("🔑 Accediendo como ADMINISTRADOR...");
+        
+        // A) Liberamos semáforo
+        isLoggingIn = false;
+
+        // B) Cambiamos pantallas
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('app').style.display = 'block';
+
+        // C) Activamos Listeners
         if (typeof startFirebaseListener === 'function') startFirebaseListener();
-        setupAdminMode();
-        // ... etc ...
+        
+        // D) Lógica visual (EXACTA A COMO FUNCIONABA ANTES)
+        setupAdminMode(); // 👈 Esta función es clave, ella pinta los botones
+        
+        // UI Dashboard Visibilidad
+        const fanDash = document.getElementById('fan-dashboard');
+        const adminDash = document.getElementById('admin-dashboard');
+        
+        if (adminDash) {
+             adminDash.classList.remove('hidden');
+             
+             // 👇👇👇 AQUÍ ESTÁ LA MAGIA DEL CENTRADO 👇👇👇
+             adminDash.style.display = 'flex';           // Modo flexible
+             adminDash.style.justifyContent = 'center';  // Centrado horizontal
+             adminDash.style.alignItems = 'center';      // Centrado vertical
+             adminDash.style.flexWrap = 'wrap';          // Si no caben, que bajen
+             adminDash.style.gap = '15px';               // Espacio entre botones
+             adminDash.style.margin = '20px auto';       // Márgenes automáticos
+             adminDash.style.width = '100%';             // Ocupar todo el ancho disponible
+             // 👆👆👆 FIN DEL CENTRADO 👆👆👆
+
+             console.log("✅ Panel Admin activado y CENTRADO.");
+        }
+        if (fanDash) {
+             fanDash.classList.add('hidden');
+             fanDash.style.display = 'none'; // Refuerzo
+        }
+
+        // E) Carga de datos
         loadAdminData();
         loadView('admin', 'groups');
         return;
     }
 
-    // --- CAMINO FAN ---
+    // --- CAMINO FAN (CON LA SEGURIDAD NUEVA: TIMESTAMP + ARRAY FIX) ---
     console.log(`☁️ Buscando usuario: "${u}" en Firebase...`);
 
     db.ref('/users')
         .once('value')
         .then((snapshot) => {
-            // ... (Toda tu lógica de búsqueda igualita) ...
-            const allUsers = snapshot.val() || {};
+            const rawData = snapshot.val() || {};
+            // Convertimos diccionario a array para búsqueda local
+            const allUsers = Object.values(rawData); 
+
             let existingUser = null;
             let userId = null;
 
-            for (let key in allUsers) {
-                if (allUsers[key].name && allUsers[key].name.toLowerCase() === u) {
-                    existingUser = allUsers[key];
-                    userId = key;
+            // BÚSQUEDA ROBUSTA
+            for (let key in rawData) {
+                if (rawData[key].name && rawData[key].name.toLowerCase() === u) {
+                    existingUser = rawData[key];
+                    userId = key; // Este es el ID largo (1766...)
                     break;
                 }
             }
 
             if (existingUser) {
-                // ... (Lógica de usuario existente) ...
                 console.log('✅ ¡ENCONTRADO! ID:', userId);
                 currentUser = existingUser;
-                currentUser.uid = userId;
+                currentUser.uid = userId; // Aseguramos que tenga el UID
+
                 localStorage.setItem('m26_active_uid', userId);
                 localStorage.setItem('m26_user', JSON.stringify(currentUser));
-                users = Object.values(allUsers);
+
+                users = allUsers;
             } else {
-                // ... (Lógica de usuario nuevo con Timestamp) ...
                 console.log('✨ Usuario nuevo. Generando ID único...');
+                
+                // 🛡️ AQUÍ ESTÁ LA DEFENSA CONTRA EL BORRADO (TIMESTAMP)
                 let newIndex = new Date().getTime().toString(); 
                 
                 currentUser = {
@@ -337,33 +376,30 @@ function handleLogin() {
                     submissionTime: null
                 };
 
+                // Guardamos local
                 localStorage.setItem('m26_active_uid', newIndex);
                 localStorage.setItem('m26_user', JSON.stringify(currentUser));
 
                 if (!Array.isArray(users)) users = [];
                 users.push(currentUser);
 
+                // 🛡️ GUARDADO QUIRÚRGICO (NO .SET MASIVO)
                 let updates = {};
                 updates['users/' + newIndex] = currentUser;
-                
-                // NOTA: No esperamos al update para entrar, pero mantenemos el semáforo
                 db.ref().update(updates);
             }
 
             enterAppAsFan();
-            // OJO: No ponemos isLoggingIn = false aquí porque al cambiar de vista
-            // ya no importa, pero si quisieras permitir reintentos sin recargar:
-            // isLoggingIn = false; 
+            // isLoggingIn = false; // (Opcional: No lo liberamos para forzar recarga si quieren salir)
         })
         .catch((error) => {
             console.error('❌ Error Login:', error);
             alert('Error de conexión. Intenta de nuevo.');
             
-            // 3. EN CASO DE ERROR, LIBERAMOS EL SEMÁFORO 🟢
+            // Liberamos semáforo en error
             isLoggingIn = false;
-            
             if (btn) {
-                btn.innerText = 'ENTRAR'; // Texto original
+                btn.innerText = 'ENTRAR';
                 btn.disabled = false;
                 btn.style.opacity = "1";
                 btn.style.cursor = "pointer";
@@ -2515,132 +2551,124 @@ function updateGlobalProjections() {
    ACTUALIZAR TABLA (CON DESEMPATE MANUAL) ⚖️
    ========================================================= */
 function refreshGroupTable(gid) {
-	const groupData = GROUPS_CONFIG[gid];
-	if (!groupData) return;
+    const groupData = GROUPS_CONFIG[gid];
+    if (!groupData) return;
 
-	// 1. Recalcular Stats
-	let teamStats = groupData.teams.map((n) => ({
-		name: n,
-		pts: 0,
-		dif: 0,
-		gf: 0,
-		gc: 0,
-		manualRank: 99, // Valor alto por defecto
-	}));
+    // 1. Recalcular Stats
+    let teamStats = groupData.teams.map((n) => ({
+        name: n,
+        pts: 0,
+        dif: 0,
+        gf: 0,
+        gc: 0,
+        manualRank: 99, 
+    }));
 
-	// Determinar fuente de datos
-	// Usamos 'currentViewMode' para saber si estamos en Admin o User
-	let predsSource;
-	if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin') {
-		predsSource = typeof officialRes !== 'undefined' ? officialRes : {};
-	} else {
-		predsSource = currentUser && currentUser.preds ? currentUser.preds : {};
-	}
+    // Determinar fuente de datos
+    let predsSource;
+    if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin') {
+        predsSource = typeof officialRes !== 'undefined' ? officialRes : {};
+    } else {
+        predsSource = currentUser && currentUser.preds ? currentUser.preds : {};
+    }
 
-	// 🆕 Cargar Rankings Manuales (Si existen)
-	teamStats.forEach((t) => {
-		let key = `${gid}-${t.name}`;
-		if (typeof groupRankOverrides !== 'undefined' && groupRankOverrides[key]) {
-			t.manualRank = groupRankOverrides[key];
-		}
-	});
+    // Cargar Rankings Manuales
+    teamStats.forEach((t) => {
+        let key = `${gid}-${t.name}`;
+        if (typeof groupRankOverrides !== 'undefined' && groupRankOverrides[key]) {
+            t.manualRank = groupRankOverrides[key];
+        }
+    });
 
-	// Sumar Puntos y Goles
-	groupData.matches.forEach((m, idx) => {
-		let id = `${gid}-${idx}`;
-		let vH = predsSource[`h-${id}`];
-		let vA = predsSource[`a-${id}`];
+    // Sumar Puntos y Goles
+    groupData.matches.forEach((m, idx) => {
+        let id = `${gid}-${idx}`;
+        let vH = predsSource[`h-${id}`];
+        let vA = predsSource[`a-${id}`];
 
-		if (vH && vA && vH !== '' && vA !== '') {
-			let sH = parseInt(vH);
-			let sA = parseInt(vA);
-			teamStats[m.t1].gf += sH;
-			teamStats[m.t1].gc += sA;
-			teamStats[m.t1].dif += sH - sA;
-			teamStats[m.t2].gf += sA;
-			teamStats[m.t2].gc += sH;
-			teamStats[m.t2].dif += sA - sH;
-			if (sH > sA) teamStats[m.t1].pts += 3;
-			else if (sA > sH) teamStats[m.t2].pts += 3;
-			else {
-				teamStats[m.t1].pts += 1;
-				teamStats[m.t2].pts += 1;
-			}
-		}
-	});
+        if (vH && vA && vH !== '' && vA !== '') {
+            let sH = parseInt(vH);
+            let sA = parseInt(vA);
+            teamStats[m.t1].gf += sH;
+            teamStats[m.t1].gc += sA;
+            teamStats[m.t1].dif += sH - sA;
+            teamStats[m.t2].gf += sA;
+            teamStats[m.t2].gc += sH;
+            teamStats[m.t2].dif += sA - sH;
+            if (sH > sA) teamStats[m.t1].pts += 3;
+            else if (sA > sH) teamStats[m.t2].pts += 3;
+            else {
+                teamStats[m.t1].pts += 1;
+                teamStats[m.t2].pts += 1;
+            }
+        }
+    });
 
-	// 2. ORDENAR (Incluyendo criterio manual)
-	teamStats.sort((a, b) => {
-		if (b.pts !== a.pts) return b.pts - a.pts;
-		if (b.dif !== a.dif) return b.dif - a.dif;
-		if (b.gf !== a.gf) return b.gf - a.gf;
-		// Si todo es igual, desempate manual
-		if (a.manualRank !== b.manualRank) return a.manualRank - b.manualRank;
-		// Si no hay manual, alfabético
-		return a.name.localeCompare(b.name);
-	});
+    // 2. ORDENAR
+    teamStats.sort((a, b) => {
+        if (b.pts !== a.pts) return b.pts - a.pts;
+        if (b.dif !== a.dif) return b.dif - a.dif;
+        if (b.gf !== a.gf) return b.gf - a.gf;
+        if (a.manualRank !== b.manualRank) return a.manualRank - b.manualRank;
+        return a.name.localeCompare(b.name);
+    });
 
-	// Determinar si puede editar (Solo Admin o Fan desbloqueado)
-	let canEditRank = false;
-	if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin')
-		canEditRank = true;
-	else if (
-		role === 'fan' &&
-		currentUser &&
-		(!currentUser.locks || !currentUser.locks.groups)
-	)
-		canEditRank = true;
+    // Permisos de edición
+    let canEditRank = false;
+    if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin')
+        canEditRank = true;
+    else if (
+        role === 'fan' &&
+        currentUser &&
+        (!currentUser.locks || !currentUser.locks.groups)
+    )
+        canEditRank = true;
 
-	// 3. Generar HTML
-	let newRows = teamStats
-		.map((t, i, arr) => {
-			let rowClass = i < 2 ? 'qual-zone' : '';
+    // 3. Generar HTML (AQUÍ ESTÁ EL ARREGLO DE ORDEN Y COLORES)
+    let newRows = teamStats
+        .map((t, i, arr) => {
+            let rowClass = i < 2 ? 'qual-zone' : '';
 
-			// 🆕 DETECTAR EMPATES
-			let prev = arr[i - 1];
-			let next = arr[i + 1];
-			let isTiedWithPrev =
-				prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
-			let isTiedWithNext =
-				next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
+            // Detectar empates
+            let prev = arr[i - 1];
+            let next = arr[i + 1];
+            let isTiedWithPrev =
+                prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
+            let isTiedWithNext =
+                next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
 
-			let showManualInput = (isTiedWithPrev || isTiedWithNext) && canEditRank;
+            let showManualInput = (isTiedWithPrev || isTiedWithNext) && canEditRank;
 
-			// Renderizar Posición (Número o Combo Box)
-			let posDisplay = i + 1;
+            let posDisplay = i + 1;
 
-			if (showManualInput) {
-				let opts = `<option value="">-</option>`;
-				[1, 2, 3, 4].forEach((num) => {
-					let sel = t.manualRank === num ? 'selected' : '';
-					opts += `<option value="${num}" ${sel}>${num}</option>`;
-				});
-				// Al cambiar, guardamos y volvemos a llamar a refreshGroupTable para que se reordene
-				posDisplay = `<select onchange="saveGroupRank('${gid}', '${t.name}', this.value); setTimeout(() => refreshGroupTable('${gid}'), 50);" 
+            if (showManualInput) {
+                let opts = `<option value="">-</option>`;
+                [1, 2, 3, 4].forEach((num) => {
+                    let sel = t.manualRank === num ? 'selected' : '';
+                    opts += `<option value="${num}" ${sel}>${num}</option>`;
+                });
+                posDisplay = `<select onchange="saveGroupRank('${gid}', '${t.name}', this.value); setTimeout(() => refreshGroupTable('${gid}'), 50);" 
                             style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">
                             ${opts}
                           </select>`;
-			} else if (t.manualRank !== 99) {
-				// Indicador visual de que hubo mano negra (manual)
-				posDisplay = `<span style="color:#ffff00; font-weight:bold;" title="Posición Manual">${
-					i + 1
-				}*</span>`;
-			}
+            } else if (t.manualRank !== 99) {
+                posDisplay = `<span style="color:#ffff00; font-weight:bold;" title="Posición Manual">${
+                    i + 1
+                }*</span>`;
+            }
 
-			return `<tr class="${rowClass}">
-            <td class="pos-num">${posDisplay}</td>
+            // 👇👇👇 ORDEN CORREGIDO: Pts | GF | GC | DG 👇👇👇
+            return `<tr class="${rowClass}" style="border-bottom: 1px solid #222;">
+            <td class="pos-num" style="text-align:center;">${posDisplay}</td>
             <td style="text-align:left; padding-left:5px;">${t.name}</td>
-            <td style="font-weight:bold; color:#fff; font-size:0.95rem;">${t.pts}</td>
-            <td style="color:#888;">${t.dif}</td>
-            <td style="color:#888;">${t.gf}</td>
-            <td style="color:#888;">${t.gc}</td>
-         </tr>`;
-		})
-		.join('');
+            
+            <td style="font-weight:bold; color:#e6b800; text-align:center;">${t.pts}</td> <td style="color:#ccc; text-align:center;">${t.gf}</td>  <td style="color:#888; text-align:center;">${t.gc}</td>  <td style="color:#ccc; text-align:center;">${t.dif > 0 ? '+' + t.dif : t.dif}</td> </tr>`;
+        })
+        .join('');
 
-	// 4. Inyectar
-	let tbody = document.getElementById(`tbody-${gid}`);
-	if (tbody) tbody.innerHTML = newRows;
+    // 4. Inyectar
+    let tbody = document.getElementById(`tbody-${gid}`);
+    if (tbody) tbody.innerHTML = newRows;
 }
 
 /* =========================================================
