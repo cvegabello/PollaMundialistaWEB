@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v4.1', // El número de la versión
+	version: 'v4.2', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
 	buildDate: '27-Dic-2025', // Fecha de la última actualización
 };
@@ -250,7 +250,17 @@ function overrideTeamName(matchId, side, teamName) {
 /* =========================================================
    LOGIN FINAL (CON CAJA FUERTE DE ID 🔒)
    ========================================================= */
+/* =========================================================
+   LOGIN: MANEJO DE INICIO DE SESIÓN 🔐
+   ========================================================= */
+
+// 🚦 SEMÁFORO DE SEGURIDAD (Para evitar doble click o Enter+Click)
+let isLoggingIn = false; 
+
 function handleLogin() {
+    // 1. SI YA ESTAMOS PROCESANDO, NO HAGAS NADA 🛑
+    if (isLoggingIn) return;
+
     const uInput = document.getElementById('username');
     const pInput = document.getElementById('password');
     const btn = document.querySelector('.login-btn');
@@ -260,41 +270,43 @@ function handleLogin() {
 
     if (!u) return alert('Por favor ingresa un nombre de usuario.');
 
+    // 2. ACTIVAMOS EL SEMÁFORO (OCUPADO) 🔴
+    isLoggingIn = true;
+
+    // Deshabilitamos visualmente el botón también
+    if (btn) {
+        btn.innerText = 'Procesando...';
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
+        btn.style.cursor = "not-allowed";
+    }
+
     // --- CAMINO ADMIN ---
     if (p === 'admin2026') {
+        // ... (Tu lógica de admin igual) ...
+        isLoggingIn = false; // Liberamos semáforo si es admin (aunque cambie de vista)
+        // ... resto del código admin ...
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         if (typeof startFirebaseListener === 'function') startFirebaseListener();
         setupAdminMode();
-        
-        const fanDash = document.getElementById('fan-dashboard');
-        const adminDash = document.getElementById('admin-dashboard');
-        if (adminDash) adminDash.classList.remove('hidden');
-        if (fanDash) fanDash.classList.add('hidden');
-        
+        // ... etc ...
         loadAdminData();
         loadView('admin', 'groups');
         return;
     }
 
     // --- CAMINO FAN ---
-    const originalBtnText = btn ? btn.innerText : 'ENTRAR';
-    if (btn) {
-        btn.innerText = 'Buscando ID...';
-        btn.disabled = true;
-    }
-
     console.log(`☁️ Buscando usuario: "${u}" en Firebase...`);
 
     db.ref('/users')
         .once('value')
         .then((snapshot) => {
+            // ... (Toda tu lógica de búsqueda igualita) ...
             const allUsers = snapshot.val() || {};
-
             let existingUser = null;
             let userId = null;
 
-            // BÚSQUEDA
             for (let key in allUsers) {
                 if (allUsers[key].name && allUsers[key].name.toLowerCase() === u) {
                     existingUser = allUsers[key];
@@ -304,66 +316,57 @@ function handleLogin() {
             }
 
             if (existingUser) {
+                // ... (Lógica de usuario existente) ...
                 console.log('✅ ¡ENCONTRADO! ID:', userId);
-
                 currentUser = existingUser;
                 currentUser.uid = userId;
-
                 localStorage.setItem('m26_active_uid', userId);
                 localStorage.setItem('m26_user', JSON.stringify(currentUser));
-
-                // Convertimos a array solo para manejo local, pero conservando los datos
                 users = Object.values(allUsers);
             } else {
+                // ... (Lógica de usuario nuevo con Timestamp) ...
                 console.log('✨ Usuario nuevo. Generando ID único...');
-                
-                /* 👇👇👇 CAMBIO CRÍTICO: USA TIMESTAMP, NO LENGTH 👇👇👇 */
-                // Esto genera un número único basado en la fecha (Ej: "17085432105")
-                // .toString() es vital para que Firebase lo trate como texto, no como array
                 let newIndex = new Date().getTime().toString(); 
-                /* 👆👆👆 FIN DEL CAMBIO 👆👆👆 */
-
+                
                 currentUser = {
                     uid: newIndex,
                     name: u,
                     preds: {},
-                    locks: {
-                        groups: false,
-                        r32: false,
-                        r16: false,
-                        qf: false,
-                        sf: false,
-                        f: false,
-                    },
+                    locks: { groups: false, r32: false, r16: false, qf: false, sf: false, f: false },
                     role: 'fan',
-                    submissionTime: null // Inicializamos vacío
+                    submissionTime: null
                 };
 
-                // 🔥 Guardar ID nuevo
                 localStorage.setItem('m26_active_uid', newIndex);
                 localStorage.setItem('m26_user', JSON.stringify(currentUser));
 
                 if (!Array.isArray(users)) users = [];
                 users.push(currentUser);
 
-                // Guardar en la nube usando el ID de tiempo
-                // NOTA: Usamos .update para ser más seguros
                 let updates = {};
                 updates['users/' + newIndex] = currentUser;
                 
-                db.ref().update(updates).then(() => {
-                     console.log("✅ Usuario nuevo guardado en la nube");
-                });
+                // NOTA: No esperamos al update para entrar, pero mantenemos el semáforo
+                db.ref().update(updates);
             }
 
             enterAppAsFan();
+            // OJO: No ponemos isLoggingIn = false aquí porque al cambiar de vista
+            // ya no importa, pero si quisieras permitir reintentos sin recargar:
+            // isLoggingIn = false; 
         })
         .catch((error) => {
             console.error('❌ Error Login:', error);
             alert('Error de conexión. Intenta de nuevo.');
+            
+            // 3. EN CASO DE ERROR, LIBERAMOS EL SEMÁFORO 🟢
+            isLoggingIn = false;
+            
             if (btn) {
-                btn.innerText = originalBtnText;
+                btn.innerText = 'ENTRAR'; // Texto original
                 btn.disabled = false;
+                btn.style.opacity = "1";
+                btn.style.cursor = "pointer";
             }
         });
 }
