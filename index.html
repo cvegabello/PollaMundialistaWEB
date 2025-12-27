@@ -66,7 +66,7 @@
         <div class="toolbar">
             <!-- <button class="tool-btn" onclick="smartSave()" title="Guardar">💾 <span class="tool-text">Guardar</span></button> -->
             
-            <button class="tool-btn" onclick="showReport()" title="Ranking">🏆 <span class="tool-text">Ranking</span></button>
+            <button class="tool-btn" onclick="openRanking()" title="Polla Posiciones">🏆 <span class="tool-text">Posiciones de la polla</span></button>
             
             <button class="tool-btn" onclick="showThirdsTable()" title="Terceros">🥉 <span class="tool-text">3ros</span></button>
             
@@ -127,10 +127,6 @@
     <h2 id="view-title" class="dynamic-title">Cargando...</h2>
 
     <div id="tab-groups" class="section active">
-        <div id="submit-groups-area" class="hidden">
-            <span id="groups-msg" style="display:block; margin-bottom:10px; font-weight:bold;">Fase en Borrador.</span>
-            <button id="btn-submit-groups" class="btn-big-submit" onclick="submitPhase('groups')">ENVIAR OFICIALMENTE</button>
-        </div>
         <div id="groups-container" class="groups-grid"></div>
     </div>
 
@@ -246,6 +242,53 @@
         </div>
     </div>
 </div>
+
+<div id="user-management-modal" class="modal" style="display:none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8);">
+    
+    <div class="modal-content" style="background-color: #1a1a1a; margin: 5% auto; padding: 20px; border: 1px solid #444; width: 90%; max-width: 600px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+        
+        <span class="close" onclick="document.getElementById('user-management-modal').style.display='none'" 
+              style="color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;">&times;</span>
+        
+        <h2 style="color: #e6b800; text-align: center; border-bottom: 1px solid #444; padding-bottom: 10px;">
+            👮‍♂️ GESTIÓN DE USUARIOS
+        </h2>
+
+        <div id="user-list-container" style="margin-top: 20px; max-height: 400px; overflow-y: auto;">
+            </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <button onclick="document.getElementById('user-management-modal').style.display='none'" 
+                    style="padding: 10px 20px; background: #333; color: white; border: none; cursor: pointer; border-radius: 5px;">
+                Cerrar Panel
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<div id="ranking-modal" class="modal" style="display:none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85);">
+    <div class="modal-content" style="background-color: #1a1a1a; margin: 5% auto; padding: 20px; border: 1px solid #e6b800; width: 90%; max-width: 500px; border-radius: 15px; box-shadow: 0 0 20px rgba(230, 184, 0, 0.3);">
+        
+        <span class="close" onclick="document.getElementById('ranking-modal').style.display='none'" 
+              style="color: #aaa; float: right; font-size: 28px; cursor: pointer;">&times;</span>
+        
+        <h2 style="color: #e6b800; text-align: center; font-family: 'Arial Black', sans-serif; letter-spacing: 1px;">
+            🏆 TABLA DE POSICIONES
+        </h2>
+
+        <div id="ranking-list-container" style="margin-top: 20px; max-height: 60vh; overflow-y: auto;">
+            </div>
+
+        <div style="text-align:center; margin-top:20px;">
+            <button onclick="document.getElementById('ranking-modal').style.display='none'" 
+                    style="background:#333; color:white; border:none; padding:10px 20px; border-radius:20px; cursor:pointer;">
+                Cerrar
+            </button>
+        </div>
+    </div>
+</div>
+
 
 
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>

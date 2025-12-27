@@ -2,9 +2,9 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v2.3', // El número de la versión
+	version: 'v3.0', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
-	buildDate: '25-Dic-2025', // Fecha de la última actualización
+	buildDate: '26-Dic-2025', // Fecha de la última actualización
 };
 
 /* =========================================================
@@ -235,88 +235,94 @@ function overrideTeamName(matchId, side, teamName) {
 /* =========================================================
    LOGIN INTELIGENTE (VERIFICACIÓN EN NUBE ☁️)
    ========================================================= */
+/* =========================================================
+   LOGIN DE FAN (CORREGIDO: ASIGNACIÓN DE UID) 🔑
+   ========================================================= */
+/* =========================================================
+   LOGIN DE FAN (VERSIÓN QUE CAPTURA EL ID 🆔)
+   ========================================================= */
+/* =========================================================
+   LOGIN DE FAN (CON PERSISTENCIA DE ID 💾)
+   ========================================================= */
+/* =========================================================
+   LOGIN BLINDADO (TATUAJE DE IDs EN LISTA GLOBAL) 🛡️
+   ========================================================= */
+/* =========================================================
+   LOGIN FINAL (CON CAJA FUERTE DE ID 🔒)
+   ========================================================= */
 function handleLogin() {
 	const uInput = document.getElementById('username');
 	const pInput = document.getElementById('password');
-	const btn = document.querySelector('.login-btn'); // Asegúrese que su botón tenga esta clase o un ID
+	const btn = document.querySelector('.login-btn');
 
-	const u = uInput.value.trim().toLowerCase(); // Guardamos en minúsculas para evitar 'Carlos' vs 'carlos'
+	const u = uInput.value.trim().toLowerCase();
 	const p = pInput.value;
 
 	if (!u) return alert('Por favor ingresa un nombre de usuario.');
 
-	// --- CAMINO ADMIN (Este es local y rápido) ---
+	// --- CAMINO ADMIN ---
 	if (p === 'admin2026') {
 		document.getElementById('login-overlay').style.display = 'none';
 		document.getElementById('app').style.display = 'block';
-
-		startFirebaseListener(); // Arrancamos el listener general
-
-		// Configurar Admin
+		if (typeof startFirebaseListener === 'function') startFirebaseListener();
 		setupAdminMode();
-
-		// Gestión de tableros
+		// UI Dashboard
 		const fanDash = document.getElementById('fan-dashboard');
 		const adminDash = document.getElementById('admin-dashboard');
 		if (adminDash) adminDash.classList.remove('hidden');
 		if (fanDash) fanDash.classList.add('hidden');
-
+		loadAdminData();
 		loadView('admin', 'groups');
 		return;
 	}
 
-	// --- CAMINO FAN (AQUÍ ESTÁ LA MAGIA 🎩) ---
-
-	// 1. Mostrar estado de carga (Feedback visual)
+	// --- CAMINO FAN ---
 	const originalBtnText = btn ? btn.innerText : 'ENTRAR';
 	if (btn) {
-		btn.innerText = 'Buscando en la nube...';
+		btn.innerText = 'Buscando ID...';
 		btn.disabled = true;
 	}
 
-	console.log(`☁️ Preguntando a Firebase por: ${u}...`);
+	console.log(`☁️ Buscando usuario: "${u}" en Firebase...`);
 
-	// 2. CONSULTA DIRECTA A FIREBASE (ONCE)
-	// No dependemos del listener, vamos a buscar activamente.
 	db.ref('/users')
 		.once('value')
 		.then((snapshot) => {
-			const allUsers = snapshot.val() || [];
+			const allUsers = snapshot.val() || {};
 
-			// Buscamos si ya existe (Búsqueda insensible a mayúsculas/minúsculas)
-			let existingUserIndex = -1;
 			let existingUser = null;
+			let userId = null;
 
-			if (Array.isArray(allUsers)) {
-				// Si es un array
-				existingUserIndex = allUsers.findIndex(
-					(user) => user.name.toLowerCase() === u,
-				);
-				if (existingUserIndex !== -1)
-					existingUser = allUsers[existingUserIndex];
-			} else {
-				// Si Firebase lo devolvió como objeto (raro pero posible)
-				const keys = Object.keys(allUsers);
-				for (let key of keys) {
-					if (allUsers[key].name.toLowerCase() === u) {
-						existingUser = allUsers[key];
-						break;
-					}
+			// BÚSQUEDA
+			for (let key in allUsers) {
+				if (allUsers[key].name && allUsers[key].name.toLowerCase() === u) {
+					existingUser = allUsers[key];
+					userId = key;
+					break;
 				}
 			}
 
-			// 3. DECISIÓN
 			if (existingUser) {
-				// CASO A: EL USUARIO YA EXISTE -> RECUPERAMOS SUS DATOS ✅
-				console.log('✅ Usuario encontrado en la nube. Cargando datos...');
+				console.log('✅ ¡ENCONTRADO! ID:', userId);
+
 				currentUser = existingUser;
-				// Nos aseguramos que users esté actualizado localmente también
-				users = Array.isArray(allUsers) ? allUsers : Object.values(allUsers);
+				currentUser.uid = userId;
+
+				// 🔥🔥 AQUÍ ESTÁ EL TRUCO: GUARDAR ID APARTE 🔥🔥
+				// Lo guardamos "a fuego" en una variable que no se borra
+				localStorage.setItem('m26_active_uid', userId);
+				localStorage.setItem('m26_user', JSON.stringify(currentUser));
+
+				users = Object.values(allUsers);
 			} else {
-				// CASO B: EL USUARIO ES NUEVO -> LO CREAMOS 🆕
-				console.log('✨ Usuario nuevo. Creando perfil...');
+				console.log('✨ Usuario nuevo. Asignando ID...');
+				let newIndex = Array.isArray(allUsers)
+					? allUsers.length
+					: Object.keys(allUsers).length;
+
 				currentUser = {
-					name: u, // Guardamos el nombre tal cual lo escribió (pero ya validamos que no existe en lowercase)
+					uid: newIndex,
+					name: u,
 					preds: {},
 					locks: {
 						groups: false,
@@ -329,19 +335,21 @@ function handleLogin() {
 					role: 'fan',
 				};
 
-				// Agregamos a la lista local
+				// 🔥 Guardar ID nuevo aparte también
+				localStorage.setItem('m26_active_uid', newIndex);
+				localStorage.setItem('m26_user', JSON.stringify(currentUser));
+
 				if (!Array.isArray(users)) users = [];
 				users.push(currentUser);
 
-				// Guardamos la nueva lista en la nube (Aquí sí usamos saveToCloud neutralizado)
-				saveToCloud();
+				if (typeof saveToCloud === 'function') saveToCloud();
+				else db.ref('users/' + newIndex).set(currentUser);
 			}
 
-			// 4. ENTRAR AL SISTEMA
 			enterAppAsFan();
 		})
 		.catch((error) => {
-			console.error('❌ Error conectando con Firebase:', error);
+			console.error('❌ Error Login:', error);
 			alert('Error de conexión. Intenta de nuevo.');
 			if (btn) {
 				btn.innerText = originalBtnText;
@@ -664,65 +672,151 @@ function saveGroupRank(group, teamName, rankValue) {
 /* =========================================================
    RENDERIZADOR DE GRUPOS (Con ID para actualización quirúrgica 🏥)
    ========================================================= */
+/* =========================================================
+   3. SOBRESCRIBIR: RENDER GROUPS (FIX DE PERSISTENCIA) 🔄
+   ========================================================= */
+/* =========================================================
+   RENDER GRUPOS (CON MENSAJE INTEGRADO 🎨)
+   ========================================================= */
+/* =========================================================
+   RENDER GRUPOS (PANEL ARRIBA ⬆️)
+   ========================================================= */
+/* =========================================================
+   RENDER GRUPOS (PANEL SEPARADO Y ARRIBA 🔝)
+   ========================================================= */
+/* =========================================================
+   RENDER GRUPOS (CONTROL TOTAL DE PANEL Y REJILLA 🎮)
+   ========================================================= */
+/* =========================================================
+   RENDER GRUPOS (VERSIÓN SIMPLE Y ELEGANTE ✨)
+   ========================================================= */
+/* =========================================================
+   RENDER GRUPOS: VERSIÓN MAESTRA (CON ACTUALIZACIÓN DE LABEL) 🏷️✅
+   ========================================================= */
 function renderGroups(customData, customMode) {
 	const container = document.getElementById('groups-container');
 	if (!container) return;
+
+	// 1. LIMPIEZA TOTAL
 	container.innerHTML = '';
 
-	let modeToUse = customMode || 'user'; // 'user' (fan) o 'admin'
+	let modeToUse = customMode || 'user';
 	let dataToUse;
 
-	// 1. Determinar datos a usar
+	// Determinar datos
 	if (modeToUse === 'official') {
 		dataToUse = typeof officialRes !== 'undefined' ? officialRes : {};
 	} else {
-		// Si es Fan, usa sus datos. Si es Admin simulando, usa lo que tenga.
 		dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
 	}
 
+	// 🔒 DETECTAR BLOQUEO
 	let isReadOnly = false;
-	let canEditRank = false; // 🆕 Variable para saber si pintamos el Combo Box
+	let userHasLocked = false;
 
 	if (modeToUse === 'official') {
-		if (role !== 'admin') isReadOnly = true;
-		if (role === 'admin') canEditRank = true; // 🆕 Solo el Admin desempata lo oficial
+		if (typeof role !== 'undefined' && role !== 'admin') isReadOnly = true;
 	} else {
-		// El usuario normal también puede desempatar su propia polla si quiere
-		if (role === 'fan' && currentUser.locks && currentUser.locks.groups)
+		if (currentUser && currentUser.locks && currentUser.locks.groups) {
 			isReadOnly = true;
-		else canEditRank = true; // 🆕 El usuario puede desempatar su simulación
+			userHasLocked = true;
+		}
 	}
 
-	// 2. Iterar Grupos
+	/* 👇👇👇 AQUÍ INCRUSTÉ LA LÓGICA DEL LABEL 👇👇👇 */
+	/* ===========================================
+       ACTUALIZAR LABEL DE CABECERA (display-status) 🏷️
+       =========================================== */
+	const statusBadge = document.getElementById('display-status');
+
+	if (statusBadge) {
+		// Solo actualizamos visualmente si estamos en modo Fan
+		if (modeToUse === 'user') {
+			if (userHasLocked) {
+				// MODO OFICIAL (VERDE TIPO NEÓN) ✅
+				statusBadge.innerText = 'OFICIAL';
+				statusBadge.className = 'status-badge'; // Mantiene clases base
+
+				// Inyectamos estilo directo para asegurar el verde
+				statusBadge.style.background = 'rgba(0, 255, 0, 0.2)';
+				statusBadge.style.color = '#00ff00';
+				statusBadge.style.border = '1px solid #00ff00';
+				statusBadge.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
+			} else {
+				// MODO BORRADOR (AMARILLO SÓLIDO) ✏️
+				statusBadge.innerText = 'BORRADOR';
+
+				// Estilo original del borrador
+				statusBadge.style.background = '#ffcc00';
+				statusBadge.style.color = '#000';
+				statusBadge.style.border = 'none';
+				statusBadge.style.boxShadow = 'none';
+			}
+		}
+	}
+	/* 👆👆👆 FIN DEL BLOQUE NUEVO 👆👆👆 */
+
+	// 🔥 2. EL MENSAJE O BOTÓN (TRUCO DEL ANCHO TOTAL) 🔥
+	if (modeToUse === 'user') {
+		if (userHasLocked) {
+			// ✅ MENSAJE VERDE (PEQUEÑO Y BONITO)
+			container.innerHTML += `
+            <div style="grid-column: 1 / -1; width: 100%; text-align: center; margin-bottom: 20px;">
+                <span style="display: inline-block; background: rgba(0, 255, 0, 0.15); border: 1px solid #00ff00; color: #00ff00; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; letter-spacing: 1px;">
+                    ✅ PRONÓSTICOS ENVIADOS
+                </span>
+            </div>`;
+		} else {
+			// 🚀 BOTÓN DE ENVÍO (CAJA AMARILLA CON RECORTE PERFECTO ✂️)
+			container.innerHTML += `
+            <div id="submit-groups-area" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-bottom: 20px; border: 1px solid #e6b800; border-radius: 15px; overflow: hidden; padding: 20px; background: rgba(0,0,0,0.2);">
+                <button id="btn-submit-groups" onclick="submitPhase('groups')" 
+                        style="background: #e6b800; color: #000; font-weight: bold; padding: 10px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; box-shadow: 0 0 10px rgba(230, 184, 0, 0.5);">
+                    🚀 ENVIAR OFICIALMENTE
+                </button>
+            </div>`;
+		}
+	}
+
+	// --- 3. PINTAMOS LOS GRUPOS ---
+	let canEditRank =
+		!isReadOnly &&
+		(modeToUse === 'user' || (modeToUse === 'official' && role === 'admin'));
+
 	for (let g in GROUPS_CONFIG) {
 		const data = GROUPS_CONFIG[g];
 		let matchesHTML = '';
 
-		// Inicializar Stats
 		let teamStats = data.teams.map((n) => ({
 			name: n,
 			pts: 0,
 			dif: 0,
 			gf: 0,
 			gc: 0,
-			manualRank: 99, // 🆕 Valor por defecto alto
+			manualRank: 99,
 		}));
 
-		// 🆕 Cargar Rankings Manuales si existen para este grupo
+		// Ranks
 		teamStats.forEach((t) => {
 			let key = `${g}-${t.name}`;
-			// Si existe un override y estamos en el modo correcto, lo cargamos
-			if (groupRankOverrides && groupRankOverrides[key]) {
+			if (
+				typeof groupRankOverrides !== 'undefined' &&
+				groupRankOverrides[key]
+			) {
 				t.manualRank = groupRankOverrides[key];
 			}
 		});
 
-		// Calcular Puntos (Su lógica original intacta)
+		// Partidos
 		data.matches.forEach((m, idx) => {
 			let id = `${g}-${idx}`;
 			let valH = dataToUse[`h-${id}`] || '';
 			let valA = dataToUse[`a-${id}`] || '';
+
 			let disabledAttr = isReadOnly ? 'disabled' : '';
+			let styleAttr = isReadOnly
+				? 'background:#333; color:#aaa; border:1px solid #444;'
+				: '';
 
 			if (valH !== '' && valA !== '') {
 				let sH = parseInt(valH);
@@ -741,7 +835,6 @@ function renderGroups(customData, customMode) {
 				}
 			}
 
-			// Render partido (Su HTML original)
 			matchesHTML += `<div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
                 <div class="center-inputs">
@@ -749,78 +842,52 @@ function renderGroups(customData, customMode) {
                     <div class="score-container">
                         <input type="number" min="0" value="${valH}" ${disabledAttr} 
                                onchange="updateVal('${id}','h',this.value)"
-                               style="${
-																	isReadOnly
-																		? 'background:#333; color:#aaa'
-																		: ''
-																}">
+                               style="${styleAttr}">
                         <span>-</span>
                         <input type="number" min="0" value="${valA}" ${disabledAttr} 
                                onchange="updateVal('${id}','a',this.value)"
-                               style="${
-																	isReadOnly
-																		? 'background:#333; color:#aaa'
-																		: ''
-																}">
+                               style="${styleAttr}">
                     </div>
                 </div>
                 <div class="team-name team-away">${data.teams[m.t2]}</div>
             </div>`;
 		});
 
-		// 🆕 ORDENAMIENTO SUPREMO (Incluye Manual) 🆕
+		// Ordenar
 		teamStats.sort((a, b) => {
-			// 1. Puntos
 			if (b.pts !== a.pts) return b.pts - a.pts;
-			// 2. Diferencia
 			if (b.dif !== a.dif) return b.dif - a.dif;
-			// 3. Goles a Favor
 			if (b.gf !== a.gf) return b.gf - a.gf;
-
-			// 4. CRITERIO DE DESEMPATE MANUAL ⚖️
-			// Si todo lo anterior es igual, miramos el manualRank (menor es mejor: 1ro, 2do...)
 			if (a.manualRank !== b.manualRank) return a.manualRank - b.manualRank;
-
-			// 5. Alfabético por defecto (para que no salten locos)
 			return a.name.localeCompare(b.name);
 		});
 
-		// Generar Filas de Tabla
+		// Tabla
 		let tableRows = teamStats
 			.map((t, i, arr) => {
-				let rowClass = i < 2 ? 'qual-zone' : i === 2 ? 'third-zone' : ''; // (Opcional: estilo para terceros)
+				let rowClass = i < 2 ? 'qual-zone' : '';
 
-				// 🆕 DETECTIVE DE EMPATES 🕵️‍♂️
-				// Un equipo está empatado si tiene los mismos stats que el de arriba O el de abajo
 				let prev = arr[i - 1];
 				let next = arr[i + 1];
-
 				let isTiedWithPrev =
 					prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
 				let isTiedWithNext =
 					next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
-
 				let showManualInput = (isTiedWithPrev || isTiedWithNext) && canEditRank;
 
-				// Columna de Posición: ¿Número o Combo Box?
 				let posDisplay = i + 1;
 
 				if (showManualInput) {
-					// Creamos el Select con opciones 1, 2, 3, 4
 					let opts = `<option value="">-</option>`;
 					[1, 2, 3, 4].forEach((num) => {
 						let sel = t.manualRank === num ? 'selected' : '';
 						opts += `<option value="${num}" ${sel}>${num}</option>`;
 					});
-
-					// Input Select Estilizado
-					posDisplay = `<select onchange="saveGroupRank('${g}', '${t.name}', this.value)" 
-                                style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0;">
+					posDisplay = `<select onchange="saveGroupRank('${g}', '${t.name}', this.value); setTimeout(() => refreshGroupTable('${g}'), 50);" 
+                                style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">
                                 ${opts}
                               </select>`;
 				} else if (t.manualRank !== 99) {
-					// Si no está empatado matemáticamente pero TIENE un rank manual guardado (raro pero posible)
-					// Le mostramos un asterisco o color para saber que está forzado
 					posDisplay = `<span style="color:#ffff00" title="Posición Manual">${
 						i + 1
 					}*</span>`;
@@ -838,27 +905,20 @@ function renderGroups(customData, customMode) {
 			.join('');
 
 		let titleTxt = `GRUPO ${g}`;
-		if (modeToUse === 'official') titleTxt += ' [OFICIAL FIFA]';
-		else if (isReadOnly) titleTxt += ' [ENVIADO]';
+		if (modeToUse === 'official') titleTxt += ' [OFICIAL]';
+		else if (userHasLocked) titleTxt += ' [ENVIADO 🔒]';
 
 		container.innerHTML += `
         <div class="card">
             <div class="group-header">${titleTxt}</div>
             <div class="card-body">
                 ${matchesHTML}
-                <table class="compact-table" style="width:100%; margin-top:10px; font-size:0.85rem; text-align:center;">
-                    <thead>
-                        <tr style="background:rgba(255,255,255,0.05); color:#666;">
-                            <th>#</th> <th style="text-align:left;">EQ</th> <th>PT</th> <th>DF</th> <th>GF</th> <th>GC</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tbody-${g}">
-                        ${tableRows}
-                    </tbody>
+                <table class="compact-table" style="width:100%; margin-top:10px;">
+                    <tbody id="tbody-${g}">${tableRows}</tbody>
                 </table>
             </div>
         </div>`;
-	}
+	} // Fin bucle
 }
 
 /* =========================================================
@@ -1519,8 +1579,81 @@ function saveUser(silent) {
 	updateStatusUI();
 }
 
+/* =========================================================
+   2. SOBRESCRIBIR: ENVIAR FASE (FIX FIREBASE) 🔄
+   ========================================================= */
+/* =========================================================
+   2. SOBRESCRIBIR: ENVIAR FASE (FIX ID CERO 0️⃣) 🔄
+   ========================================================= */
+/* =========================================================
+   ENVIAR FASE (CON SINCRONIZACIÓN DE LISTA) 🔄✅
+   ========================================================= */
+/* =========================================================
+   ENVIAR FASE (MODO QUIRÚRGICO - SIN SAVEUSER) 💉
+   ========================================================= */
+/* =========================================================
+   ENVIAR FASE (CON AUTO-RESCATE DE ID 🚑)
+   ========================================================= */
+/* =========================================================
+   ENVIAR FASE (CON RECUPERACIÓN DE ID DESDE CAJA FUERTE 🏦)
+   ========================================================= */
+/* =========================================================
+   ENVIAR FASE (SIN RECARGA FORZOSA 🛑)
+   ========================================================= */
+/* =========================================================
+   ENVIAR FASE (PERRO GUARDIÁN SILENCIOSO 🐕🤫)
+   ========================================================= */
 function submitPhase(phase) {
-	if (!phaseControl[phase]) return alert('Fase cerrada por Admin.');
+	// 1. Chequeo de Admin
+	if (typeof phaseControl !== 'undefined' && !phaseControl[phase])
+		return alert('⛔ Fase cerrada por el Administrador.');
+
+	/* 👇👇👇 PERRO GUARDIÁN (CON TRY-CATCH) 👇👇👇 */
+	try {
+		if (
+			typeof firebase !== 'undefined' &&
+			typeof firebase.auth === 'function'
+		) {
+			const authInst = firebase.auth();
+			if (authInst) {
+				const liveUser = authInst.currentUser;
+				if (
+					liveUser &&
+					currentUser &&
+					currentUser.uid &&
+					liveUser.uid !== currentUser.uid
+				) {
+					console.warn('⚠️ Cruce de identidades detectado.');
+					alert(
+						'⚠️ ALERTA DE SEGURIDAD:\n\nSe detectó otra sesión activa en este navegador.\nLa página se recargará para evitar errores de datos.',
+					);
+					window.location.reload();
+					return; // 🛑 FRENAMOS
+				}
+			}
+		}
+	} catch (e) {
+		console.warn('⚠️ El Perro Guardián falló, pero el envío continúa:', e);
+	}
+	/* 👆👆👆 FIN DEL PERRO GUARDIÁN 👆👆👆 */
+
+	// --- RECUPERACIÓN DE ID (CAJA FUERTE) ---
+	let finalUID = null;
+	if (
+		currentUser &&
+		currentUser.uid !== undefined &&
+		currentUser.uid !== null
+	) {
+		finalUID = currentUser.uid;
+	} else {
+		let savedID = localStorage.getItem('m26_active_uid');
+		if (savedID !== null && savedID !== undefined) {
+			finalUID = savedID;
+			if (currentUser) currentUser.uid = finalUID;
+		}
+	}
+
+	// --- VALIDACIÓN ---
 	let missing = false;
 	if (phase === 'groups') {
 		for (let g in GROUPS_CONFIG) {
@@ -1543,20 +1676,64 @@ function submitPhase(phase) {
 			f: F_MATCHUPS,
 		};
 		let matches = map[phase];
-		if (matches)
+		if (matches) {
 			for (let m of matches) {
 				let h = currentUser.preds[`k-${m.id}-h`];
 				let a = currentUser.preds[`k-${m.id}-a`];
 				if (h === undefined || h === '' || a === undefined || a === '')
 					missing = true;
 			}
+		}
 	}
-	if (missing) return alert('⚠️ Faltan marcadores. Debes llenar todo.');
-	if (confirm(`¿Confirmar envío de ${phase.toUpperCase()}?`)) {
+
+	if (missing)
+		return alert('⚠️ Faltan marcadores. Llene todo antes de enviar.');
+
+	// --- CONFIRMACIÓN Y ENVÍO ---
+	if (
+		confirm(
+			`¿Confirmar envío oficial de ${phase.toUpperCase()}?\n\nNo podrá hacer cambios después.`,
+		)
+	) {
+		if (typeof db === 'undefined' || finalUID === null) {
+			return alert(
+				'❌ ERROR CRÍTICO: Imposible identificar usuario. Por favor relogueese.',
+			);
+		}
+
+		// 1. Bloqueo Visual Local
+		if (!currentUser.locks) currentUser.locks = {};
 		currentUser.locks[phase] = true;
-		saveUser(true);
-		renderGroups();
-		renderBracket();
+
+		/* 👇👇👇 CAMBIO IMPORTANTE AQUÍ 👇👇👇 */
+		// Preparamos la fecha actual en formato texto internacional
+		const now = new Date().toISOString();
+
+		// Creamos un paquete de actualizaciones
+		let updates = {};
+		updates[`users/${finalUID}/locks/${phase}`] = true; // El candado
+		updates[`users/${finalUID}/submissionTime`] = now; // La fecha
+
+		// 2. 🔥 DISPARO A FIREBASE (ACTUALIZADO) 🔥
+		// Usamos .update() en la raíz para guardar ambas cosas a la vez
+		db.ref()
+			.update(updates)
+			.then(() => {
+				alert('✅ ¡Enviado y Registrado con Fecha!');
+
+				// 3. ACTUALIZACIÓN SUAVE
+				if (phase === 'groups') {
+					if (typeof renderGroups === 'function') renderGroups();
+				} else {
+					if (typeof renderBracket === 'function') renderBracket();
+				}
+			})
+			.catch((e) => {
+				alert('❌ Error: ' + e.message);
+				currentUser.locks[phase] = false; // Reversamos
+				if (typeof renderGroups === 'function') renderGroups();
+			});
+		/* 👆👆👆 FIN DEL CAMBIO 👆👆👆 */
 	}
 }
 
@@ -1719,27 +1896,82 @@ function showReport() {
 	document.getElementById('report-content').innerHTML = html + '</table>';
 }
 
+/* =========================================================
+   GESTIÓN DE USUARIOS (EN VIVO DESDE FIREBASE 📡)
+   ========================================================= */
 function openUserManagement() {
-	document.getElementById('modal-title').innerText = 'GESTION USUARIOS';
-	document.getElementById('modal-overlay').style.display = 'flex';
-	let players = [];
-	for (let i = 0; i < localStorage.length; i++) {
-		let k = localStorage.key(i);
-		if (k.startsWith('m26_data_'))
-			players.push(JSON.parse(localStorage.getItem(k)));
-	}
-	let html = `<table class="ranking-table"><tr><th>JUGADOR</th><th>ESTADO</th><th>ACCIÓN</th></tr>`;
-	players.forEach((p) => {
-		let isLocked = p.locks && p.locks.groups;
-		let status = isLocked
-			? '<span style="color:var(--neon-green)">OFICIAL</span>'
-			: '<span style="color:var(--neon-gold)">BORRADOR</span>';
-		let btn = isLocked
-			? `<button class="btn-enter" style="padding:5px; font-size:0.7rem; width:auto;" onclick="unlockPlayer('${p.name}')">RESET</button>`
-			: '-';
-		html += `<tr><td>${p.name}</td><td>${status}</td><td>${btn}</td></tr>`;
-	});
-	document.getElementById('report-content').innerHTML = html + '</table>';
+	const container = document.getElementById('user-list-container'); // Asegúrese que su modal tenga un div con este ID
+	const modal = document.getElementById('user-management-modal'); // ID de su modal
+
+	if (modal) modal.style.display = 'block';
+	if (container)
+		container.innerHTML =
+			'<p style="color:#aaa;">Cargando lista de fans...</p>';
+
+	console.log('👮‍♂️ ADMIN: Consultando usuarios en la nube...');
+
+	// 1. CONSULTA FRESCA A FIREBASE
+	db.ref('/users')
+		.once('value')
+		.then((snapshot) => {
+			const allUsers = snapshot.val() || {};
+			let html =
+				'<table style="width:100%; border-collapse: collapse; color: white;">';
+
+			// Cabecera
+			html += `
+        <tr style="border-bottom: 1px solid #444; text-align:left;">
+            <th style="padding:10px;">Usuario</th>
+            <th style="padding:10px;">Fase Grupos</th>
+            <th style="padding:10px;">Acción</th>
+        </tr>`;
+
+			// 2. ITERAMOS LOS USUARIOS
+			// (Usamos Object.keys para soportar tanto Arrays como Objetos de Firebase)
+			Object.keys(allUsers).forEach((key) => {
+				const u = allUsers[key];
+				const uid = key; // Este es el ID Real (0, 1, o -Mx...)
+
+				// Revisamos el candado
+				let isLocked = false;
+				if (u.locks && u.locks.groups === true) isLocked = true;
+
+				// Estado Visual
+				let statusBadge = isLocked
+					? `<span style="color:#00ff00; border:1px solid #00ff00; padding:2px 8px; border-radius:10px; font-size:0.8rem;">🔒 ENVIADO</span>`
+					: `<span style="color:#ffff00; border:1px solid #ffff00; padding:2px 8px; border-radius:10px; font-size:0.8rem;">✏️ BORRADOR</span>`;
+
+				// Botón de Acción
+				let actionBtn = '';
+				if (isLocked) {
+					// Si está bloqueado, mostramos botón para DESBLOQUEAR
+					actionBtn = `
+                <button onclick="adminResetPhase('${uid}', 'groups')" 
+                        style="background: #ff4444; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight:bold;">
+                    🔓 ABRIR
+                </button>`;
+				} else {
+					actionBtn = `<span style="color:#888; font-size:0.8rem;">- Disponible -</span>`;
+				}
+
+				// Fila de la tabla
+				html += `
+            <tr style="border-bottom: 1px solid #333;">
+                <td style="padding:10px;">${u.name}</td>
+                <td style="padding:10px;">${statusBadge}</td>
+                <td style="padding:10px;">${actionBtn}</td>
+            </tr>`;
+			});
+
+			html += '</table>';
+
+			if (container) container.innerHTML = html;
+		})
+		.catch((error) => {
+			console.error('Error cargando usuarios:', error);
+			if (container)
+				container.innerHTML = '<p style="color:red;">Error cargando lista.</p>';
+		});
 }
 
 function unlockPlayer(name) {
@@ -2034,9 +2266,48 @@ function calculateThirdsList(sourceData) {
    FUNCIONES DE LA NUEVA BARRA DE HERRAMIENTAS
    ========================================================= */
 
-// Función para SALIR (Recarga la página y vuelve al login)
+/* =========================================================
+   LOGOUT SEGURO (SIN RASTROS 🧹)
+   ========================================================= */
 function logout() {
-	location.reload();
+	console.log('👋 Iniciando cierre de sesión seguro...');
+
+	// 1. Limpiar almacenamiento local (Las llaves viejas)
+	localStorage.clear();
+	sessionStorage.clear();
+
+	// 2. Intentar desconectar de Firebase con seguridad
+	try {
+		// Verificamos si firebase existe Y si 'auth' es una función válida
+		// OJO: Usamos typeof para no ejecutarla accidentalmente
+		if (
+			typeof firebase !== 'undefined' &&
+			typeof firebase.auth === 'function'
+		) {
+			firebase
+				.auth()
+				.signOut()
+				.then(() => {
+					console.log('✅ Desconexión de Firebase exitosa.');
+					window.location.reload();
+				})
+				.catch((error) => {
+					console.warn(
+						'⚠️ Alerta: Firebase no cerró bien, pero recargamos igual.',
+						error,
+					);
+					window.location.reload();
+				});
+		} else {
+			// Si Firebase Auth no existe, no importa, recargamos de una
+			console.log('ℹ️ Firebase Auth no detectado, forzando recarga.');
+			window.location.reload();
+		}
+	} catch (e) {
+		// Si algo explota (como el error que tenías), lo capturamos y recargamos sí o sí
+		console.error('⚠️ Error crítico en logout (ignorado):', e);
+		window.location.reload();
+	}
 }
 
 // Función GUARDAR INTELIGENTE
@@ -2827,4 +3098,237 @@ function wipeOfficialData() {
 		alert('⚠️ Solo se borró lo local.');
 		if (typeof loadView === 'function') loadView('admin', 'groups');
 	}
+}
+
+/* =========================================================
+   1. FUNCIÓN NUEVA: CONTROL VISUAL DEL BOTÓN (UI) 🆕
+   ========================================================= */
+function updateSubmitUI() {
+	// Referencias a los ID de su HTML
+	const area = document.getElementById('submit-groups-area');
+	const btn = document.getElementById('btn-submit-groups');
+	const msg = document.getElementById('groups-msg');
+
+	if (!area || !btn || !msg) return;
+
+	// A. Si es ADMIN: Esconder todo el panel
+	if (typeof currentViewMode !== 'undefined' && currentViewMode === 'admin') {
+		area.classList.add('hidden');
+		area.style.display = 'none';
+		return;
+	}
+
+	// B. Si es FAN: Verificar si ya envió
+	let isLocked = currentUser && currentUser.locks && currentUser.locks.groups;
+
+	// Asegurar que el contenedor se vea (quitamos la clase hidden)
+	area.classList.remove('hidden');
+	area.style.display = 'block';
+
+	if (isLocked) {
+		// CASO: YA ENVIADO 🔒 (Mensaje Verde)
+		btn.style.display = 'none'; // Esconder botón
+		msg.innerText = '✅ TUS PRONÓSTICOS FUERON ENVIADOS OFICIALMENTE';
+		msg.style.color = '#00ff00';
+		msg.style.fontWeight = 'bold';
+		msg.style.border = '1px solid #00ff00';
+		msg.style.padding = '10px';
+		msg.style.borderRadius = '5px';
+		msg.style.background = 'rgba(0, 255, 0, 0.1)';
+	} else {
+		// CASO: BORRADOR 📝 (Botón visible)
+		btn.style.display = 'inline-block'; // Mostrar botón
+		msg.innerText = 'Estado: Borrador (No enviado aún)';
+		msg.style.color = '#ffffff';
+		msg.style.border = 'none';
+		msg.style.background = 'transparent';
+	}
+}
+
+/* =========================================================
+   ACCIÓN ADMIN: RESETEAR FASE A BORRADOR 🔓
+   ========================================================= */
+function adminResetPhase(targetUid, phase) {
+	if (
+		!confirm(
+			`¿Seguro que desea devolver la fase ${phase.toUpperCase()} a estado BORRADOR para este usuario?`,
+		)
+	)
+		return;
+
+	console.log(
+		`👮‍♂️ ADMIN: Abriendo candado para UID: ${targetUid}, Fase: ${phase}`,
+	);
+
+	// ESCRIBIR DIRECTO EN FIREBASE
+	db.ref(`users/${targetUid}/locks/${phase}`)
+		.set(false)
+		.then(() => {
+			alert('✅ Usuario devuelto a estado BORRADOR.');
+			// Recargamos la lista para ver el cambio inmediato
+			openUserManagement();
+		})
+		.catch((error) => {
+			alert('❌ Error: ' + error.message);
+		});
+}
+
+/* =========================================================
+   CARGAR DATOS ADMIN (CON LA RUTA REAL '/officialRes') 🎯
+   ========================================================= */
+function loadAdminData() {
+	console.log('👮‍♂️ ADMIN: Conectando con la base de datos oficial...');
+
+	// 1. Limpiamos la variable local para matar fantasmas
+	officialRes = {};
+
+	// 2. Consultamos la ruta EXACTA que usted me confirmó
+	db.ref('/officialRes')
+		.once('value')
+		.then((snapshot) => {
+			// Guardamos los datos oficiales reales
+			officialRes = snapshot.val() || {};
+
+			console.log('👮‍♂️ Datos oficiales cargados:', officialRes);
+
+			// 3. Si ya estamos viendo la pantalla de grupos, refrescamos de una
+			// (Esto fuerza a que la pantalla borre lo de Santi y muestre lo Oficial)
+			const container = document.getElementById('groups-container');
+			if (container) {
+				renderGroups(officialRes, 'official');
+			}
+		})
+		.catch((e) => {
+			console.error('❌ Error cargando oficiales:', e);
+		});
+}
+
+/* =========================================================
+   ABRIR RANKING (TABLA DE POSICIONES) 🏆
+   ========================================================= */
+function openRanking() {
+	const modal = document.getElementById('ranking-modal');
+	const container = document.getElementById('ranking-list-container');
+
+	if (modal) modal.style.display = 'block';
+	if (container)
+		container.innerHTML =
+			'<p style="text-align:center; color:#aaa;">Calculando posiciones...</p>';
+
+	// 1. Traemos usuarios y resultados oficiales
+	Promise.all([
+		db.ref('/users').once('value'),
+		db.ref('/officialRes').once('value'), // Para calcular puntos reales
+	])
+		.then((snapshots) => {
+			const usersSnap = snapshots[0].val() || {};
+			const officialSnap = snapshots[1].val() || {}; // Resultados reales
+
+			let rankingData = [];
+
+			// 2. Procesamos cada usuario
+			Object.keys(usersSnap).forEach((uid) => {
+				const u = usersSnap[uid];
+
+				// FILTRO: Solo mostramos usuarios que ya enviaron (Candado Cerrado)
+				if (u.locks && u.locks.groups) {
+					// Calcular Puntos (Aquí irá la lógica compleja luego, por ahora base 0)
+					let pts = calculateTotalPoints(u.preds, officialSnap);
+
+					// Formatear fecha
+					let dateStr = 'Sin fecha';
+					let rawDate = '9999-99-99'; // Para que los sin fecha queden de últimos
+
+					if (u.submissionTime) {
+						rawDate = u.submissionTime;
+						let d = new Date(u.submissionTime);
+						dateStr = d.toLocaleString('es-CO', {
+							month: 'short',
+							day: 'numeric',
+							hour: '2-digit',
+							minute: '2-digit',
+						});
+					}
+
+					rankingData.push({
+						name: u.name || 'Anónimo',
+						points: pts,
+						rawDate: rawDate, // Para ordenar
+						displayDate: dateStr, // Para mostrar
+					});
+				}
+			});
+
+			// 3. ORDENAMIENTO (CRITERIO DE DESEMPATE POR FECHA) ⚖️
+			rankingData.sort((a, b) => {
+				// Criterio 1: Más puntos arriba
+				if (b.points !== a.points) return b.points - a.points;
+
+				// Criterio 2: (Desempate) El que envió PRIMERO (fecha menor) gana
+				return a.rawDate.localeCompare(b.rawDate);
+			});
+
+			// 4. PINTAR LA TABLA
+			let html = `
+        <table style="width:100%; border-collapse: collapse; color: white; font-size:0.9rem;">
+            <tr style="background:#333; color:#e6b800; text-align:left;">
+                <th style="padding:10px; text-align:center;">#</th>
+                <th style="padding:10px;">Fan</th>
+                <th style="padding:10px; text-align:center;">Pts</th>
+                <th style="padding:10px; text-align:right;">Enviado</th>
+            </tr>`;
+
+			if (rankingData.length === 0) {
+				html += `<tr><td colspan="4" style="padding:20px; text-align:center; color:#888;">Nadie ha enviado pronósticos aún.</td></tr>`;
+			} else {
+				rankingData.forEach((player, index) => {
+					// El Top 3 tiene colores especiales
+					let rankColor = '#fff';
+					let rowBg = 'transparent';
+					if (index === 0) {
+						rankColor = '#FFD700';
+						rowBg = 'rgba(255, 215, 0, 0.1)';
+					} // Oro
+					if (index === 1) {
+						rankColor = '#C0C0C0';
+						rowBg = 'rgba(192, 192, 192, 0.1)';
+					} // Plata
+					if (index === 2) {
+						rankColor = '#CD7F32';
+						rowBg = 'rgba(205, 127, 50, 0.1)';
+					} // Bronce
+
+					html += `
+                <tr style="border-bottom: 1px solid #333; background:${rowBg};">
+                    <td style="padding:10px; text-align:center; font-weight:bold; color:${rankColor};">${
+						index + 1
+					}</td>
+                    <td style="padding:10px; font-weight:bold;">${
+											player.name
+										}</td>
+                    <td style="padding:10px; text-align:center; font-size:1.1rem;">${
+											player.points
+										}</td>
+                    <td style="padding:10px; text-align:right; font-size:0.8rem; color:#aaa;">${
+											player.displayDate
+										}</td>
+                </tr>`;
+				});
+			}
+
+			html += '</table>';
+			container.innerHTML = html;
+		})
+		.catch((e) => {
+			console.error(e);
+			container.innerHTML = 'Error cargando ranking.';
+		});
+}
+
+// FUNCION AUXILIAR PARA PUNTOS (Por ahora simple)
+function calculateTotalPoints(userPreds, officialRes) {
+	let total = 0;
+	// Aquí meteremos la lógica de 5, 3, 1 puntos más adelante.
+	// Como officialRes está vacío por ahora, retornará 0.
+	return total;
 }

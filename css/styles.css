@@ -1,181 +1,353 @@
 /* --- VARIABLES --- */
 :root {
-    --bg-dark: #0a0b10;
-    --bg-card: rgba(30, 35, 50, 0.85);
-    --neon-blue: #00d4ff;
-    --neon-green: #00ff88;
-    --neon-pink: #ff0055;
-    --neon-gold: #ffcc00;
-    --text-main: #ffffff;
-    --text-muted: #a0a0a0;
-    --glass-border: 1px solid rgba(0, 243, 255, 0.2); 
+	--bg-dark: #0a0b10;
+	--bg-card: rgba(30, 35, 50, 0.85);
+	--neon-blue: #00d4ff;
+	--neon-green: #00ff88;
+	--neon-pink: #ff0055;
+	--neon-gold: #ffcc00;
+	--text-main: #ffffff;
+	--text-muted: #a0a0a0;
+	--glass-border: 1px solid rgba(0, 243, 255, 0.2);
 }
 
-* { box-sizing: border-box; transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1); }
+* {
+	box-sizing: border-box;
+	transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
 
 body {
-    font-family: 'Roboto', sans-serif;
-    background: radial-gradient(circle at top, #1a2035, #000000);
-    color: var(--text-main);
-    margin: 0; padding: 15px;
-    min-height: 100vh;
-    overflow-x: hidden;
+	font-family: 'Roboto', sans-serif;
+	background: radial-gradient(circle at top, #1a2035, #000000);
+	color: var(--text-main);
+	margin: 0;
+	padding: 15px;
+	min-height: 100vh;
+	overflow-x: hidden;
 }
 
 /* PARTICULAS */
 #particles {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    z-index: -1; pointer-events: none; opacity: 0.5;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: -1;
+	pointer-events: none;
+	opacity: 0.5;
 }
 
-.container { max-width: 1300px; margin: 0 auto; display: none; position: relative; z-index: 1; }
+.container {
+	max-width: 1300px;
+	margin: 0 auto;
+	display: none;
+	position: relative;
+	z-index: 1;
+}
 
 /* --- CURSOR MANITO GLOBAL --- */
-button, .tab-btn, .fab, input[type="checkbox"], .phase-item, .round-action-btn, .login-btn, .btn-enter {
-    cursor: pointer !important;
+button,
+.tab-btn,
+.fab,
+input[type='checkbox'],
+.phase-item,
+.round-action-btn,
+.login-btn,
+.btn-enter {
+	cursor: pointer !important;
 }
 
 /* --- HEADER --- */
-header { display: flex; flex-direction: column; align-items: center; margin-bottom: 30px; }
+header {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-bottom: 30px;
+}
 
 h1 {
-    font-size: 2.5rem; 
-    font-weight: 900; 
-    margin: 0 0 20px 0; 
-    text-align: center;
-    
-    /* EL DEGRADADO */
-    background: linear-gradient(90deg, #fff, var(--neon-blue));
-    
-    /* LA CORRECCIÓN: */
-    -webkit-background-clip: text; /* Para Chrome/Safari */
-    background-clip: text;         /* <--- ESTA ES LA QUE FALTABA (Estándar) */
-    
-    -webkit-text-fill-color: transparent;
-    color: transparent; /* Buena práctica por si el navegador no entiende lo anterior */
-    
-    text-transform: uppercase; 
-    letter-spacing: 2px;
-    filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.5));
-    animation: pulseTitle 3s infinite alternate;
+	font-size: 2.5rem;
+	font-weight: 900;
+	margin: 0 0 20px 0;
+	text-align: center;
+
+	/* EL DEGRADADO */
+	background: linear-gradient(90deg, #fff, var(--neon-blue));
+
+	/* LA CORRECCIÓN: */
+	-webkit-background-clip: text; /* Para Chrome/Safari */
+	background-clip: text; /* <--- ESTA ES LA QUE FALTABA (Estándar) */
+
+	-webkit-text-fill-color: transparent;
+	color: transparent; /* Buena práctica por si el navegador no entiende lo anterior */
+
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	filter: drop-shadow(0 0 15px rgba(0, 243, 255, 0.5));
+	animation: pulseTitle 3s infinite alternate;
 }
-@keyframes pulseTitle { from { filter: drop-shadow(0 0 10px rgba(0,243,255,0.4)); } to { filter: drop-shadow(0 0 20px rgba(0,243,255,0.8)); } }
+@keyframes pulseTitle {
+	from {
+		filter: drop-shadow(0 0 10px rgba(0, 243, 255, 0.4));
+	}
+	to {
+		filter: drop-shadow(0 0 20px rgba(0, 243, 255, 0.8));
+	}
+}
 
 /* STATUS BAR */
 .status-container {
-    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
-    background: rgba(20, 20, 30, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    padding: 15px 30px; border-radius: 50px;
-    width: 100%; max-width: 850px;
-    box-shadow: 0 5px 30px rgba(0,0,0,0.5);
+	display: grid;
+	grid-template-columns: 1fr auto 1fr;
+	align-items: center;
+	background: rgba(20, 20, 30, 0.9);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	padding: 15px 30px;
+	border-radius: 50px;
+	width: 100%;
+	max-width: 850px;
+	box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
 }
-.user-name { font-size: 1.2rem; font-weight: 700; color: var(--neon-blue); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.user-progress { font-size: 0.75rem; color: var(--text-muted); }
-
-.status-badge { 
-    padding: 6px 15px; border-radius: 30px; font-weight: 900; 
-    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;
-    white-space: nowrap;
+.user-name {
+	font-size: 1.2rem;
+	font-weight: 700;
+	color: var(--neon-blue);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
-.bg-draft { background: var(--neon-gold); color: black; box-shadow: 0 0 15px var(--neon-gold); }
-.bg-official { background: var(--neon-green); color: black; box-shadow: 0 0 15px var(--neon-green); }
+.user-progress {
+	font-size: 0.75rem;
+	color: var(--text-muted);
+}
 
-.points-value { font-size: 1.8rem; font-weight: 900; color: white; text-shadow: 0 0 15px var(--neon-blue); text-align: right; }
+.status-badge {
+	padding: 6px 15px;
+	border-radius: 30px;
+	font-weight: 900;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	white-space: nowrap;
+}
+.bg-draft {
+	background: var(--neon-gold);
+	color: black;
+	box-shadow: 0 0 15px var(--neon-gold);
+}
+.bg-official {
+	background: var(--neon-green);
+	color: black;
+	box-shadow: 0 0 15px var(--neon-green);
+}
+
+.points-value {
+	font-size: 1.8rem;
+	font-weight: 900;
+	color: white;
+	text-shadow: 0 0 15px var(--neon-blue);
+	text-align: right;
+}
 
 /* --- EFECTOS HOVER BOTONES --- */
-button:not(:disabled):hover, .tab-btn:hover, .fab:hover, .btn-enter:hover {
-    transform: translateY(-3px) scale(1.02);
-    filter: brightness(1.2);
-    box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
+button:not(:disabled):hover,
+.tab-btn:hover,
+.fab:hover,
+.btn-enter:hover {
+	transform: translateY(-3px) scale(1.02);
+	filter: brightness(1.2);
+	box-shadow: 0 0 25px rgba(255, 255, 255, 0.4);
 }
 
 /* --- TABS --- */
-.tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; }
-.tab-btn {
-    background: transparent; border: 1px solid #555; color: #aaa;
-    padding: 10px 25px; border-radius: 30px; font-weight: 700; font-size: 0.9rem;
+.tabs {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	margin-bottom: 25px;
+	flex-wrap: wrap;
 }
-.tab-btn:hover { border-color: white; color: white; }
+.tab-btn {
+	background: transparent;
+	border: 1px solid #555;
+	color: #aaa;
+	padding: 10px 25px;
+	border-radius: 30px;
+	font-weight: 700;
+	font-size: 0.9rem;
+}
+.tab-btn:hover {
+	border-color: white;
+	color: white;
+}
 .tab-btn.active {
-    background: var(--neon-blue); border-color: var(--neon-blue); color: black;
-    box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
+	background: var(--neon-blue);
+	border-color: var(--neon-blue);
+	color: black;
+	box-shadow: 0 0 20px rgba(0, 243, 255, 0.6);
 }
 
 /* --- ALERT BOX CENTRADO --- */
 #submit-groups-area {
-    background: rgba(255, 215, 0, 0.1);
-    border: 1px solid var(--neon-gold);
-    color: var(--neon-gold);
-    padding: 20px;
-    text-align: center;
-    border-radius: 15px;
-    margin: 0 auto 30px auto;
-    max-width: 600px;
-    display: flex; flex-direction: column; align-items: center; gap: 15px;
-    box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+	background: rgba(255, 215, 0, 0.1);
+	border: 1px solid var(--neon-gold);
+	color: var(--neon-gold);
+	padding: 20px;
+	text-align: center;
+	border-radius: 15px;
+	margin: 0 auto 30px auto;
+	max-width: 600px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 15px;
+	box-shadow: 0 0 20px rgba(255, 215, 0, 0.1);
+	overflow: hidden;
 }
 
 .btn-big-submit {
-    background: var(--neon-blue); color: #000; border: none; padding: 12px 40px;
-    font-size: 1rem; font-weight: 900; border-radius: 30px;
-    box-shadow: 0 0 15px var(--neon-blue);
+	background: var(--neon-blue);
+	color: #000;
+	border: none;
+	padding: 12px 40px;
+	font-size: 1rem;
+	font-weight: 900;
+	border-radius: 30px;
+	box-shadow: 0 0 15px var(--neon-blue);
 }
-.btn-big-submit:hover { box-shadow: 0 0 30px var(--neon-blue); background: white; }
-.btn-big-disabled { background: #333; color: #666; box-shadow: none; cursor: not-allowed; transform: none !important; }
+.btn-big-submit:hover {
+	box-shadow: 0 0 30px var(--neon-blue);
+	background: white;
+}
+.btn-big-disabled {
+	background: #333;
+	color: #666;
+	box-shadow: none;
+	cursor: not-allowed;
+	transform: none !important;
+}
 
 /* --- CARDS --- */
-.groups-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+.groups-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+	gap: 25px;
+}
 
 .card {
-    background: var(--bg-card);
-    border: var(--glass-border);
-    border-radius: 15px;
-    overflow: hidden;
-    position: relative;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); 
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+	background: var(--bg-card);
+	border: var(--glass-border);
+	border-radius: 15px;
+	overflow: hidden;
+	position: relative;
+	box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+	transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 .card::before {
-    content: ''; position: absolute; top:0; left:0; width:100%; height: 3px;
-    background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
-    z-index: 2;
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 3px;
+	background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+	z-index: 2;
 }
 .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 10px 40px rgba(0, 243, 255, 0.2);
-    border-color: var(--neon-blue);
+	transform: translateY(-8px);
+	box-shadow: 0 10px 40px rgba(0, 243, 255, 0.2);
+	border-color: var(--neon-blue);
 }
 
 .group-header {
-    padding: 12px; text-align: center; font-weight: 900; font-size: 1.1rem;
-    color: white; letter-spacing: 1px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent);
+	padding: 12px;
+	text-align: center;
+	font-weight: 900;
+	font-size: 1.1rem;
+	color: white;
+	letter-spacing: 1px;
+	background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent);
 }
-.card-body { padding: 15px; }
+.card-body {
+	padding: 15px;
+}
 
 .match-row {
-    display: grid; grid-template-columns: 1fr 100px 1fr; align-items: center;
-    margin-bottom: 12px; padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+	display: grid;
+	grid-template-columns: 1fr 100px 1fr;
+	align-items: center;
+	margin-bottom: 12px;
+	padding-bottom: 8px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
-.team-name { font-size: 0.9rem; font-weight: 500; }
-.team-home { text-align: right; padding-right: 10px; }
-.team-away { text-align: left; padding-left: 10px; }
-.center-inputs { display: flex; flex-direction: column; align-items: center; }
-.match-info { font-size: 0.65rem; color: #666; margin-bottom: 3px; text-transform: uppercase; }
-
-input[type="number"] {
-    width: 38px; height: 32px; text-align: center; font-size: 1.1rem; font-weight: 700;
-    border: none; border-radius: 4px; background: white; color: black;
+.team-name {
+	font-size: 0.9rem;
+	font-weight: 500;
 }
-input[type="number"]:focus { outline: 3px solid var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-input[type="number"]:disabled { background: #444; color: #888; }
+.team-home {
+	text-align: right;
+	padding-right: 10px;
+}
+.team-away {
+	text-align: left;
+	padding-left: 10px;
+}
+.center-inputs {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+.match-info {
+	font-size: 0.65rem;
+	color: #666;
+	margin-bottom: 3px;
+	text-transform: uppercase;
+}
 
-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; color: #ccc; }
-th { text-align: center; padding: 5px; color: var(--neon-blue); border-bottom: 1px solid #333; }
-td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-.qual-zone { color: var(--neon-green); font-weight: bold; background: rgba(10, 255, 96, 0.05); }
+input[type='number'] {
+	width: 38px;
+	height: 32px;
+	text-align: center;
+	font-size: 1.1rem;
+	font-weight: 700;
+	border: none;
+	border-radius: 4px;
+	background: white;
+	color: black;
+}
+input[type='number']:focus {
+	outline: 3px solid var(--neon-blue);
+	box-shadow: 0 0 10px var(--neon-blue);
+}
+input[type='number']:disabled {
+	background: #444;
+	color: #888;
+}
+
+table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 10px;
+	font-size: 0.8rem;
+	color: #ccc;
+}
+th {
+	text-align: center;
+	padding: 5px;
+	color: var(--neon-blue);
+	border-bottom: 1px solid #333;
+}
+td {
+	text-align: center;
+	padding: 5px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.qual-zone {
+	color: var(--neon-green);
+	font-weight: bold;
+	background: rgba(10, 255, 96, 0.05);
+}
 
 /* --- BRACKET --- */
 /* .bracket-container { overflow-x: auto; padding: 10px 0 50px 0; -webkit-overflow-scrolling: touch; }
@@ -186,25 +358,25 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    ========================================================= */
 
 #bracket-container {
-    /* 1. Alineación Horizontal */
-    display: flex;
-    flex-direction: row;        /* Fila india (uno al lado del otro) */
-    align-items: flex-start;    /* Alineados arriba (luego los bajamos con padding individual) */
-    
-    /* 2. La Magia del Scroll */
-    overflow-x: auto;           /* Si no caben, permite deslizar horizontalmente */
-    overflow-y: hidden;         /* Evita scroll vertical en el contenedor principal */
-    
-    /* 3. Espaciado y Comportamiento */
-    width: 100%;                /* Usa todo el ancho de la pantalla */
-    padding: 0 20px 20px 20px;              /* Un respiro alrededor */
-    box-sizing: border-box;     /* Para que el padding no descuadre el ancho */
-    
-    /* 4. Suavidad en Celulares (iOS/Android) */
-    -webkit-overflow-scrolling: touch; /* Scroll con inercia (suavecito) */
-    
-    /* 5. Fondo opcional (para que se note que es un área especial) */
-    /* background: #111; */ 
+	/* 1. Alineación Horizontal */
+	display: flex;
+	flex-direction: row; /* Fila india (uno al lado del otro) */
+	align-items: flex-start; /* Alineados arriba (luego los bajamos con padding individual) */
+
+	/* 2. La Magia del Scroll */
+	overflow-x: auto; /* Si no caben, permite deslizar horizontalmente */
+	overflow-y: hidden; /* Evita scroll vertical en el contenedor principal */
+
+	/* 3. Espaciado y Comportamiento */
+	width: 100%; /* Usa todo el ancho de la pantalla */
+	padding: 0 20px 20px 20px; /* Un respiro alrededor */
+	box-sizing: border-box; /* Para que el padding no descuadre el ancho */
+
+	/* 4. Suavidad en Celulares (iOS/Android) */
+	-webkit-overflow-scrolling: touch; /* Scroll con inercia (suavecito) */
+
+	/* 5. Fondo opcional (para que se note que es un área especial) */
+	/* background: #111; */
 }
 
 /* =========================================================
@@ -212,19 +384,19 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    ========================================================= */
 
 .round-column {
-    /* 1. Evitar que se encojan */
-    flex: 0 0 auto;             /* "No te encojas, respeta tu ancho" */
-    
-    /* 2. Ancho Fijo */
-    width: 320px;               /* Ancho suficiente para que quepan nombres largos */
-    
-    /* 3. Separación entre fases */
-    margin-right: 50px;         /* Espacio entre la columna de 16avos y Octavos */
+	/* 1. Evitar que se encojan */
+	flex: 0 0 auto; /* "No te encojas, respeta tu ancho" */
+
+	/* 2. Ancho Fijo */
+	width: 320px; /* Ancho suficiente para que quepan nombres largos */
+
+	/* 3. Separación entre fases */
+	margin-right: 50px; /* Espacio entre la columna de 16avos y Octavos */
 }
 
 /* El último hijo (Final) no necesita margen a la derecha */
 .round-column:last-child {
-    margin-right: 0;
+	margin-right: 0;
 }
 
 /* =========================================================
@@ -232,175 +404,469 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    ========================================================= */
 /* Barra completa */
 #bracket-container::-webkit-scrollbar {
-    height: 10px;               /* Altura de la barra horizontal */
+	height: 10px; /* Altura de la barra horizontal */
 }
 
 /* El "carril" de la barra */
 #bracket-container::-webkit-scrollbar-track {
-    background: #000;           /* Color oscuro de fondo */
-    border-radius: 5px;
+	background: #000; /* Color oscuro de fondo */
+	border-radius: 5px;
 }
 
 /* El "dedo" o indicador que se mueve */
 #bracket-container::-webkit-scrollbar-thumb {
-    background: #444;           /* Gris elegante */
-    border-radius: 5px;
-    border: 1px solid #000;
+	background: #444; /* Gris elegante */
+	border-radius: 5px;
+	border: 1px solid #000;
 }
 
 /* Al pasar el mouse por la barra */
 #bracket-container::-webkit-scrollbar-thumb:hover {
-    background: #fbbf24;        /* Se pone dorado al tocarlo */
+	background: #fbbf24; /* Se pone dorado al tocarlo */
 }
-
-
 
 .round-header {
-    background: #151515; border: 1px solid #333; color: var(--neon-blue);
-    padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+	background: #151515;
+	border: 1px solid #333;
+	color: var(--neon-blue);
+	padding: 10px;
+	border-radius: 8px;
+	text-align: center;
+	margin-bottom: 15px;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
-.round-title { font-weight: 900; display: block; margin-bottom: 8px; font-size: 0.9rem;}
+.round-title {
+	font-weight: 900;
+	display: block;
+	margin-bottom: 8px;
+	font-size: 0.9rem;
+}
 
-.round-action-btn { width: 100%; padding: 10px; border: none; border-radius: 4px; font-weight: 900; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px;}
-.btn-go { background: var(--neon-green); color: black; box-shadow: 0 0 10px var(--neon-green); }
-.btn-wait { background: #222; color: #555; cursor: not-allowed; border: 1px solid #333; box-shadow: none !important; transform: none !important; }
-.btn-done { background: transparent; color: var(--neon-blue); border: 1px solid var(--neon-blue); cursor: default; box-shadow: none !important; transform: none !important; }
+.round-action-btn {
+	width: 100%;
+	padding: 10px;
+	border: none;
+	border-radius: 4px;
+	font-weight: 900;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+}
+.btn-go {
+	background: var(--neon-green);
+	color: black;
+	box-shadow: 0 0 10px var(--neon-green);
+}
+.btn-wait {
+	background: #222;
+	color: #555;
+	cursor: not-allowed;
+	border: 1px solid #333;
+	box-shadow: none !important;
+	transform: none !important;
+}
+.btn-done {
+	background: transparent;
+	color: var(--neon-blue);
+	border: 1px solid var(--neon-blue);
+	cursor: default;
+	box-shadow: none !important;
+	transform: none !important;
+}
 
 .bracket-match {
-    background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px; padding: 10px; margin-bottom: 15px;
-    position: relative; transition: 0.3s;
+	background: var(--bg-card);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	border-radius: 8px;
+	padding: 10px;
+	margin-bottom: 15px;
+	position: relative;
+	transition: 0.3s;
 }
 .bracket-match::before {
-    content: ''; position: absolute; top:0; left:0; width: 3px; height: 100%;
-    background: linear-gradient(180deg, var(--neon-blue), var(--neon-pink));
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 3px;
+	height: 100%;
+	background: linear-gradient(180deg, var(--neon-blue), var(--neon-pink));
 }
-.bracket-match:hover { border-color: var(--neon-pink); box-shadow: 0 0 20px rgba(188, 19, 254, 0.3); }
+.bracket-match:hover {
+	border-color: var(--neon-pink);
+	box-shadow: 0 0 20px rgba(188, 19, 254, 0.3);
+}
 
-.bracket-row { display: flex; justify-content: space-between; align-items: center; margin: 6px 0; }
-.b-team { font-size: 0.85rem; font-weight: 500; width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.b-team-input { background: transparent; border: 1px solid var(--neon-pink); color: var(--neon-pink); padding: 2px; font-family: 'Roboto'; width: 100%; font-size: 0.8rem; }
-.bracket-input { width: 40px !important; height: 30px !important; font-size: 1rem !important; }
+.bracket-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin: 6px 0;
+}
+.b-team {
+	font-size: 0.85rem;
+	font-weight: 500;
+	width: 160px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.b-team-input {
+	background: transparent;
+	border: 1px solid var(--neon-pink);
+	color: var(--neon-pink);
+	padding: 2px;
+	font-family: 'Roboto';
+	width: 100%;
+	font-size: 0.8rem;
+}
+.bracket-input {
+	width: 40px !important;
+	height: 30px !important;
+	font-size: 1rem !important;
+}
 
 /* --- LOGIN Y ANIMACIÓN DE FONDO --- */
-#login-overlay { 
-    position: fixed; top:0; left:0; width:100%; height:100%; 
-    z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px;
-    background-color: #000;
-    overflow: hidden; 
+#login-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+	background-color: #000;
+	overflow: hidden;
 }
 
 /* ANIMACIÓN: RUTAS APUNTANDO A LA CARPETA ASSETS/IMG */
 #login-overlay::after {
-    content: ""; position: absolute; top: -20px; left: -20px; right: -20px; bottom: -20px;
-    background-image: url('../assets/img/FixtureWC2026.avif'); /* Ruta relativa desde css/ */
-    background-size: cover; background-position: center;
-    filter: blur(8px) brightness(0.4); z-index: -1;
-    animation: backgroundCycle 12s infinite ease-in-out;
+	content: '';
+	position: absolute;
+	top: -20px;
+	left: -20px;
+	right: -20px;
+	bottom: -20px;
+	background-image: url('../assets/img/FixtureWC2026.avif'); /* Ruta relativa desde css/ */
+	background-size: cover;
+	background-position: center;
+	filter: blur(8px) brightness(0.4);
+	z-index: -1;
+	animation: backgroundCycle 12s infinite ease-in-out;
 }
 
 @keyframes backgroundCycle {
-    0%, 42% {
-        background-image: url('../assets/img/FixtureWC2026.avif');
-    }
-    50%, 92% {
-        background-image: url('../assets/img/Fondo2.avif');
-    }
-    100% {
-        background-image: url('../assets/img/FixtureWC2026.avif');
-    }
+	0%,
+	42% {
+		background-image: url('../assets/img/FixtureWC2026.avif');
+	}
+	50%,
+	92% {
+		background-image: url('../assets/img/Fondo2.avif');
+	}
+	100% {
+		background-image: url('../assets/img/FixtureWC2026.avif');
+	}
 }
 
-.login-box { 
-    background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(5px);
-    padding: 40px 25px 25px 25px; 
-    border-radius: 20px; text-align: center; 
-    width: 100%; max-width: 420px;
-    border: 1px solid rgba(0, 243, 255, 0.3); 
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-    position: relative; overflow: hidden;
-    animation: floatUp 0.8s ease-out; transition: all 0.4s ease; 
+.login-box {
+	background: rgba(0, 0, 0, 0.5);
+	backdrop-filter: blur(5px);
+	padding: 40px 25px 25px 25px;
+	border-radius: 20px;
+	text-align: center;
+	width: 100%;
+	max-width: 420px;
+	border: 1px solid rgba(0, 243, 255, 0.3);
+	box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+	position: relative;
+	overflow: hidden;
+	animation: floatUp 0.8s ease-out;
+	transition: all 0.4s ease;
 }
 
 .login-box:hover {
-    transform: translateY(-5px) scale(1.01); border-color: var(--neon-blue);
-    box-shadow: 0 0 40px rgba(0, 243, 255, 0.3), 0 30px 60px rgba(0,0,0,0.9);
+	transform: translateY(-5px) scale(1.01);
+	border-color: var(--neon-blue);
+	box-shadow: 0 0 40px rgba(0, 243, 255, 0.3), 0 30px 60px rgba(0, 0, 0, 0.9);
 }
 
-@keyframes floatUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes floatUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
 
 .login-box::before {
-    content: ''; position: absolute; top:0; left:0; width:100%; height: 4px;
-    background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 4px;
+	background: linear-gradient(90deg, var(--neon-blue), var(--neon-pink));
 }
 
 .login-logo-img {
-    width: 120px; /* Logo pequeño */
-    max-width: 100%; height: auto; margin-bottom: 25px;
-    filter: drop-shadow(0 0 15px rgba(255,255,255,0.1));
+	width: 120px; /* Logo pequeño */
+	max-width: 100%;
+	height: auto;
+	margin-bottom: 25px;
+	filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.1));
 }
 
 .login-credits {
-    margin-top: 25px; font-size: 0.75rem; color: #ccc; font-weight: 300; letter-spacing: 1px;
+	margin-top: 25px;
+	font-size: 0.75rem;
+	color: #ccc;
+	font-weight: 300;
+	letter-spacing: 1px;
 }
 
-.login-input { width: 100%; padding: 18px; margin: 10px 0; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 10px; font-size: 1rem; }
-.login-input:focus { border-color: var(--neon-blue); outline: none; box-shadow: 0 0 10px rgba(0, 243, 255, 0.3); }
-
-.btn-enter { 
-    width: 100%; padding: 18px; margin-top: 10px; 
-    background: linear-gradient(90deg, var(--neon-blue), #0077ff); 
-    color: white; font-weight: 900; border: none; border-radius: 10px; font-size: 1.1rem;
-    box-shadow: 0 0 20px rgba(0, 119, 255, 0.4); text-transform: uppercase; letter-spacing: 2px;
+.login-input {
+	width: 100%;
+	padding: 18px;
+	margin: 10px 0;
+	background: rgba(0, 0, 0, 0.4);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: white;
+	border-radius: 10px;
+	font-size: 1rem;
 }
-.btn-enter:hover { filter: brightness(1.2); box-shadow: 0 0 40px rgba(0, 119, 255, 0.6); }
+.login-input:focus {
+	border-color: var(--neon-blue);
+	outline: none;
+	box-shadow: 0 0 10px rgba(0, 243, 255, 0.3);
+}
+
+.btn-enter {
+	width: 100%;
+	padding: 18px;
+	margin-top: 10px;
+	background: linear-gradient(90deg, var(--neon-blue), #0077ff);
+	color: white;
+	font-weight: 900;
+	border: none;
+	border-radius: 10px;
+	font-size: 1.1rem;
+	box-shadow: 0 0 20px rgba(0, 119, 255, 0.4);
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+.btn-enter:hover {
+	filter: brightness(1.2);
+	box-shadow: 0 0 40px rgba(0, 119, 255, 0.6);
+}
 
 /* --- ADMIN PANEL (SOBRIO) --- */
 .admin-panel {
-    display: block;
-    background: linear-gradient(135deg, #2b1055, #000000); 
-    border: 1px solid rgba(188, 19, 254, 0.5); 
-    padding: 30px; border-radius: 20px; margin-bottom: 40px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+	display: block;
+	background: linear-gradient(135deg, #2b1055, #000000);
+	border: 1px solid rgba(188, 19, 254, 0.5);
+	padding: 30px;
+	border-radius: 20px;
+	margin-bottom: 40px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
 }
-.admin-panel h4 { color: #d8b4fe; margin-top: 0; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 2px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; margin-bottom: 20px; }
-.rules-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 20px; }
-.rules-grid label { display: block; color: #aaa; margin-bottom: 5px; font-size:0.8rem; }
-.rules-grid input { width: 100%; padding: 8px; text-align: center; background: rgba(0,0,0,0.4); color: white; border: 1px solid #555; border-radius: 6px; font-weight:bold; }
-.phase-grid { display: flex; flex-wrap: wrap; gap: 10px; }
-.phase-item { background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; color: #ddd; border: 1px solid rgba(255,255,255,0.1); transition: 0.3s; cursor: pointer; }
-.phase-item:hover { background: rgba(188, 19, 254, 0.2); border-color: var(--neon-pink); }
+.admin-panel h4 {
+	color: #d8b4fe;
+	margin-top: 0;
+	font-size: 1.2rem;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	padding-bottom: 10px;
+	margin-bottom: 20px;
+}
+.rules-grid {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+	margin-bottom: 20px;
+}
+.rules-grid label {
+	display: block;
+	color: #aaa;
+	margin-bottom: 5px;
+	font-size: 0.8rem;
+}
+.rules-grid input {
+	width: 100%;
+	padding: 8px;
+	text-align: center;
+	background: rgba(0, 0, 0, 0.4);
+	color: white;
+	border: 1px solid #555;
+	border-radius: 6px;
+	font-weight: bold;
+}
+.phase-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+.phase-item {
+	background: rgba(255, 255, 255, 0.05);
+	padding: 10px 15px;
+	border-radius: 8px;
+	font-size: 0.85rem;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	color: #ddd;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	transition: 0.3s;
+	cursor: pointer;
+}
+.phase-item:hover {
+	background: rgba(188, 19, 254, 0.2);
+	border-color: var(--neon-pink);
+}
 
 /* --- FABs & REFRESH --- */
-.fab-container { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; align-items: flex-end; z-index: 100; }
-.fab { padding: 12px 25px; border-radius: 30px; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); font-size: 0.8rem; text-transform: uppercase; }
-.fab-save { background: var(--neon-gold); color: black; }
-.fab-report { background: white; color: black; }
-.fab-refresh { background: var(--neon-blue); color: black; box-shadow: 0 0 15px rgba(0, 243, 255, 0.4); } 
-.fab-admin { background: var(--neon-pink); color: white; display: none; }
+.fab-container {
+	position: fixed;
+	bottom: 20px;
+	right: 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	align-items: flex-end;
+	z-index: 100;
+}
+.fab {
+	padding: 12px 25px;
+	border-radius: 30px;
+	font-weight: 900;
+	border: none;
+	cursor: pointer;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+	font-size: 0.8rem;
+	text-transform: uppercase;
+}
+.fab-save {
+	background: var(--neon-gold);
+	color: black;
+}
+.fab-report {
+	background: white;
+	color: black;
+}
+.fab-refresh {
+	background: var(--neon-blue);
+	color: black;
+	box-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
+}
+.fab-admin {
+	background: var(--neon-pink);
+	color: white;
+	display: none;
+}
 
 /* UTILS */
-.hidden { display: none !important; }
-.section { display: none; animation: fadeIn 0.5s; }
-.section.active { display: block; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.hidden {
+	display: none !important;
+}
+.section {
+	display: none;
+	animation: fadeIn 0.5s;
+}
+.section.active {
+	display: block;
+}
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translateY(10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
 
-#modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 800; justify-content: center; align-items: center; }
-.modal-card { background: #151515; padding: 40px; border-radius: 20px; width: 700px; max-height: 80vh; overflow-y: auto; border: 1px solid #333; box-shadow: 0 0 50px rgba(0,0,0,0.8); }
-.close-btn { float: right; cursor: pointer; font-size: 1.5rem; color: #fff; background: none; border: none; }
-.ranking-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.ranking-table th { background: #111; color: var(--neon-blue); padding: 10px; text-align: left; }
-.ranking-table td { padding: 10px; border-bottom: 1px solid #333; color: #ccc; }
-.my-row { background-color: rgba(0, 255, 136, 0.1); font-weight: bold; color: var(--neon-green) !important; }
+#modal-overlay {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background: rgba(0, 0, 0, 0.9);
+	z-index: 800;
+	justify-content: center;
+	align-items: center;
+}
+.modal-card {
+	background: #151515;
+	padding: 40px;
+	border-radius: 20px;
+	width: 700px;
+	max-height: 80vh;
+	overflow-y: auto;
+	border: 1px solid #333;
+	box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+}
+.close-btn {
+	float: right;
+	cursor: pointer;
+	font-size: 1.5rem;
+	color: #fff;
+	background: none;
+	border: none;
+}
+.ranking-table {
+	width: 100%;
+	border-collapse: collapse;
+	margin-top: 15px;
+}
+.ranking-table th {
+	background: #111;
+	color: var(--neon-blue);
+	padding: 10px;
+	text-align: left;
+}
+.ranking-table td {
+	padding: 10px;
+	border-bottom: 1px solid #333;
+	color: #ccc;
+}
+.my-row {
+	background-color: rgba(0, 255, 136, 0.1);
+	font-weight: bold;
+	color: var(--neon-green) !important;
+}
 
 @media (max-width: 768px) {
-    .status-container { grid-template-columns: 1fr; gap: 10px; padding: 15px; text-align: center; }
-    .user-info, .points-value { text-align: center; }
-    .groups-grid { grid-template-columns: 1fr; gap: 20px; }
-    .match-row { grid-template-columns: 1fr 90px 1fr; }
-    .modal-card { width: 95%; padding: 20px; }
+	.status-container {
+		grid-template-columns: 1fr;
+		gap: 10px;
+		padding: 15px;
+		text-align: center;
+	}
+	.user-info,
+	.points-value {
+		text-align: center;
+	}
+	.groups-grid {
+		grid-template-columns: 1fr;
+		gap: 20px;
+	}
+	.match-row {
+		grid-template-columns: 1fr 90px 1fr;
+	}
+	.modal-card {
+		width: 95%;
+		padding: 20px;
+	}
 }
 
 /* --- NUEVA NAVEGACIÓN AGRUPADA ---
@@ -422,148 +888,154 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 } */
 
 .nav-label {
-    display: block;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-    letter-spacing: 2px;
-    margin-bottom: 10px;
-    font-weight: 900;
+	display: block;
+	font-size: 0.7rem;
+	color: var(--text-muted);
+	letter-spacing: 2px;
+	margin-bottom: 10px;
+	font-weight: 900;
 }
 
-.nav-row, .nav-standalone {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
+.nav-row,
+.nav-standalone {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+	flex-wrap: wrap;
 }
 
 /* --- ESTILO MODERNO SOBRIO PARA ADMIN PANEL --- */
 .card-modern {
-    background: var(--bg-card); /* Mismo fondo de las tarjetas normales */
-    border: 1px solid var(--neon-blue); /* Borde neón sutil */
-    box-shadow: 0 0 30px rgba(0, 212, 255, 0.1); /* Resplandor suave */
-    max-width: 800px;
-    margin: 0 auto;
+	background: var(--bg-card); /* Mismo fondo de las tarjetas normales */
+	border: 1px solid var(--neon-blue); /* Borde neón sutil */
+	box-shadow: 0 0 30px rgba(0, 212, 255, 0.1); /* Resplandor suave */
+	max-width: 800px;
+	margin: 0 auto;
 }
 
 .admin-panel h4 {
-    border-bottom: 1px solid rgba(0, 243, 255, 0.3);
+	border-bottom: 1px solid rgba(0, 243, 255, 0.3);
 }
 
 /* Ajuste para inputs dentro del panel admin */
 .admin-panel input {
-    border: 1px solid #555;
-    background: rgba(0,0,0,0.5);
+	border: 1px solid #555;
+	background: rgba(0, 0, 0, 0.5);
 }
 .admin-panel input:focus {
-    border-color: var(--neon-pink);
-    box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
+	border-color: var(--neon-pink);
+	box-shadow: 0 0 10px rgba(255, 0, 85, 0.3);
 }
 
 /* --- NUEVA BARRA DE HERRAMIENTAS (TOOLBAR) --- */
 .toolbar {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 15px;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    flex-wrap: wrap; /* Para que se adapte al celular */
+	display: flex;
+	justify-content: center;
+	gap: 8px;
+	margin-top: 15px;
+	padding: 10px;
+	background: rgba(0, 0, 0, 0.4);
+	border-radius: 15px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	flex-wrap: wrap; /* Para que se adapte al celular */
 }
 
 .tool-btn {
-    background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: #fff; /* Color texto blanco */
-    padding: 8px 12px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Roboto', sans-serif;
-    font-size: 0.85rem;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    transition: all 0.3s ease;
+	background: transparent;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	color: #fff; /* Color texto blanco */
+	padding: 8px 12px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-family: 'Roboto', sans-serif;
+	font-size: 0.85rem;
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	transition: all 0.3s ease;
 }
 
 .tool-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: var(--neon-blue, #0ff);
-    transform: translateY(-2px);
+	background: rgba(255, 255, 255, 0.15);
+	border-color: var(--neon-blue, #0ff);
+	transform: translateY(-2px);
 }
 
 .tool-btn:active {
-    transform: scale(0.95);
+	transform: scale(0.95);
 }
 
 /* Botón Salir en Rojito */
 .tool-btn.logout {
-    border-color: rgba(255, 0, 85, 0.4);
-    color: #ff8fa3;
+	border-color: rgba(255, 0, 85, 0.4);
+	color: #ff8fa3;
 }
 
 /* En Celulares: Ocultar texto, dejar solo icono */
 @media (max-width: 480px) {
-    .tool-text { display: none; }
-    .tool-btn { padding: 10px; font-size: 1.2rem; }
+	.tool-text {
+		display: none;
+	}
+	.tool-btn {
+		padding: 10px;
+		font-size: 1.2rem;
+	}
 }
 
 /* Tabla Compacta para Grupos */
 .compact-table {
-    border-collapse: collapse;
+	border-collapse: collapse;
 }
 
-.compact-table th, .compact-table td {
-    padding: 4px 2px; /* Reducimos el relleno para que quepan */
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+.compact-table th,
+.compact-table td {
+	padding: 4px 2px; /* Reducimos el relleno para que quepan */
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .compact-table th {
-    font-weight: normal;
-    font-size: 0.75rem; /* Letra pequeñita para los títulos */
+	font-weight: normal;
+	font-size: 0.75rem; /* Letra pequeñita para los títulos */
 }
 
 /* En móviles, si los nombres son muy largos, evita que rompan la tabla */
 .compact-table td:nth-child(2) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100px; /* Ajuste esto si necesita */
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: 100px; /* Ajuste esto si necesita */
 }
 
 /* --- ESTILOS DE LA TARJETA DEL FERRARI --- */
 
 /* Ajuste general de la tarjeta para las líneas */
 
-
 /* --- BARRA SUPERIOR (TITULITOS) --- */
 .match-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    padding-bottom: 4px;
-    border-bottom: 1px solid #333;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 6px;
+	padding-bottom: 4px;
+	border-bottom: 1px solid #333;
 }
 
 /* El ID del partido (M89) */
 .match-id-badge {
-    font-size: 0.7rem;
-    background: #444;
-    color: #fff;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-weight: bold;
-    letter-spacing: 0.5px;
+	font-size: 0.7rem;
+	background: #444;
+	color: #fff;
+	padding: 1px 5px;
+	border-radius: 3px;
+	font-weight: bold;
+	letter-spacing: 0.5px;
 }
 
 /* De dónde vienen (W74 vs W77) */
 .match-source-label {
-    font-size: 0.65rem;
-    color: #888;
-    font-style: italic;
+	font-size: 0.65rem;
+	color: #888;
+	font-style: italic;
 }
 
 /* --- ORGANIZACIÓN VISUAL POR PAREJAS (Corregido) --- */
@@ -571,23 +1043,23 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 /* 1. LOS DE ARRIBA DE LA LLAVE (Partidos 1, 3, 5, 7...) */
 /* En el HTML son los hijos PARES (2, 4, 6...) porque el Título es el 1 */
 #col-r32 .bracket-match:nth-child(even) {
-    margin-bottom: 5px;  /* Pegaditos a su pareja */
+	margin-bottom: 5px; /* Pegaditos a su pareja */
 }
 
 /* 2. LOS DE ABAJO DE LA LLAVE (Partidos 2, 4, 6, 8...) */
 /* En el HTML son los hijos IMPARES (3, 5, 7...) */
 #col-r32 .bracket-match:nth-child(odd) {
-    margin-bottom: 40px; /* Separación grande para el siguiente grupo */
+	margin-bottom: 40px; /* Separación grande para el siguiente grupo */
 }
 
 /* Opcional: Separar un poquito el primer partido del título */
 .round-header {
-    margin-bottom: 15px;
+	margin-bottom: 15px;
 }
 
 /* Efecto Hover: Si pasas el mouse, la tarjeta brilla */
 .bracket-match:hover {
-    border-color: #fbbf24; /* Dorado */
+	border-color: #fbbf24; /* Dorado */
 }
 
 /* =========================================================
@@ -599,10 +1071,10 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    sino que baje para alinearse con el centro de la primera llave de 16avos.
 */
 #col-r16 {
-    /* JUEGUE CON ESTE NUMERO:
+	/* JUEGUE CON ESTE NUMERO:
        Si el primer partido está muy arriba, aumente (ej: 100px).
        Si está muy abajo, disminuya. */
-    padding-top: 66px; 
+	padding-top: 66px;
 }
 
 /* 2. SEPARAR LAS TARJETAS ENTRE SÍ
@@ -610,10 +1082,10 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    necesitamos mucho espacio entre ellos.
 */
 #col-r16 .bracket-match {
-    /* JUEGUE CON ESTE NUMERO:
+	/* JUEGUE CON ESTE NUMERO:
        Es la distancia entre el partido de Octavos 1 y el Octavos 2.
        Auméntelo hasta que coincidan con sus parejas de la izquierda. */
-    margin-bottom: 142px; 
+	margin-bottom: 142px;
 }
 
 /* 3. PEQUEÑO AJUSTE AL TÍTULO (Opcional)
@@ -621,8 +1093,8 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    y se quede más o menos alineado con el título "16avos".
 */
 #col-r16 .round-header {
-    margin-top: -65px; /* Lo subimos un poquito para contrarrestar el padding */
-    margin-bottom: 65px; /* Devolvemos el espacio */
+	margin-top: -65px; /* Lo subimos un poquito para contrarrestar el padding */
+	margin-bottom: 65px; /* Devolvemos el espacio */
 }
 
 /* =========================================================
@@ -631,39 +1103,35 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 
 /* 1. BAJAR EL INICIO DE LA COLUMNA (El Ascensor) */
 #col-qf {
-    /* JUEGUE CON ESTE NÚMERO:
+	/* JUEGUE CON ESTE NÚMERO:
        Este baja toda la columna. 
        El primer partido de Cuartos debe quedar justo en el medio 
        de los dos primeros de Octavos.
        Empiece probando con 130px o 140px. */
-    padding-top: 188px; 
+	padding-top: 188px;
 }
 
 /* 2. SEPARAR LAS TARJETAS (El Acordeón) */
 #col-qf .bracket-match {
-    /* JUEGUE CON ESTE NÚMERO:
+	/* JUEGUE CON ESTE NÚMERO:
        Es la distancia entre el Cuartos 1 y Cuartos 2.
        Como abarca mucho espacio vertical, este número será GRANDE.
        Empiece probando con 200px o 220px. */
-    margin-bottom: 380px; 
+	margin-bottom: 380px;
 }
 
 /* 3. CORRECCIÓN VISUAL DEL TÍTULO (Opcional) */
 /* Para que el título "Cuartos" no se baje tanto y quede alineado con los otros */
 #col-qf .round-header {
-    margin-top: -187px; /* Lo subimos fuerte para contrarrestar el padding */
-    margin-bottom: 187px; /* Devolvemos el espacio */
+	margin-top: -187px; /* Lo subimos fuerte para contrarrestar el padding */
+	margin-bottom: 187px; /* Devolvemos el espacio */
 }
-
-
-
 
 /* Estilo para el 3er Puesto (más discreto) */
 #col-f .bracket-match:last-child {
-    opacity: 0.9;
-    border-style: dashed; /* Borde punteado para diferenciar */
+	opacity: 0.9;
+	border-style: dashed; /* Borde punteado para diferenciar */
 }
-
 
 /* =========================================================
    ALINEACIÓN FINA: SEMIS Y FINAL (MODO COMPACTO)
@@ -673,46 +1141,41 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 
 /* 1. BAJAR EL INICIO (Para centrar Semi 1 entre los dos primeros de Cuartos) */
 #col-sf {
-    /* JUEGUE CON ESTE NÚMERO: 
+	/* JUEGUE CON ESTE NÚMERO: 
        Pruebe entre 180px y 250px aprox. */
-    padding-top: 420px; 
+	padding-top: 420px;
 }
 
 /* 2. SEPARAR LAS DOS SEMIS (El hueco gigante) */
 #col-sf .bracket-match {
-    /* JUEGUE CON ESTE NÚMERO:
+	/* JUEGUE CON ESTE NÚMERO:
        Espacio entre la Semi 1 y la Semi 2.
        Pruebe entre 350px y 450px. */
-    margin-bottom: 850px; 
+	margin-bottom: 850px;
 }
 
 /* 3. SUBIR EL TÍTULO "SEMIS" (Para que no se baje con los partidos) */
 #col-sf .round-header {
-    /* Este número debe ser negativo y parecido al padding-top */
-    margin-top: -418px; 
-    margin-bottom: 418px; /* Devolvemos el espacio para no romper nada */
+	/* Este número debe ser negativo y parecido al padding-top */
+	margin-top: -418px;
+	margin-bottom: 418px; /* Devolvemos el espacio para no romper nada */
 }
-
 
 /* --- GRAN FINAL (#col-f) --- */
 
 /* 1. BAJAR EL INICIO (Para quedar en el centro de las Semis) */
 #col-f {
-    /* JUEGUE CON ESTE NÚMERO:
+	/* JUEGUE CON ESTE NÚMERO:
        Tiene que bajar bastante. 
        Pruebe entre 400px y 500px. */
-    padding-top: 50px; 
+	padding-top: 50px;
 }
 
 /* 2. SUBIR EL TÍTULO "FINAL" */
 #col-f .round-header {
-    margin-top: -48px; 
-    margin-bottom: 48px;
+	margin-top: -48px;
+	margin-bottom: 48px;
 }
-
-
-
-
 
 /* =========================================================
    MODO COMPACTO (Para que quepa todo en una pantalla)
@@ -720,42 +1183,42 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 
 /* 1. Columnas más delgadas y pegadas */
 .round-column {
-    width: 230px !important;    /* Bajamos de 320px a 240px */
-    margin-right: 18px !important; /* Menos espacio entre columnas */
+	width: 230px !important; /* Bajamos de 320px a 240px */
+	margin-right: 18px !important; /* Menos espacio entre columnas */
 }
 
 /* 2. Tarjetas más pequeñas */
 .bracket-match {
-    padding: 5px !important;    /* Menos relleno interno */
-    font-size: 0.8rem;          /* Letra un poco más chica */
-    border-radius: 4px;
+	padding: 5px !important; /* Menos relleno interno */
+	font-size: 0.8rem; /* Letra un poco más chica */
+	border-radius: 4px;
 }
 
 /* 3. Inputs (Cajitas de goles) más compactos */
 .bracket-input {
-    width: 35px !important;     /* Más angostos */
-    height: 22px !important;    /* Más bajitos */
-    padding: 2px !important;
-    font-size: 0.85rem !important;
+	width: 35px !important; /* Más angostos */
+	height: 22px !important; /* Más bajitos */
+	padding: 2px !important;
+	font-size: 0.85rem !important;
 }
 
 /* 4. Nombres de equipos */
 .team-name {
-    font-size: 0.8rem !important;
+	font-size: 0.8rem !important;
 }
 
 /* 5. Títulos de rondas más discretos */
 .round-title {
-    font-size: 1rem !important;
+	font-size: 1rem !important;
 }
 
 /* 6. CORRECCIÓN DEL SCROLLBAR (Para que se vea siempre)
    Esto hace que el contenedor tenga una altura máxima y el scroll 
    aparezca dentro de esa caja, no al final de la página web. */
 #bracket-container {
-    height: calc(100vh - 150px); /* Altura de la pantalla menos el encabezado */
-    overflow-y: auto; /* Permite scroll vertical si es necesario */
-    align-items: flex-start; /* Alineación superior */
+	height: calc(100vh - 150px); /* Altura de la pantalla menos el encabezado */
+	overflow-y: auto; /* Permite scroll vertical si es necesario */
+	align-items: flex-start; /* Alineación superior */
 }
 
 /* =========================================================
@@ -764,47 +1227,37 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 
 /* Apuntamos DIRECTAMENTE a la tarjeta de la Final por su ID */
 #match-104 {
-    margin-bottom: 120px !important;  /* Separación del 3er puesto */
-    transform: scale(1.1);            /* Grande */
-    z-index: 10;
-    
-    /* FONDO Y BORDE BASE */
-    background: rgba(0, 0, 0, 0.95) !important;
-    border: 1px solid #fff !important;  /* Borde blanco puro */
-    border-radius: 8px;
+	margin-bottom: 120px !important; /* Separación del 3er puesto */
+	transform: scale(1.1); /* Grande */
+	z-index: 10;
 
-    /* SOMBRAS DE ORO */
-    box-shadow: 
-        0 0 2px  #fff,
-        0 0 4px #ffd700,
-        0 0 8px #ffd700,
-        0 0 12px #ff8c00;
+	/* FONDO Y BORDE BASE */
+	background: rgba(0, 0, 0, 0.95) !important;
+	border: 1px solid #fff !important; /* Borde blanco puro */
+	border-radius: 8px;
 
-    /* ANIMACIÓN */
-    animation: finalresplandorFino 2.5s ease-in-out infinite alternate;
+	/* SOMBRAS DE ORO */
+	box-shadow: 0 0 2px #fff, 0 0 4px #ffd700, 0 0 8px #ffd700, 0 0 12px #ff8c00;
+
+	/* ANIMACIÓN */
+	animation: finalresplandorFino 2.5s ease-in-out infinite alternate;
 }
 
 /* El 3er Puesto (ID 103) lo dejamos quietico o discreto */
 #match-103 {
-    opacity: 0.8;
-    border-style: dashed;
+	opacity: 0.8;
+	border-style: dashed;
 }
 
 /* LA ANIMACIÓN (Si ya la tiene no necesita copiarla de nuevo) */
 @keyframes finalresplandor {
-    from {
-        box-shadow: 
-            0 0 5px  #fff,
-            0 0 15px #ffd700,
-            0 0 30px #ff8c00;
-    }
-    to {
-        box-shadow: 
-            0 0 10px #fff,
-            0 0 25px #ffd700,
-            0 0 50px #ffd700,
-            0 0 80px #ff8c00;
-    }
+	from {
+		box-shadow: 0 0 5px #fff, 0 0 15px #ffd700, 0 0 30px #ff8c00;
+	}
+	to {
+		box-shadow: 0 0 10px #fff, 0 0 25px #ffd700, 0 0 50px #ffd700,
+			0 0 80px #ff8c00;
+	}
 }
 
 /* =========================================================
@@ -816,81 +1269,81 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
    ========================================================= */
 
 .round-header {
-    /* 1. COMPORTAMIENTO STICKY (Se queda pegado arriba) */
-    position: sticky !important;
-    top: 0;
-    z-index: 9999 !important; /* Siempre encima de todo */
+	/* 1. COMPORTAMIENTO STICKY (Se queda pegado arriba) */
+	position: sticky !important;
+	top: 0;
+	z-index: 9999 !important; /* Siempre encima de todo */
 
-    /* 2. EL COLOR DE LA MÁSCARA (VITAL) */
-    /* Debe ser IGUAL al fondo de su body para que parezca transparente */
-    /* Según su foto, es un azul muy oscuro. Ajuste este código: */
-    background-color: #0d0d15; 
+	/* 2. EL COLOR DE LA MÁSCARA (VITAL) */
+	/* Debe ser IGUAL al fondo de su body para que parezca transparente */
+	/* Según su foto, es un azul muy oscuro. Ajuste este código: */
+	background-color: #0d0d15;
 
-    /* 3. ZONA DE "DESAPARICIÓN" (El espacio extra abajo) */
-    /* Esto le da aire al título. Las tarjetas se taparán cuando entren aquí */
-    padding-bottom: 25px; /* <--- Este es el espacio de seguridad antes del título */
-    padding-top: 15px;    /* Espacio arriba para que respire */
-    
-    /* 4. ANCHO TOTAL */
-    /* Asegura que tape todo el ancho de la columna */
-    width: 100%;
-    box-sizing: border-box;
+	/* 3. ZONA DE "DESAPARICIÓN" (El espacio extra abajo) */
+	/* Esto le da aire al título. Las tarjetas se taparán cuando entren aquí */
+	padding-bottom: 25px; /* <--- Este es el espacio de seguridad antes del título */
+	padding-top: 15px; /* Espacio arriba para que respire */
 
-    /* 5. BORDE SUAVE (Opcional) */
-    /* Un pequeño degradado abajo para que el corte no sea tan brusco */
-    /* Si lo quiere totalmente invisible, borre esta línea */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-    
-    /* Alineación de lo que va adentro (Título y Botón) */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+	/* 4. ANCHO TOTAL */
+	/* Asegura que tape todo el ancho de la columna */
+	width: 100%;
+	box-sizing: border-box;
+
+	/* 5. BORDE SUAVE (Opcional) */
+	/* Un pequeño degradado abajo para que el corte no sea tan brusco */
+	/* Si lo quiere totalmente invisible, borre esta línea */
+	border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+	/* Alineación de lo que va adentro (Título y Botón) */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
 /* --- CLASE UTILITARIA PARA OCULTAR --- */
 .hidden {
-    display: none !important;
+	display: none !important;
 }
 
 /* --- ESTILOS ESPECÍFICOS DEL ADMIN --- */
 .admin-card {
-    border: 1px solid #ff4444; /* Borde Rojo Admin */
-    background: linear-gradient(180deg, #1a0a0a 0%, #000 100%);
-    width: 400px; /* Un poco más ancha para que quepan los botones */
+	border: 1px solid #ff4444; /* Borde Rojo Admin */
+	background: linear-gradient(180deg, #1a0a0a 0%, #000 100%);
+	width: 400px; /* Un poco más ancha para que quepan los botones */
 }
 
 .admin-card .card-title {
-    color: #ff4444; /* Texto Rojo */
+	color: #ff4444; /* Texto Rojo */
 }
 
 .btn-admin {
-    background: #333;
-    border: 1px solid #555;
+	background: #333;
+	border: 1px solid #555;
 }
 
 .btn-admin:hover {
-    background: #ff4444;
-    color: white;
-    border-color: #ff4444;
+	background: #ff4444;
+	color: white;
+	border-color: #ff4444;
 }
 
 .btn-settings {
-    background: #444;
-    width: 100%; /* Ocupa todo el ancho abajo */
-    margin-top: 5px;
+	background: #444;
+	width: 100%; /* Ocupa todo el ancho abajo */
+	margin-top: 5px;
 }
 
 .btn-settings:hover {
-    background: #fff;
-    color: #000;
+	background: #fff;
+	color: #000;
 }
 
 /* Alineación de botones admin */
 .admin-buttons-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 5px;
+	display: flex;
+	gap: 10px;
+	margin-bottom: 5px;
 }
 
 /* =========================================================
@@ -899,121 +1352,122 @@ td { text-align: center; padding: 5px; border-bottom: 1px solid rgba(255,255,255
 
 /* 1. El Contenedor Principal (Centrado y Flexible) */
 .dashboard-container {
-    display: flex;
-    justify-content: center; /* Centrado horizontalmente */
-    align-items: stretch;    /* Que ambas tarjetas tengan la misma altura */
-    gap: 20px;               /* Espacio entre tarjetas */
-    flex-wrap: wrap;         /* Si es celular, baja una debajo de la otra */
-    margin: 30px auto;       /* Margen vertical y centrado automático */
-    padding: 0 10px;
-    max-width: 800px;        /* Que no se estire infinitamente en pantallas grandes */
+	display: flex;
+	justify-content: center; /* Centrado horizontalmente */
+	align-items: stretch; /* Que ambas tarjetas tengan la misma altura */
+	gap: 20px; /* Espacio entre tarjetas */
+	flex-wrap: wrap; /* Si es celular, baja una debajo de la otra */
+	margin: 30px auto; /* Margen vertical y centrado automático */
+	padding: 0 10px;
+	max-width: 800px; /* Que no se estire infinitamente en pantallas grandes */
 }
 
 /* 2. Las Tarjetas (Cajitas) */
 .control-card {
-    background: #151515;       /* Gris muy oscuro (casi negro) */
-    border: 1px solid #333;
-    border-radius: 12px;
-    padding: 20px;
-    width: 300px;              /* Ancho fijo para escritorio */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5); /* Sombra elegante */
-    transition: transform 0.2s, border-color 0.2s;
+	background: #151515; /* Gris muy oscuro (casi negro) */
+	border: 1px solid #333;
+	border-radius: 12px;
+	padding: 20px;
+	width: 300px; /* Ancho fijo para escritorio */
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Sombra elegante */
+	transition: transform 0.2s, border-color 0.2s;
 }
 
 .control-card:hover {
-    transform: translateY(-3px); /* Efecto de levitación al pasar el mouse */
-    border-color: #555;
+	transform: translateY(-3px); /* Efecto de levitación al pasar el mouse */
+	border-color: #555;
 }
 
 /* 3. Estilo Específico: Tarjeta Oficial (Mundo FIFA) */
 .official-card {
-    border: 1px solid #b8860b; /* Borde Dorado Oscuro */
-    /* Degradado sutil para que se vea VIP */
-    background: linear-gradient(180deg, #1a1a10 0%, #0d0d0d 100%); 
+	border: 1px solid #b8860b; /* Borde Dorado Oscuro */
+	/* Degradado sutil para que se vea VIP */
+	background: linear-gradient(180deg, #1a1a10 0%, #0d0d0d 100%);
 }
 
 .official-card .card-title {
-    color: #ffd700; /* Título Dorado */
+	color: #ffd700; /* Título Dorado */
 }
 
 /* 4. Encabezados de las Tarjetas */
 .card-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-    font-size: 0.9rem;
-    font-weight: 900;
-    letter-spacing: 1px;
-    color: #aaa;
-    text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 15px;
+	font-size: 0.9rem;
+	font-weight: 900;
+	letter-spacing: 1px;
+	color: #aaa;
+	text-transform: uppercase;
 }
 
 .card-icon {
-    font-size: 1.5rem; /* Icono un poco más grande */
+	font-size: 1.5rem; /* Icono un poco más grande */
 }
 
 /* 5. Los Botones dentro de las tarjetas */
 .card-buttons {
-    display: flex;
-    gap: 10px;
-    width: 100%;
+	display: flex;
+	gap: 10px;
+	width: 100%;
 }
 
 .dash-btn {
-    flex: 1; /* Ocupan todo el ancho disponible */
-    padding: 12px 5px;
-    cursor: pointer;
-    border: none;
-    border-radius: 6px;
-    background: #2a2a2a;
-    color: #eee;
-    font-weight: bold;
-    font-size: 0.8rem;
-    transition: all 0.3s ease;
+	flex: 1; /* Ocupan todo el ancho disponible */
+	padding: 12px 5px;
+	cursor: pointer;
+	border: none;
+	border-radius: 6px;
+	background: #2a2a2a;
+	color: #eee;
+	font-weight: bold;
+	font-size: 0.8rem;
+	transition: all 0.3s ease;
 }
 
 .dash-btn:hover {
-    background: #444;
-    color: #fff;
+	background: #444;
+	color: #fff;
 }
 
 /* Estado ACTIVO (El botón presionado) */
 .dash-btn.active {
-    background: #3b82f6; /* Azul brillante para User */
-    color: #fff;
-    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); /* Resplandor azul */
+	background: #3b82f6; /* Azul brillante para User */
+	color: #fff;
+	box-shadow: 0 0 10px rgba(59, 130, 246, 0.4); /* Resplandor azul */
 }
 
 /* Botones Dorados (Lado Oficial) */
 .btn-gold:hover {
-    background: #b8860b;
-    color: #000;
+	background: #b8860b;
+	color: #000;
 }
 
-.btn-gold.active { /* Cuando está activo el oficial */
-    background: #ffd700;
-    color: #000;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); /* Resplandor dorado */
+.btn-gold.active {
+	/* Cuando está activo el oficial */
+	background: #ffd700;
+	color: #000;
+	box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); /* Resplandor dorado */
 }
 
 /* 6. RESPONSIVE (CELULARES) 📱 */
 @media (max-width: 700px) {
-    .dashboard-container {
-        flex-direction: column; /* Pila vertical */
-        align-items: center;
-    }
-    
-    .control-card {
-        width: 100%; /* Ocupa todo el ancho del celular */
-        max-width: 350px;
-    }
+	.dashboard-container {
+		flex-direction: column; /* Pila vertical */
+		align-items: center;
+	}
+
+	.control-card {
+		width: 100%; /* Ocupa todo el ancho del celular */
+		max-width: 350px;
+	}
 }
 
 /* CLASE UTILITARIA (Para ocultar/mostrar paneles) */
 .hidden {
-    display: none !important;
+	display: none !important;
 }
