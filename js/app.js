@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v4.4', // El número de la versión
+	version: 'v4.6', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
 	buildDate: '27-Dic-2025', // Fecha de la última actualización
 };
@@ -742,153 +742,168 @@ function saveGroupRank(group, teamName, rankValue) {
 /* =========================================================
    RENDER GRUPOS: VERSIÓN MAESTRA (CON ACTUALIZACIÓN DE LABEL) 🏷️✅
    ========================================================= */
+/* =========================================================
+   RENDER GRUPOS (CON FEEDBACK VISUAL DE PUNTOS 🏆✨)
+   ========================================================= */
 function renderGroups(customData, customMode) {
-	const container = document.getElementById('groups-container');
-	if (!container) return;
+    const container = document.getElementById('groups-container');
+    if (!container) return;
 
-	// 1. LIMPIEZA TOTAL
-	container.innerHTML = '';
+    // 1. LIMPIEZA TOTAL
+    container.innerHTML = '';
 
-	let modeToUse = customMode || 'user';
-	let dataToUse;
+    let modeToUse = customMode || 'user';
+    let dataToUse;
 
-	// Determinar datos
-	if (modeToUse === 'official') {
-		dataToUse = typeof officialRes !== 'undefined' ? officialRes : {};
-	} else {
-		dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
-	}
+    // Determinar datos
+    if (modeToUse === 'official') {
+        dataToUse = typeof officialRes !== 'undefined' ? officialRes : {};
+    } else {
+        dataToUse = customData || (currentUser ? currentUser.preds : {}) || {};
+    }
 
-	// 🔒 DETECTAR BLOQUEO
-	let isReadOnly = false;
-	let userHasLocked = false;
+    // 🔒 DETECTAR BLOQUEO
+    let isReadOnly = false;
+    let userHasLocked = false;
 
-	if (modeToUse === 'official') {
-		if (typeof role !== 'undefined' && role !== 'admin') isReadOnly = true;
-	} else {
-		if (currentUser && currentUser.locks && currentUser.locks.groups) {
-			isReadOnly = true;
-			userHasLocked = true;
-		}
-	}
+    if (modeToUse === 'official') {
+        if (typeof role !== 'undefined' && role !== 'admin') isReadOnly = true;
+    } else {
+        if (currentUser && currentUser.locks && currentUser.locks.groups) {
+            isReadOnly = true;
+            userHasLocked = true;
+        }
+    }
 
-	/* 👇👇👇 AQUÍ INCRUSTÉ LA LÓGICA DEL LABEL 👇👇👇 */
-	/* ===========================================
-       ACTUALIZAR LABEL DE CABECERA (display-status) 🏷️
+    /* ===========================================
+       ACTUALIZAR LABEL DE CABECERA (display-status)
        =========================================== */
-	const statusBadge = document.getElementById('display-status');
+    const statusBadge = document.getElementById('display-status');
+    if (statusBadge && modeToUse === 'user') {
+        if (userHasLocked) {
+            statusBadge.innerText = 'OFICIAL';
+            statusBadge.className = 'status-badge';
+            statusBadge.style.background = 'rgba(0, 255, 0, 0.2)';
+            statusBadge.style.color = '#00ff00';
+            statusBadge.style.border = '1px solid #00ff00';
+            statusBadge.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
+        } else {
+            statusBadge.innerText = 'BORRADOR';
+            statusBadge.style.background = '#ffcc00';
+            statusBadge.style.color = '#000';
+            statusBadge.style.border = 'none';
+            statusBadge.style.boxShadow = 'none';
+        }
+    }
 
-	if (statusBadge) {
-		// Solo actualizamos visualmente si estamos en modo Fan
-		if (modeToUse === 'user') {
-			if (userHasLocked) {
-				// MODO OFICIAL (VERDE TIPO NEÓN) ✅
-				statusBadge.innerText = 'OFICIAL';
-				statusBadge.className = 'status-badge'; // Mantiene clases base
-
-				// Inyectamos estilo directo para asegurar el verde
-				statusBadge.style.background = 'rgba(0, 255, 0, 0.2)';
-				statusBadge.style.color = '#00ff00';
-				statusBadge.style.border = '1px solid #00ff00';
-				statusBadge.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
-			} else {
-				// MODO BORRADOR (AMARILLO SÓLIDO) ✏️
-				statusBadge.innerText = 'BORRADOR';
-
-				// Estilo original del borrador
-				statusBadge.style.background = '#ffcc00';
-				statusBadge.style.color = '#000';
-				statusBadge.style.border = 'none';
-				statusBadge.style.boxShadow = 'none';
-			}
-		}
-	}
-	/* 👆👆👆 FIN DEL BLOQUE NUEVO 👆👆👆 */
-
-	// 🔥 2. EL MENSAJE O BOTÓN (TRUCO DEL ANCHO TOTAL) 🔥
-	if (modeToUse === 'user') {
-		if (userHasLocked) {
-			// ✅ MENSAJE VERDE (PEQUEÑO Y BONITO)
-			container.innerHTML += `
+    // 🔥 2. EL MENSAJE O BOTÓN (TRUCO DEL ANCHO TOTAL) 🔥
+    if (modeToUse === 'user') {
+        if (userHasLocked) {
+            container.innerHTML += `
             <div style="grid-column: 1 / -1; width: 100%; text-align: center; margin-bottom: 20px;">
                 <span style="display: inline-block; background: rgba(0, 255, 0, 0.15); border: 1px solid #00ff00; color: #00ff00; padding: 8px 20px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; letter-spacing: 1px;">
                     ✅ PRONÓSTICOS ENVIADOS
                 </span>
             </div>`;
-		} else {
-			// 🚀 BOTÓN DE ENVÍO (CAJA AMARILLA CON RECORTE PERFECTO ✂️)
-			container.innerHTML += `
+        } else {
+            container.innerHTML += `
             <div id="submit-groups-area" style="grid-column: 1 / -1; width: 100%; text-align: center; margin-bottom: 20px; border: 1px solid #e6b800; border-radius: 15px; overflow: hidden; padding: 20px; background: rgba(0,0,0,0.2);">
                 <button id="btn-submit-groups" onclick="submitPhase('groups')" 
                         style="background: #e6b800; color: #000; font-weight: bold; padding: 10px 30px; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem; box-shadow: 0 0 10px rgba(230, 184, 0, 0.5);">
                     🚀 ENVIAR OFICIALMENTE
                 </button>
             </div>`;
-		}
-	}
+        }
+    }
 
-	// --- 3. PINTAMOS LOS GRUPOS ---
-	let canEditRank =
-		!isReadOnly &&
-		(modeToUse === 'user' || (modeToUse === 'official' && role === 'admin'));
+    // --- 3. PINTAMOS LOS GRUPOS ---
+    let canEditRank = !isReadOnly && (modeToUse === 'user' || (modeToUse === 'official' && role === 'admin'));
 
-	for (let g in GROUPS_CONFIG) {
-		const data = GROUPS_CONFIG[g];
-		let matchesHTML = '';
+    for (let g in GROUPS_CONFIG) {
+        const data = GROUPS_CONFIG[g];
+        let matchesHTML = '';
 
-		let teamStats = data.teams.map((n) => ({
-			name: n,
-			pts: 0,
-			dif: 0,
-			gf: 0,
-			gc: 0,
-			manualRank: 99,
-		}));
+        let teamStats = data.teams.map((n) => ({
+            name: n, pts: 0, dif: 0, gf: 0, gc: 0, manualRank: 99,
+        }));
 
-		// Ranks
-		teamStats.forEach((t) => {
-			let key = `${g}-${t.name}`;
-			if (
-				typeof groupRankOverrides !== 'undefined' &&
-				groupRankOverrides[key]
-			) {
-				t.manualRank = groupRankOverrides[key];
-			}
-		});
+        // Ranks Manuales
+        teamStats.forEach((t) => {
+            let key = `${g}-${t.name}`;
+            if (typeof groupRankOverrides !== 'undefined' && groupRankOverrides[key]) {
+                t.manualRank = groupRankOverrides[key];
+            }
+        });
 
-		// Partidos
-		data.matches.forEach((m, idx) => {
-			let id = `${g}-${idx}`;
-			let valH = dataToUse[`h-${id}`] || '';
-			let valA = dataToUse[`a-${id}`] || '';
+        // Partidos
+        data.matches.forEach((m, idx) => {
+            let id = `${g}-${idx}`;
+            let valH = dataToUse[`h-${id}`] || '';
+            let valA = dataToUse[`a-${id}`] || '';
 
-			let disabledAttr = isReadOnly ? 'disabled' : '';
-			let styleAttr = isReadOnly
-				? 'background:#333; color:#aaa; border:1px solid #444;'
-				: '';
+            // Cálculos para la tabla (Esto sigue igual)
+            if (valH !== '' && valA !== '') {
+                let sH = parseInt(valH);
+                let sA = parseInt(valA);
+                teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += sH - sA;
+                teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += sA - sH;
+                if (sH > sA) teamStats[m.t1].pts += 3;
+                else if (sA > sH) teamStats[m.t2].pts += 3;
+                else { teamStats[m.t1].pts += 1; teamStats[m.t2].pts += 1; }
+            }
 
-			if (valH !== '' && valA !== '') {
-				let sH = parseInt(valH);
-				let sA = parseInt(valA);
-				teamStats[m.t1].gf += sH;
-				teamStats[m.t1].gc += sA;
-				teamStats[m.t1].dif += sH - sA;
-				teamStats[m.t2].gf += sA;
-				teamStats[m.t2].gc += sH;
-				teamStats[m.t2].dif += sA - sH;
-				if (sH > sA) teamStats[m.t1].pts += 3;
-				else if (sA > sH) teamStats[m.t2].pts += 3;
-				else {
-					teamStats[m.t1].pts += 1;
-					teamStats[m.t2].pts += 1;
-				}
-			}
+            let disabledAttr = isReadOnly ? 'disabled' : '';
+            let styleAttr = isReadOnly ? 'background:#333; color:#aaa; border:1px solid #444;' : '';
 
-			matchesHTML += `<div class="match-row">
+            // 1. FEEDBACK VISUAL (ARRIBA - BADGE NEON) 🏆
+            let feedbackBadge = `<div class="match-info">${m.info}</div>`; 
+            
+            // 2. RESULTADO OFICIAL (ABAJO - CAJITA GRIS) 🏁
+            let officialBadge = ""; 
+
+            if (modeToUse === 'user' && typeof officialRes !== 'undefined') {
+                let offH = officialRes[`h-${id}`];
+                let offA = officialRes[`a-${id}`];
+
+                // A) Lógica del Badge Neon (Arriba)
+                if (valH !== '' && valA !== '' && offH !== undefined && offH !== '') {
+                    // ... (Aquí va la lógica de colores que ya hicimos) ...
+                    // La repito resumida para que el bloque quede completo al copiar:
+                    let uH = parseInt(valH); let uA = parseInt(valA);
+                    let oH = parseInt(offH); let oA = parseInt(offA);
+                    let pts = 0; let label = ""; let color = "#666"; let glow = "";
+
+                    if (uH === oH && uA === oA) {
+                        pts = rules.exact; label = "🎯 EXACTO"; color = "#39ff14"; glow = "text-shadow: 0 0 5px #39ff14;";
+                    } else {
+                        let uDiff = uH - uA; let oDiff = oH - oA;
+                        if (Math.sign(uDiff) === Math.sign(oDiff)) {
+                            if (uDiff === oDiff) { pts = rules.diff; label = "⚖️ DIF. GOL"; color = "#ffd700"; }
+                            else { pts = rules.winner; label = "✅ GANADOR"; color = "#00e5ff"; }
+                        } else { pts = 0; label = "❌ 0 PTS"; color = "#ff4444"; }
+                    }
+
+                    feedbackBadge = `
+                    <div style="font-size: 0.75rem; color: ${color}; font-weight: 800; margin-bottom: 4px; ${glow} letter-spacing: 0.5px; white-space: nowrap;">
+                        ${label} <span style="background: rgba(255,255,255,0.1); padding: 1px 5px; border-radius: 4px; margin-left:3px;">+${pts}</span>
+                    </div>`;
+                }
+
+                // B) Lógica del Resultado Oficial (Abajo) 👇 AQUÍ ESTÁ LA NUEVA MAGIA 👇
+                if (offH !== undefined && offH !== '' && offA !== undefined && offA !== '') {
+                    officialBadge = `
+                    <div style="margin-top: 6px; font-size: 0.75rem; color: #aaa; background: rgba(0,0,0,0.4); 
+                                border: 1px solid #444; border-radius: 4px; padding: 2px 8px; display: inline-block;">
+                        <span style="color: #888; font-weight: bold; text-transform: uppercase; font-size: 0.65rem;">Oficial:</span> 
+                        <span style="color: #fff; font-weight: bold; margin-left: 4px;">${offH} - ${offA}</span>
+                    </div>`;
+                }
+            }
+
+            matchesHTML += `<div class="match-row">
                 <div class="team-name team-home">${data.teams[m.t1]}</div>
                 <div class="center-inputs">
-                    <div class="match-info">${m.info}</div>
-                    <div class="score-container">
+                    ${feedbackBadge} <div class="score-container">
                         <input type="number" min="0" value="${valH}" ${disabledAttr} 
                                onchange="updateVal('${id}','h',this.value)"
                                style="${styleAttr}">
@@ -897,12 +912,13 @@ function renderGroups(customData, customMode) {
                                onchange="updateVal('${id}','a',this.value)"
                                style="${styleAttr}">
                     </div>
-                </div>
+
+                    ${officialBadge} </div>
                 <div class="team-name team-away">${data.teams[m.t2]}</div>
             </div>`;
-		});
+        });
 
-		// Ordenar
+        // Ordenar Tabla
         teamStats.sort((a, b) => {
             if (b.pts !== a.pts) return b.pts - a.pts;
             if (b.dif !== a.dif) return b.dif - a.dif;
@@ -911,22 +927,16 @@ function renderGroups(customData, customMode) {
             return a.name.localeCompare(b.name);
         });
 
-        // 1. PREPARAMOS LAS FILAS (DATOS)
+        // Generar filas de tabla
         let tableRows = teamStats
             .map((t, i, arr) => {
                 let rowClass = i < 2 ? 'qual-zone' : '';
-
-                // Lógica de desempate manual (tu código original)
-                let prev = arr[i - 1];
-                let next = arr[i + 1];
-                let isTiedWithPrev =
-                    prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
-                let isTiedWithNext =
-                    next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
+                let prev = arr[i - 1]; let next = arr[i + 1];
+                let isTiedWithPrev = prev && prev.pts === t.pts && prev.dif === t.dif && prev.gf === t.gf;
+                let isTiedWithNext = next && next.pts === t.pts && next.dif === t.dif && next.gf === t.gf;
                 let showManualInput = (isTiedWithPrev || isTiedWithNext) && canEditRank;
 
                 let posDisplay = i + 1;
-
                 if (showManualInput) {
                     let opts = `<option value="">-</option>`;
                     [1, 2, 3, 4].forEach((num) => {
@@ -934,22 +944,19 @@ function renderGroups(customData, customMode) {
                         opts += `<option value="${num}" ${sel}>${num}</option>`;
                     });
                     posDisplay = `<select onchange="saveGroupRank('${g}', '${t.name}', this.value); setTimeout(() => refreshGroupTable('${g}'), 50);" 
-                                style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">
-                                ${opts}
-                              </select>`;
+                                style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">${opts}</select>`;
                 } else if (t.manualRank !== 99) {
-                    posDisplay = `<span style="color:#ffff00" title="Posición Manual">${
-                        i + 1
-                    }*</span>`;
+                    posDisplay = `<span style="color:#ffff00" title="Posición Manual">${i + 1}*</span>`;
                 }
 
-                // 👇👇👇 AQUÍ ESTÁ EL CAMBIO DE ORDEN DE COLUMNAS 👇👇👇
-                // Orden: Pos | Nombre | Pts | GF | GC | DG
                 return `<tr class="${rowClass}" style="border-bottom: 1px solid #222;">
                 <td class="pos-num" style="text-align:center;">${posDisplay}</td>
                 <td style="text-align:left; padding-left:5px;">${t.name}</td>
-                
-                <td style="font-weight:bold; color:#e6b800; text-align:center;">${t.pts}</td> <td style="color:#ccc; text-align:center;">${t.gf}</td>  <td style="color:#888; text-align:center;">${t.gc}</td>  <td style="color:#ccc; text-align:center;">${t.dif > 0 ? '+' + t.dif : t.dif}</td> </tr>`;
+                <td style="font-weight:bold; color:#e6b800; text-align:center;">${t.pts}</td>
+                <td style="color:#ccc; text-align:center;">${t.gf}</td>
+                <td style="color:#888; text-align:center;">${t.gc}</td>
+                <td style="color:#ccc; text-align:center;">${t.dif > 0 ? '+' + t.dif : t.dif}</td>
+              </tr>`;
             })
             .join('');
 
@@ -957,13 +964,11 @@ function renderGroups(customData, customMode) {
         if (modeToUse === 'official') titleTxt += ' [OFICIAL]';
         else if (userHasLocked) titleTxt += ' [ENVIADO 🔒]';
 
-        // 2. INYECTAMOS LA TABLA CON LA CABECERA NUEVA (THEAD)
         container.innerHTML += `
         <div class="card">
             <div class="group-header">${titleTxt}</div>
             <div class="card-body">
                 ${matchesHTML}
-                
                 <table class="compact-table" style="width:100%; margin-top:15px; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 1px solid #444; color: #888; font-size: 0.75rem; text-transform: uppercase;">
@@ -981,7 +986,7 @@ function renderGroups(customData, customMode) {
                 </table>
             </div>
         </div>`;
-    } // Fin bucle
+    } 
 }
 
 /* =========================================================
@@ -1919,18 +1924,44 @@ function calculatePoints(preds, locks) {
 	return total;
 }
 
+/* =========================================================
+   CÁLCULO DE PUNTOS POR PARTIDO (CORREGIDO ✅)
+   ========================================================= */
 function calcMatchPts(uH, uA, oH, oA) {
-	if (!uH || !uA || !oH || !oA) return 0;
-	uH = parseInt(uH);
-	uA = parseInt(uA);
-	oH = parseInt(oH);
-	oA = parseInt(oA);
-	if (uH === oH && uA === oA) return rules.exact;
-	let uS = Math.sign(uH - uA),
-		oS = Math.sign(oH - oA);
-	if (uS !== oS) return 0;
-	if (uS !== 0 && uH - uA === oH - oA) return rules.diff;
-	return rules.winner;
+    // Si falta algún dato, chao
+    if (uH === undefined || uA === undefined || oH === undefined || oA === undefined ||
+        uH === '' || uA === '' || oH === '' || oA === '') return 0;
+    
+    // Convertimos a números para no pelear con textos
+    uH = parseInt(uH); uA = parseInt(uA);
+    oH = parseInt(oH); oA = parseInt(oA);
+
+    // 1. EXACTO (5 Puntos) 🎯
+    if (uH === oH && uA === oA) return rules.exact;
+
+    // Calculamos diferencias
+    let uDiff = uH - uA; // Ej: 1-1 = 0
+    let oDiff = oH - oA; // Ej: 2-2 = 0
+
+    // Usamos Math.sign para saber si ganó Local(1), Visita(-1) o Empate(0)
+    let uSign = Math.sign(uDiff);
+    let oSign = Math.sign(oDiff);
+
+    // 2. VERIFICAR TENDENCIA (Ganador o Empate)
+    if (uSign === oSign) {
+        // Si entra aquí, es porque acertó al ganador O al empate.
+        
+        // 3. VERIFICAR DIFERENCIA DE GOL
+        // Si Pronostico es empate (0) y Oficial es empate (0), entra aquí y da 3 pts.
+        // Si Pronostico es 2-1 (1) y Oficial es 1-0 (1), entra aquí y da 3 pts.
+        if (uDiff === oDiff) {
+            return rules.diff; // 3 Puntos ⚖️
+        } else {
+            return rules.winner; // 1 Punto ✅
+        }
+    }
+
+    return 0; // ❌
 }
 
 /* =========================================================
@@ -2977,11 +3008,45 @@ function startFirebaseListener() {
     });
 
     // Escuchar resultados oficiales (si no lo tienes aparte)
+    // 2. ESCUCHAR RESULTADOS OFICIALES (ADMIN)
     db.ref('/officialRes').on('value', (snap) => {
         officialRes = snap.val() || {};
-        // Recalcular puntos si es necesario
-        if (typeof renderRanking === 'function') renderRanking();
+        console.log("📢 Resultados oficiales actualizados.");
+
+        // A. Recalculamos los puntajes totales en memoria (para el header y ranking)
+        if (typeof recalculateAllScores === 'function') recalculateAllScores();
+
+        // B. Si el Ranking está abierto, lo actualizamos
+        const rankingModal = document.getElementById('ranking-modal');
+        if (rankingModal && rankingModal.style.display === 'block') {
+            if (typeof openRanking === 'function') openRanking();
+        }
+
+        // C. 👇 EL TRUCO VISUAL: Si estamos viendo GRUPOS, repintar de una 👇
+        const groupsContainer = document.getElementById('groups-container');
+        // (offsetParent !== null significa que es visible en pantalla)
+        if (groupsContainer && groupsContainer.offsetParent !== null) {
+             console.log("🎨 Repintando grupos para mostrar Badges...");
+             let preds = (currentUser && currentUser.preds) ? currentUser.preds : {};
+             // Forzamos el renderizado para que salga el feedback visual
+             if (typeof renderGroups === 'function') renderGroups(preds, 'user');
+        }
     });
+
+    // 3. ESCUCHAR REGLAS DE PUNTUACIÓN (Para que sea configurable)
+    db.ref('/m26_rules').on('value', (snap) => {
+        const remoteRules = snap.val();
+        if (remoteRules) {
+            rules = remoteRules; // Actualizamos la variable global
+            localStorage.setItem('m26_rules', JSON.stringify(rules)); // Respaldo local
+            console.log("📏 Reglas de puntuación actualizadas:", rules);
+            
+            // Si cambian las reglas, hay que recalcular a todo el mundo YA
+            if (typeof recalculateAllScores === 'function') recalculateAllScores();
+            if (typeof renderRanking === 'function') openRanking(); // Refrescar si está abierto
+        }
+    });
+
 }
 
 // 2. GUARDAR CAMBIOS (VERSIÓN BLINDADA 🛡️)
@@ -3260,70 +3325,86 @@ function loadAdminData() {
 /* =========================================================
    ABRIR RANKING (TABLA DE POSICIONES) 🏆
    ========================================================= */
+/* =========================================================
+   ABRIR RANKING (TABLA DE POSICIONES) 🏆
+   ========================================================= */
 function openRanking() {
-	const modal = document.getElementById('ranking-modal');
-	const container = document.getElementById('ranking-list-container');
+    const modal = document.getElementById('ranking-modal');
+    const container = document.getElementById('ranking-list-container');
 
-	if (modal) modal.style.display = 'block';
-	if (container)
-		container.innerHTML =
-			'<p style="text-align:center; color:#aaa;">Calculando posiciones...</p>';
+    if (modal) modal.style.display = 'block';
+    if (container)
+        container.innerHTML =
+            '<p style="text-align:center; color:#aaa;">Calculando posiciones...</p>';
 
-	// 1. Traemos usuarios y resultados oficiales
-	Promise.all([
-		db.ref('/users').once('value'),
-		db.ref('/officialRes').once('value'), // Para calcular puntos reales
-	])
-		.then((snapshots) => {
-			const usersSnap = snapshots[0].val() || {};
-			const officialSnap = snapshots[1].val() || {}; // Resultados reales
+    // 👇👇 CAMBIO 1: FORZAMOS EL RE-CÁLCULO INMEDIATO 👇👇
+    // Así aseguramos que si cambiaste reglas a 10pts, aquí ya valgan 10pts.
+    if (typeof recalculateAllScores === 'function') {
+        recalculateAllScores(); 
+    }
 
-			let rankingData = [];
+    // 1. Traemos usuarios y resultados oficiales
+    Promise.all([
+        db.ref('/users').once('value'),
+        db.ref('/officialRes').once('value'), 
+    ])
+        .then((snapshots) => {
+            const usersSnap = snapshots[0].val() || {};
+            // const officialSnap = snapshots[1].val() || {}; // Ya no lo necesitamos aquí porque recalculateAllScores ya hizo el trabajo sucio.
 
-			// 2. Procesamos cada usuario
-			Object.keys(usersSnap).forEach((uid) => {
-				const u = usersSnap[uid];
+            let rankingData = [];
 
-				// FILTRO: Solo mostramos usuarios que ya enviaron (Candado Cerrado)
-				if (u.locks && u.locks.groups) {
-					// Calcular Puntos (Aquí irá la lógica compleja luego, por ahora base 0)
-					let pts = calculateTotalPoints(u.preds, officialSnap);
+            // 2. Procesamos cada usuario
+            Object.keys(usersSnap).forEach((uid) => {
+                const u = usersSnap[uid];
 
-					// Formatear fecha
-					let dateStr = 'Sin fecha';
-					let rawDate = '9999-99-99'; // Para que los sin fecha queden de últimos
+                // FILTRO: Solo mostramos usuarios que ya enviaron (Candado Cerrado)
+                if (u.locks && u.locks.groups) {
+                    
+                    // 👇👇 CAMBIO 2: LEEMOS EL TOTAL YA CALCULADO 👇👇
+                    // recalculateAllScores() ya guardó "totalPoints" dentro de cada usuario en memoria RAM.
+                    // Si por alguna razón no existe, usamos 0.
+                    // PERO OJO: Si acabamos de bajar 'u' de Firebase, puede que Firebase no tenga 'totalPoints' actualizado aún.
+                    // TRUCO DE MAESTRO: Buscamos al usuario en nuestra variable global 'users' que sí está fresca.
+                    
+                    let freshUser = users.find(localU => localU.uid === uid);
+                    let pts = (freshUser && freshUser.totalPoints) ? freshUser.totalPoints : 0;
 
-					if (u.submissionTime) {
-						rawDate = u.submissionTime;
-						let d = new Date(u.submissionTime);
-						dateStr = d.toLocaleString('es-CO', {
-							month: 'short',
-							day: 'numeric',
-							hour: '2-digit',
-							minute: '2-digit',
-						});
-					}
+                    // Formatear fecha
+                    let dateStr = 'Sin fecha';
+                    let rawDate = '9999-99-99'; 
 
-					rankingData.push({
-						name: u.name || 'Anónimo',
-						points: pts,
-						rawDate: rawDate, // Para ordenar
-						displayDate: dateStr, // Para mostrar
-					});
-				}
-			});
+                    if (u.submissionTime) {
+                        rawDate = u.submissionTime;
+                        let d = new Date(u.submissionTime);
+                        dateStr = d.toLocaleString('es-CO', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                        });
+                    }
 
-			// 3. ORDENAMIENTO (CRITERIO DE DESEMPATE POR FECHA) ⚖️
-			rankingData.sort((a, b) => {
-				// Criterio 1: Más puntos arriba
-				if (b.points !== a.points) return b.points - a.points;
+                    rankingData.push({
+                        name: u.name || 'Anónimo',
+                        points: pts,
+                        rawDate: rawDate, 
+                        displayDate: dateStr, 
+                    });
+                }
+            });
 
-				// Criterio 2: (Desempate) El que envió PRIMERO (fecha menor) gana
-				return a.rawDate.localeCompare(b.rawDate);
-			});
+            // 3. ORDENAMIENTO (CRITERIO DE DESEMPATE POR FECHA) ⚖️
+            rankingData.sort((a, b) => {
+                // Criterio 1: Más puntos arriba
+                if (b.points !== a.points) return b.points - a.points;
 
-			// 4. PINTAR LA TABLA
-			let html = `
+                // Criterio 2: (Desempate) El que envió PRIMERO (fecha menor) gana
+                return a.rawDate.localeCompare(b.rawDate);
+            });
+
+            // 4. PINTAR LA TABLA
+            let html = `
         <table style="width:100%; border-collapse: collapse; color: white; font-size:0.9rem;">
             <tr style="background:#333; color:#e6b800; text-align:left;">
                 <th style="padding:10px; text-align:center;">#</th>
@@ -3332,51 +3413,51 @@ function openRanking() {
                 <th style="padding:10px; text-align:right;">Enviado</th>
             </tr>`;
 
-			if (rankingData.length === 0) {
-				html += `<tr><td colspan="4" style="padding:20px; text-align:center; color:#888;">Nadie ha enviado pronósticos aún.</td></tr>`;
-			} else {
-				rankingData.forEach((player, index) => {
-					// El Top 3 tiene colores especiales
-					let rankColor = '#fff';
-					let rowBg = 'transparent';
-					if (index === 0) {
-						rankColor = '#FFD700';
-						rowBg = 'rgba(255, 215, 0, 0.1)';
-					} // Oro
-					if (index === 1) {
-						rankColor = '#C0C0C0';
-						rowBg = 'rgba(192, 192, 192, 0.1)';
-					} // Plata
-					if (index === 2) {
-						rankColor = '#CD7F32';
-						rowBg = 'rgba(205, 127, 50, 0.1)';
-					} // Bronce
+            if (rankingData.length === 0) {
+                html += `<tr><td colspan="4" style="padding:20px; text-align:center; color:#888;">Nadie ha enviado pronósticos aún.</td></tr>`;
+            } else {
+                rankingData.forEach((player, index) => {
+                    // El Top 3 tiene colores especiales
+                    let rankColor = '#fff';
+                    let rowBg = 'transparent';
+                    if (index === 0) {
+                        rankColor = '#FFD700';
+                        rowBg = 'rgba(255, 215, 0, 0.1)';
+                    } // Oro
+                    if (index === 1) {
+                        rankColor = '#C0C0C0';
+                        rowBg = 'rgba(192, 192, 192, 0.1)';
+                    } // Plata
+                    if (index === 2) {
+                        rankColor = '#CD7F32';
+                        rowBg = 'rgba(205, 127, 50, 0.1)';
+                    } // Bronce
 
-					html += `
+                    html += `
                 <tr style="border-bottom: 1px solid #333; background:${rowBg};">
                     <td style="padding:10px; text-align:center; font-weight:bold; color:${rankColor};">${
-						index + 1
-					}</td>
+                        index + 1
+                    }</td>
                     <td style="padding:10px; font-weight:bold;">${
-											player.name
-										}</td>
+                                            player.name
+                                        }</td>
                     <td style="padding:10px; text-align:center; font-size:1.1rem;">${
-											player.points
-										}</td>
+                                            player.points
+                                        }</td>
                     <td style="padding:10px; text-align:right; font-size:0.8rem; color:#aaa;">${
-											player.displayDate
-										}</td>
+                                            player.displayDate
+                                        }</td>
                 </tr>`;
-				});
-			}
+                });
+            }
 
-			html += '</table>';
-			container.innerHTML = html;
-		})
-		.catch((e) => {
-			console.error(e);
-			container.innerHTML = 'Error cargando ranking.';
-		});
+            html += '</table>';
+            container.innerHTML = html;
+        })
+        .catch((e) => {
+            console.error(e);
+            container.innerHTML = 'Error cargando ranking.';
+        });
 }
 
 // FUNCION AUXILIAR PARA PUNTOS (Por ahora simple)
@@ -3385,4 +3466,73 @@ function calculateTotalPoints(userPreds, officialRes) {
 	// Aquí meteremos la lógica de 5, 3, 1 puntos más adelante.
 	// Como officialRes está vacío por ahora, retornará 0.
 	return total;
+}
+
+/* =========================================================
+   🧮 MOTOR DE CÁLCULO (DINÁMICO SEGÚN CONFIGURACIÓN)
+   ========================================================= */
+/* =========================================================
+   🧮 MOTOR DE CÁLCULO (DINÁMICO Y CON UI)
+   ========================================================= */
+function recalculateAllScores() {
+    // Si no tenemos datos oficiales ni usuarios, no perdamos tiempo
+    if (!users || !officialRes) return;
+
+    // console.log("🧮 Recalculando puntos con reglas:", rules); // (Opcional: silenciar console)
+
+    users.forEach(u => {
+        let totalPts = 0;
+        let hits = 0; // Aciertos exactos
+
+        // Si el usuario no tiene pronósticos, es 0
+        if (!u.preds) {
+            u.totalPoints = 0;
+        } else {
+            // --- 1. PUNTOS POR PARTIDOS (GRUPOS) ---
+            for (let groupKey in GROUPS_CONFIG) {
+                const group = GROUPS_CONFIG[groupKey];
+                group.matches.forEach((match, idx) => {
+                    let id = `${groupKey}-${idx}`; 
+                    
+                    let pts = calcMatchPts(
+                        u.preds[`h-${id}`], 
+                        u.preds[`a-${id}`], 
+                        officialRes[`h-${id}`], 
+                        officialRes[`a-${id}`]
+                    );
+
+                    if (pts > 0) {
+                        totalPts += pts;
+                        if (pts === rules.exact) hits++; 
+                    }
+                });
+            }
+            // (Aquí iría lógica de fases finales si existiera)
+        }
+
+        // --- 3. GUARDAMOS EN MEMORIA RAM ---
+        u.totalPoints = totalPts;
+        u.totalHits = hits;
+
+        // 👇👇👇 AQUÍ ESTÁ EL ARREGLO PARA EL HEADER 👇👇👇
+        // Si el usuario que estamos calculando es el usuario LOGUEADO actualmente...
+        if (currentUser && currentUser.uid === u.uid) {
+            
+            // 1. Actualizamos su objeto en memoria local
+            currentUser.totalPoints = totalPts;
+            
+            // 2. Buscamos la etiqueta en el HTML y le pegamos el número
+            const pointsLabel = document.getElementById('total-points');
+            if (pointsLabel) {
+                pointsLabel.innerText = totalPts;
+                
+                // Efecto visual opcional (verde si > 0)
+                if (totalPts > 0) pointsLabel.style.color = '#00ff00';
+                else pointsLabel.style.color = '#fff';
+            }
+        }
+        // 👆👆👆 FIN DEL ARREGLO 👆👆👆
+    });
+    
+    console.log("✅ Puntos recalculados y Header actualizado.");
 }
