@@ -2,9 +2,9 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v4.6', // El número de la versión
+	version: 'v4.7', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
-	buildDate: '27-Dic-2025', // Fecha de la última actualización
+	buildDate: '28-Dic-2025', // Fecha de la última actualización
 };
 
 /* =========================================================
@@ -3009,11 +3009,12 @@ function startFirebaseListener() {
 
     // Escuchar resultados oficiales (si no lo tienes aparte)
     // 2. ESCUCHAR RESULTADOS OFICIALES (ADMIN)
+    // 2. ESCUCHAR RESULTADOS OFICIALES (ADMIN)
     db.ref('/officialRes').on('value', (snap) => {
         officialRes = snap.val() || {};
         console.log("📢 Resultados oficiales actualizados.");
 
-        // A. Recalculamos los puntajes totales en memoria (para el header y ranking)
+        // A. Recalculamos los puntajes totales en memoria
         if (typeof recalculateAllScores === 'function') recalculateAllScores();
 
         // B. Si el Ranking está abierto, lo actualizamos
@@ -3022,13 +3023,23 @@ function startFirebaseListener() {
             if (typeof openRanking === 'function') openRanking();
         }
 
-        // C. 👇 EL TRUCO VISUAL: Si estamos viendo GRUPOS, repintar de una 👇
+        // C. 👇 LÓGICA DE REPINTADO (CON PROTECCIÓN PARA ADMIN) 👇
         const groupsContainer = document.getElementById('groups-container');
-        // (offsetParent !== null significa que es visible en pantalla)
+        
+        // Verificamos si la tabla de grupos está visible
         if (groupsContainer && groupsContainer.offsetParent !== null) {
-             console.log("🎨 Repintando grupos para mostrar Badges...");
+             
+             // 🛡️ PARCHE DE SEGURIDAD:
+             // Si soy ADMIN, NO repinte nada. Deje que yo termine de escribir tranquilo.
+             if (currentUser && currentUser.role === 'admin') {
+                 console.log("🛡️ Admin detectado: Bloqueando repintado automático.");
+                 return; // <--- ESTO ES LO QUE EVITA QUE SE LE BORREN LOS INPUTS
+             }
+
+             console.log("🎨 Usuario Fan: Repintando grupos para mostrar Badges...");
              let preds = (currentUser && currentUser.preds) ? currentUser.preds : {};
-             // Forzamos el renderizado para que salga el feedback visual
+             
+             // Si es un Fan normal, ahí sí repinte para que vea los colores
              if (typeof renderGroups === 'function') renderGroups(preds, 'user');
         }
     });
