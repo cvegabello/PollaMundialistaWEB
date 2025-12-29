@@ -526,52 +526,65 @@ td {
 	font-size: 1rem !important;
 }
 
-/* --- LOGIN Y ANIMACIÓN DE FONDO --- */
+/* --- LOGIN Y ANIMACIÓN DE FONDO (OPTIMIZADO) --- */
 #login-overlay {
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	z-index: 999;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	padding: 20px;
-	background-color: #000;
-	overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #000;
+    overflow: hidden;
+    /* Importante: aseguramos que los pseudo-elementos se posicionen respecto a esto */
+    position: fixed; 
 }
 
-/* ANIMACIÓN: RUTAS APUNTANDO A LA CARPETA ASSETS/IMG */
+/* BASE COMÚN PARA AMBAS IMÁGENES */
+#login-overlay::before,
 #login-overlay::after {
-	content: '';
-	position: absolute;
-	top: -20px;
-	left: -20px;
-	right: -20px;
-	bottom: -20px;
-	background-image: url('../assets/img/FixtureWC2026.avif'); /* Ruta relativa desde css/ */
-	background-size: cover;
-	background-position: center;
-	filter: blur(8px) brightness(0.4);
-	z-index: -1;
-	animation: backgroundCycle 12s infinite ease-in-out;
+    content: '';
+    position: absolute;
+    /* Usamos inset para cubrir todo (top, right, bottom, left) */
+    top: -20px; left: -20px; right: -20px; bottom: -20px;
+    background-size: cover;
+    background-position: center;
+    /* El filtro se aplica una sola vez y no se recalcula tanto */
+    filter: blur(8px) brightness(0.4);
+    z-index: -1;
+    /* Esto le dice al navegador que use la tarjeta de video (GPU) */
+    will-change: opacity; 
 }
 
-@keyframes backgroundCycle {
-	0%,
-	42% {
-		background-image: url('../assets/img/FixtureWC2026.avif');
-	}
-	50%,
-	92% {
-		background-image: url('../assets/img/Fondo2.avif');
-	}
-	100% {
-		background-image: url('../assets/img/FixtureWC2026.avif');
-	}
+/* CAPA 1: LA IMAGEN DE BASE (Siempre visible abajo) */
+#login-overlay::before {
+    background-image: url('../assets/img/FixtureWC2026.avif');
+    z-index: -2; /* Se queda atrás */
 }
 
+/* CAPA 2: LA IMAGEN QUE APARECE Y DESAPARECE (Arriba) */
+#login-overlay::after {
+    background-image: url('../assets/img/Fondo2.avif');
+    z-index: -1; /* Se queda encima de la capa 1 */
+    animation: fadeAnimation 12s infinite ease-in-out;
+}
+
+/* ANIMAMOS SOLO LA OPACIDAD (Super ligero para la CPU) */
+@keyframes fadeAnimation {
+    0%, 45% {
+        opacity: 0; /* Invisible (Se ve la imagen de abajo) */
+    }
+    50%, 95% {
+        opacity: 1; /* Visible (Tapa a la imagen de abajo) */
+    }
+    100% {
+        opacity: 0;
+    }
+}
 .login-box {
 	background: rgba(0, 0, 0, 0.5);
 	backdrop-filter: blur(5px);

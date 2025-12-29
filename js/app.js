@@ -2,7 +2,7 @@
    🏁 CONFIGURACIÓN GLOBAL Y VERSIÓN
    ========================================================= */
 const APP_CONFIG = {
-	version: 'v4.7', // El número de la versión
+	version: 'v5.0', // El número de la versión
 	environment: 'BETA', // Estado: DEV, BETA, PROD
 	buildDate: '28-Dic-2025', // Fecha de la última actualización
 };
@@ -120,6 +120,11 @@ window.addEventListener('resize', () => {
 /* =========================================================
    3. ESTADO GLOBAL (CORREGIDO)
    ========================================================= */
+
+var isAdmin = (localStorage.getItem('m26_isAdmin') === 'true');
+
+// Variable para controlar el "Anti-Rebote" (Debounce)
+var recalculateTimer = null;
 
 // 1. LISTA DE USUARIOS (¡Esta era la que faltaba!)
 // Cargamos de 'm26_users' para seguir su nomenclatura
@@ -285,8 +290,25 @@ function handleLogin() {
 
     // --- CAMINO ADMIN (RECUPERADO DEL PASADO + SEMÁFORO) ---
     if (p === 'admin2026') {
-        console.log("🔑 Accediendo como ADMINISTRADOR...");
+        console.log("🔑 Contraseña correcta. Accediendo como ADMINISTRADOR...");
+
+		localStorage.setItem('m26_isAdmin', 'true'); // Tatuaje en disco
+    	isAdmin = true; // Actualización en RAM
         
+        // =============================================================
+        // 🚨 LA SOLUCIÓN: CREAMOS EL "CARNET" DE ADMIN EN MEMORIA
+        // =============================================================
+        // Esto engaña al sistema para que crea que hay un usuario logueado
+        // y que ese usuario tiene poderes. Así el Listener respeta los inputs.
+        currentUser = {
+            name: "Administrador",
+            uid: "admin_local_session", // Un ID falso pero único
+            admin: true,                // 👈 ESTA ES LA CLAVE PARA EL LISTENER
+            role: 'admin'
+        };
+        
+        // =============================================================
+
         // A) Liberamos semáforo
         isLoggingIn = false;
 
@@ -297,8 +319,8 @@ function handleLogin() {
         // C) Activamos Listeners
         if (typeof startFirebaseListener === 'function') startFirebaseListener();
         
-        // D) Lógica visual (EXACTA A COMO FUNCIONABA ANTES)
-        setupAdminMode(); // 👈 Esta función es clave, ella pinta los botones
+        // D) Lógica visual
+        setupAdminMode(); 
         
         // UI Dashboard Visibilidad
         const fanDash = document.getElementById('fan-dashboard');
@@ -307,21 +329,21 @@ function handleLogin() {
         if (adminDash) {
              adminDash.classList.remove('hidden');
              
-             // 👇👇👇 AQUÍ ESTÁ LA MAGIA DEL CENTRADO 👇👇👇
-             adminDash.style.display = 'flex';           // Modo flexible
-             adminDash.style.justifyContent = 'center';  // Centrado horizontal
-             adminDash.style.alignItems = 'center';      // Centrado vertical
-             adminDash.style.flexWrap = 'wrap';          // Si no caben, que bajen
-             adminDash.style.gap = '15px';               // Espacio entre botones
-             adminDash.style.margin = '20px auto';       // Márgenes automáticos
-             adminDash.style.width = '100%';             // Ocupar todo el ancho disponible
-             // 👆👆👆 FIN DEL CENTRADO 👆👆👆
+             // 👇 CENTRADO
+             adminDash.style.display = 'flex';           
+             adminDash.style.justifyContent = 'center';  
+             adminDash.style.alignItems = 'center';      
+             adminDash.style.flexWrap = 'wrap';          
+             adminDash.style.gap = '15px';               
+             adminDash.style.margin = '20px auto';       
+             adminDash.style.width = '100%';             
+             // 👆 FIN CENTRADO
 
              console.log("✅ Panel Admin activado y CENTRADO.");
         }
         if (fanDash) {
              fanDash.classList.add('hidden');
-             fanDash.style.display = 'none'; // Refuerzo
+             fanDash.style.display = 'none'; 
         }
 
         // E) Carga de datos
@@ -330,14 +352,13 @@ function handleLogin() {
         return;
     }
 
-    // --- CAMINO FAN (CON LA SEGURIDAD NUEVA: TIMESTAMP + ARRAY FIX) ---
+    // --- CAMINO FAN (LÓGICA ESTÁNDAR) ---
     console.log(`☁️ Buscando usuario: "${u}" en Firebase...`);
 
     db.ref('/users')
         .once('value')
         .then((snapshot) => {
             const rawData = snapshot.val() || {};
-            // Convertimos diccionario a array para búsqueda local
             const allUsers = Object.values(rawData); 
 
             let existingUser = null;
@@ -347,7 +368,7 @@ function handleLogin() {
             for (let key in rawData) {
                 if (rawData[key].name && rawData[key].name.toLowerCase() === u) {
                     existingUser = rawData[key];
-                    userId = key; // Este es el ID largo (1766...)
+                    userId = key; 
                     break;
                 }
             }
@@ -355,7 +376,7 @@ function handleLogin() {
             if (existingUser) {
                 console.log('✅ ¡ENCONTRADO! ID:', userId);
                 currentUser = existingUser;
-                currentUser.uid = userId; // Aseguramos que tenga el UID
+                currentUser.uid = userId; 
 
                 localStorage.setItem('m26_active_uid', userId);
                 localStorage.setItem('m26_user', JSON.stringify(currentUser));
@@ -364,7 +385,6 @@ function handleLogin() {
             } else {
                 console.log('✨ Usuario nuevo. Generando ID único...');
                 
-                // 🛡️ AQUÍ ESTÁ LA DEFENSA CONTRA EL BORRADO (TIMESTAMP)
                 let newIndex = new Date().getTime().toString(); 
                 
                 currentUser = {
@@ -376,27 +396,23 @@ function handleLogin() {
                     submissionTime: null
                 };
 
-                // Guardamos local
                 localStorage.setItem('m26_active_uid', newIndex);
                 localStorage.setItem('m26_user', JSON.stringify(currentUser));
 
                 if (!Array.isArray(users)) users = [];
                 users.push(currentUser);
 
-                // 🛡️ GUARDADO QUIRÚRGICO (NO .SET MASIVO)
                 let updates = {};
                 updates['users/' + newIndex] = currentUser;
                 db.ref().update(updates);
             }
 
             enterAppAsFan();
-            // isLoggingIn = false; // (Opcional: No lo liberamos para forzar recarga si quieren salir)
         })
         .catch((error) => {
             console.error('❌ Error Login:', error);
             alert('Error de conexión. Intenta de nuevo.');
             
-            // Liberamos semáforo en error
             isLoggingIn = false;
             if (btn) {
                 btn.innerText = 'ENTRAR';
@@ -745,6 +761,9 @@ function saveGroupRank(group, teamName, rankValue) {
 /* =========================================================
    RENDER GRUPOS (CON FEEDBACK VISUAL DE PUNTOS 🏆✨)
    ========================================================= */
+/* =========================================================
+   RENDERIZAR GRUPOS (Versión FIX - Indices Corregidos) 🔧
+   ========================================================= */
 function renderGroups(customData, customMode) {
     const container = document.getElementById('groups-container');
     if (!container) return;
@@ -775,28 +794,20 @@ function renderGroups(customData, customMode) {
         }
     }
 
-    /* ===========================================
-       ACTUALIZAR LABEL DE CABECERA (display-status)
-       =========================================== */
+    // --- BADGE DE CABECERA ---
     const statusBadge = document.getElementById('display-status');
     if (statusBadge && modeToUse === 'user') {
         if (userHasLocked) {
-            statusBadge.innerText = 'OFICIAL';
-            statusBadge.className = 'status-badge';
-            statusBadge.style.background = 'rgba(0, 255, 0, 0.2)';
-            statusBadge.style.color = '#00ff00';
-            statusBadge.style.border = '1px solid #00ff00';
-            statusBadge.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
+            statusBadge.innerText = 'OFICIAL'; statusBadge.className = 'status-badge';
+            statusBadge.style.background = 'rgba(0, 255, 0, 0.2)'; statusBadge.style.color = '#00ff00';
+            statusBadge.style.border = '1px solid #00ff00'; statusBadge.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
         } else {
-            statusBadge.innerText = 'BORRADOR';
-            statusBadge.style.background = '#ffcc00';
-            statusBadge.style.color = '#000';
-            statusBadge.style.border = 'none';
-            statusBadge.style.boxShadow = 'none';
+            statusBadge.innerText = 'BORRADOR'; statusBadge.style.background = '#ffcc00';
+            statusBadge.style.color = '#000'; statusBadge.style.border = 'none'; statusBadge.style.boxShadow = 'none';
         }
     }
 
-    // 🔥 2. EL MENSAJE O BOTÓN (TRUCO DEL ANCHO TOTAL) 🔥
+    // 🔥 2. EL MENSAJE O BOTÓN 🔥
     if (modeToUse === 'user') {
         if (userHasLocked) {
             container.innerHTML += `
@@ -823,6 +834,7 @@ function renderGroups(customData, customMode) {
         const data = GROUPS_CONFIG[g];
         let matchesHTML = '';
 
+        // Inicializamos array para Tabla Usuario
         let teamStats = data.teams.map((n) => ({
             name: n, pts: 0, dif: 0, gf: 0, gc: 0, manualRank: 99,
         }));
@@ -835,16 +847,17 @@ function renderGroups(customData, customMode) {
             }
         });
 
-        // Partidos
+        // Loop Partidos
         data.matches.forEach((m, idx) => {
             let id = `${g}-${idx}`;
             let valH = dataToUse[`h-${id}`] || '';
             let valA = dataToUse[`a-${id}`] || '';
 
-            // Cálculos para la tabla (Esto sigue igual)
+            // Cálculos Tabla Usuario
             if (valH !== '' && valA !== '') {
                 let sH = parseInt(valH);
                 let sA = parseInt(valA);
+                // Usamos indices m.t1 y m.t2 (0,1,2,3) -> CORRECTO
                 teamStats[m.t1].gf += sH; teamStats[m.t1].gc += sA; teamStats[m.t1].dif += sH - sA;
                 teamStats[m.t2].gf += sA; teamStats[m.t2].gc += sH; teamStats[m.t2].dif += sA - sH;
                 if (sH > sA) teamStats[m.t1].pts += 3;
@@ -855,31 +868,31 @@ function renderGroups(customData, customMode) {
             let disabledAttr = isReadOnly ? 'disabled' : '';
             let styleAttr = isReadOnly ? 'background:#333; color:#aaa; border:1px solid #444;' : '';
 
-            // 1. FEEDBACK VISUAL (ARRIBA - BADGE NEON) 🏆
+            // 1. FEEDBACK VISUAL (BADGE NEON)
             let feedbackBadge = `<div class="match-info">${m.info}</div>`; 
-            
-            // 2. RESULTADO OFICIAL (ABAJO - CAJITA GRIS) 🏁
             let officialBadge = ""; 
 
             if (modeToUse === 'user' && typeof officialRes !== 'undefined') {
                 let offH = officialRes[`h-${id}`];
                 let offA = officialRes[`a-${id}`];
 
-                // A) Lógica del Badge Neon (Arriba)
+                // Badge Neon
                 if (valH !== '' && valA !== '' && offH !== undefined && offH !== '') {
-                    // ... (Aquí va la lógica de colores que ya hicimos) ...
-                    // La repito resumida para que el bloque quede completo al copiar:
                     let uH = parseInt(valH); let uA = parseInt(valA);
                     let oH = parseInt(offH); let oA = parseInt(offA);
                     let pts = 0; let label = ""; let color = "#666"; let glow = "";
 
+                    let rExact = (typeof rules !== 'undefined' && rules.exact) ? rules.exact : 3;
+                    let rDiff = (typeof rules !== 'undefined' && rules.diff) ? rules.diff : 2;
+                    let rWin = (typeof rules !== 'undefined' && rules.winner) ? rules.winner : 1;
+
                     if (uH === oH && uA === oA) {
-                        pts = rules.exact; label = "🎯 EXACTO"; color = "#39ff14"; glow = "text-shadow: 0 0 5px #39ff14;";
+                        pts = rExact; label = "🎯 EXACTO"; color = "#39ff14"; glow = "text-shadow: 0 0 5px #39ff14;";
                     } else {
                         let uDiff = uH - uA; let oDiff = oH - oA;
                         if (Math.sign(uDiff) === Math.sign(oDiff)) {
-                            if (uDiff === oDiff) { pts = rules.diff; label = "⚖️ DIF. GOL"; color = "#ffd700"; }
-                            else { pts = rules.winner; label = "✅ GANADOR"; color = "#00e5ff"; }
+                            if (uDiff === oDiff) { pts = rDiff; label = "⚖️ DIF. GOL"; color = "#ffd700"; }
+                            else { pts = rWin; label = "✅ GANADOR"; color = "#00e5ff"; }
                         } else { pts = 0; label = "❌ 0 PTS"; color = "#ff4444"; }
                     }
 
@@ -889,7 +902,7 @@ function renderGroups(customData, customMode) {
                     </div>`;
                 }
 
-                // B) Lógica del Resultado Oficial (Abajo) 👇 AQUÍ ESTÁ LA NUEVA MAGIA 👇
+                // Resultado Oficial
                 if (offH !== undefined && offH !== '' && offA !== undefined && offA !== '') {
                     officialBadge = `
                     <div style="margin-top: 6px; font-size: 0.75rem; color: #aaa; background: rgba(0,0,0,0.4); 
@@ -912,13 +925,12 @@ function renderGroups(customData, customMode) {
                                onchange="updateVal('${id}','a',this.value)"
                                style="${styleAttr}">
                     </div>
-
                     ${officialBadge} </div>
                 <div class="team-name team-away">${data.teams[m.t2]}</div>
             </div>`;
         });
 
-        // Ordenar Tabla
+        // Ordenar Tabla Usuario
         teamStats.sort((a, b) => {
             if (b.pts !== a.pts) return b.pts - a.pts;
             if (b.dif !== a.dif) return b.dif - a.dif;
@@ -927,7 +939,7 @@ function renderGroups(customData, customMode) {
             return a.name.localeCompare(b.name);
         });
 
-        // Generar filas de tabla
+        // Generar filas HTML
         let tableRows = teamStats
             .map((t, i, arr) => {
                 let rowClass = i < 2 ? 'qual-zone' : '';
@@ -944,7 +956,7 @@ function renderGroups(customData, customMode) {
                         opts += `<option value="${num}" ${sel}>${num}</option>`;
                     });
                     posDisplay = `<select onchange="saveGroupRank('${g}', '${t.name}', this.value); setTimeout(() => refreshGroupTable('${g}'), 50);" 
-                                style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">${opts}</select>`;
+                                   style="background:#000; color:#ffff00; border:1px solid #555; width:40px; font-weight:bold; padding:0; cursor:pointer;">${opts}</select>`;
                 } else if (t.manualRank !== 99) {
                     posDisplay = `<span style="color:#ffff00" title="Posición Manual">${i + 1}*</span>`;
                 }
@@ -959,6 +971,77 @@ function renderGroups(customData, customMode) {
               </tr>`;
             })
             .join('');
+
+        // =====================================================================
+        // 🧠 CÁLCULO DE BONUS (CORREGIDO - USANDO ARRAY POR ÍNDICES) 🧠
+        // =====================================================================
+        let groupBonusHTML = "";
+
+        if (modeToUse === 'user' && typeof officialRes !== 'undefined') {
+            
+            // 1. Datos Usuario (Ya tenemos los nombres en orden)
+            let u1 = teamStats[0].name;
+            let u2 = teamStats[1].name;
+
+            // 2. Datos Oficiales (Inicializamos ARRAY igual que teamStats) 👈 AQUÍ ESTABA EL ERROR
+            let offStats = data.teams.map((n) => ({
+                name: n, pts: 0, dif: 0, gf: 0
+            }));
+            
+            let groupFinished = true;
+
+            data.matches.forEach((m, idx) => {
+                let id = `${g}-${idx}`;
+                let oH = officialRes[`h-${id}`];
+                let oA = officialRes[`a-${id}`];
+
+                if (oH === undefined || oA === undefined || oH === '' || oA === '') {
+                    groupFinished = false; 
+                } else {
+                    oH = parseInt(oH); oA = parseInt(oA);
+                    // Ahora accedemos por ÍNDICE (0,1,2,3) igual que arriba. ¡Sin error!
+                    offStats[m.t1].gf += oH; offStats[m.t1].dif += (oH - oA);
+                    offStats[m.t2].gf += oA; offStats[m.t2].dif += (oA - oH);
+                    if (oH > oA) offStats[m.t1].pts += 3;
+                    else if (oA > oH) offStats[m.t2].pts += 3;
+                    else { offStats[m.t1].pts += 1; offStats[m.t2].pts += 1; }
+                }
+            });
+
+            if (groupFinished) {
+                // Ordenamos Oficial
+                offStats.sort((a, b) => {
+                    if (b.pts !== a.pts) return b.pts - a.pts;
+                    if (b.dif !== a.dif) return b.dif - a.dif;
+                    return b.gf - a.gf;
+                });
+
+                let o1 = offStats[0].name;
+                let o2 = offStats[1].name;
+
+                let bonusPts = 0; let bonusLabel = ""; let bonusColor = "";
+
+                let rGroupExact = (typeof rules !== 'undefined' && rules.groupExact) ? rules.groupExact : 10;
+                let rGroupSwap  = (typeof rules !== 'undefined' && rules.groupSwap)  ? rules.groupSwap : 5;
+                let rGroupOne   = (typeof rules !== 'undefined' && rules.groupOne)   ? rules.groupOne : 2;
+
+                if (u1 === o1 && u2 === o2) {
+                    bonusPts = rGroupExact; bonusLabel = "🏆 REY DE GRUPO"; bonusColor = "#39ff14";
+                } else if (u1 === o2 && u2 === o1) {
+                    bonusPts = rGroupSwap; bonusLabel = "🥈 CLASIFICADOS (INV)"; bonusColor = "#ffd700";
+                } else if ((u1 === o1 || u1 === o2) || (u2 === o1 || u2 === o2)) {
+                    bonusPts = rGroupOne; bonusLabel = "🥉 1 ACIERTO"; bonusColor = "#00e5ff";
+                }
+
+                if (bonusPts > 0) {
+                    groupBonusHTML = `
+                    <div style="margin-top: 15px; padding: 10px; border: 1px dashed ${bonusColor}; border-radius: 8px; text-align: center; background: rgba(0,0,0,0.3);">
+                        <div style="color: ${bonusColor}; font-weight: 800; font-size: 0.85rem; letter-spacing: 1px;">${bonusLabel}</div>
+                        <div style="color: #fff; font-size: 0.8rem;">¡Ganaste <span style="font-weight: bold; color: ${bonusColor};">+${bonusPts}</span> Puntos!</div>
+                    </div>`;
+                }
+            }
+        }
 
         let titleTxt = `GRUPO ${g}`;
         if (modeToUse === 'official') titleTxt += ' [OFICIAL]';
@@ -984,6 +1067,7 @@ function renderGroups(customData, customMode) {
                         ${tableRows}
                     </tbody>
                 </table>
+                ${groupBonusHTML}
             </div>
         </div>`;
     } 
@@ -3007,8 +3091,7 @@ function startFirebaseListener() {
         }
     });
 
-    // Escuchar resultados oficiales (si no lo tienes aparte)
-    // 2. ESCUCHAR RESULTADOS OFICIALES (ADMIN)
+    
     // 2. ESCUCHAR RESULTADOS OFICIALES (ADMIN)
     db.ref('/officialRes').on('value', (snap) => {
         officialRes = snap.val() || {};
@@ -3044,19 +3127,81 @@ function startFirebaseListener() {
         }
     });
 
-    // 3. ESCUCHAR REGLAS DE PUNTUACIÓN (Para que sea configurable)
-    db.ref('/m26_rules').on('value', (snap) => {
-        const remoteRules = snap.val();
-        if (remoteRules) {
-            rules = remoteRules; // Actualizamos la variable global
-            localStorage.setItem('m26_rules', JSON.stringify(rules)); // Respaldo local
-            console.log("📏 Reglas de puntuación actualizadas:", rules);
-            
-            // Si cambian las reglas, hay que recalcular a todo el mundo YA
-            if (typeof recalculateAllScores === 'function') recalculateAllScores();
-            if (typeof renderRanking === 'function') openRanking(); // Refrescar si está abierto
+    // =========================================================
+// 👂 ESCUCHAR CAMBIOS EN LAS REGLAS (Ruta: /m26_rules)
+// =========================================================
+
+// =========================================================
+// 👂 ESCUCHAR CAMBIOS EN LAS REGLAS (Ruta: /m26_rules)
+// =========================================================
+
+// 1. IMPORTANTE: Apagamos el listener anterior para evitar duplicados
+// =========================================================
+// 👂 ESCUCHAR CAMBIOS EN LAS REGLAS (Ruta: /m26_rules)
+// =========================================================
+
+// 1. Limpieza inicial
+// 3. ESCUCHAR REGLAS DE PUNTUACIÓN (Para que sea configurable)
+
+	db.ref('/m26_rules').off(); 
+
+	db.ref('/m26_rules').on('value', (snap) => { 
+    if (snap.exists()) {
+        let dbRules = snap.val(); 
+        
+        // 🧠 TRADUCTOR (Mix -> Swap)
+        rules = {
+            exact: dbRules.exact || 5,
+            diff: dbRules.diff || 3,
+            winner: dbRules.winner || 1,
+            groupExact: dbRules.groupExact || 10,
+            groupSwap: dbRules.groupMix || 5,
+            groupOne: dbRules.groupOne || 2
+        };
+
+        localStorage.setItem('m26_rules', JSON.stringify(rules));
+        console.log("📏 Reglas actualizadas:", rules);
+
+
+        // 🛑 AQUI EMPIEZA LA MAGIA DEL RENDIMIENTO 🛑
+        // Si ya había una orden de recalcular pendiente, la cancelamos.
+        if (recalculateTimer) {
+            clearTimeout(recalculateTimer);
         }
-    });
+
+        // Creamos una nueva orden para ejecutarse en 500ms (medio segundo)
+        recalculateTimer = setTimeout(() => {
+            console.log("⏳ ...Silencio detectado. Ejecutando cálculos pesados ahora.");
+
+            // 2. Recálculo matemático 
+            if (typeof recalculateAllScores === 'function') {
+                recalculateAllScores();
+            }
+
+            // 3. Lógica Visual
+            const localAdminCheck = localStorage.getItem('m26_isAdmin');
+            const amIAdmin = (isAdmin === true || localAdminCheck === 'true');
+
+            if (amIAdmin) {
+                console.log("👮‍♂️ Admin: Datos recalculados en silencio.");
+            } else {
+                const groupsContainer = document.getElementById('groups-container');
+                if (groupsContainer && groupsContainer.offsetParent !== null) {
+                    let preds = (typeof currentUser !== 'undefined' && currentUser && currentUser.preds) ? currentUser.preds : {};
+                    if (typeof renderGroups === 'function') {
+                        renderGroups(preds, 'user'); 
+                    }
+                }
+            }
+            
+            // Refrescar ranking
+            if (typeof openRanking === 'function' && document.getElementById('ranking-modal').style.display === 'block') {
+                 openRanking();
+            }
+
+        }, 500); // <--- TIEMPO DE ESPERA (500ms)
+    }
+});
 
 }
 
@@ -3489,8 +3634,6 @@ function recalculateAllScores() {
     // Si no tenemos datos oficiales ni usuarios, no perdamos tiempo
     if (!users || !officialRes) return;
 
-    // console.log("🧮 Recalculando puntos con reglas:", rules); // (Opcional: silenciar console)
-
     users.forEach(u => {
         let totalPts = 0;
         let hits = 0; // Aciertos exactos
@@ -3499,7 +3642,7 @@ function recalculateAllScores() {
         if (!u.preds) {
             u.totalPoints = 0;
         } else {
-            // --- 1. PUNTOS POR PARTIDOS (GRUPOS) ---
+            // --- A. PUNTOS POR PARTIDOS (GRUPOS) ---
             for (let groupKey in GROUPS_CONFIG) {
                 const group = GROUPS_CONFIG[groupKey];
                 group.matches.forEach((match, idx) => {
@@ -3518,15 +3661,23 @@ function recalculateAllScores() {
                     }
                 });
             }
+
+            // --- B. 👇 AQUÍ SUMAMOS EL BONUS DE GRUPOS 👇 ---
+            // Llamamos a la función auxiliar que creamos arriba
+            if (typeof calculateGroupBonuses === 'function') {
+                let bonusPts = calculateGroupBonuses(u.preds);
+                totalPts += bonusPts;
+                // console.log(`Usuario ${u.name} ganó ${bonusPts} en bonus.`);
+            }
+
             // (Aquí iría lógica de fases finales si existiera)
         }
 
-        // --- 3. GUARDAMOS EN MEMORIA RAM ---
+        // --- C. GUARDAMOS EN MEMORIA RAM ---
         u.totalPoints = totalPts;
         u.totalHits = hits;
 
-        // 👇👇👇 AQUÍ ESTÁ EL ARREGLO PARA EL HEADER 👇👇👇
-        // Si el usuario que estamos calculando es el usuario LOGUEADO actualmente...
+        // --- D. ACTUALIZAMOS HEADER VISUAL ---
         if (currentUser && currentUser.uid === u.uid) {
             
             // 1. Actualizamos su objeto en memoria local
@@ -3537,13 +3688,99 @@ function recalculateAllScores() {
             if (pointsLabel) {
                 pointsLabel.innerText = totalPts;
                 
-                // Efecto visual opcional (verde si > 0)
-                if (totalPts > 0) pointsLabel.style.color = '#00ff00';
-                else pointsLabel.style.color = '#fff';
+                // Efecto visual (verde neón)
+                if (totalPts > 0) {
+                    pointsLabel.style.color = '#00ff00';
+                    pointsLabel.style.textShadow = '0 0 10px rgba(0,255,0,0.6)';
+                } else {
+                    pointsLabel.style.color = '#fff';
+                    pointsLabel.style.textShadow = 'none';
+                }
             }
         }
-        // 👆👆👆 FIN DEL ARREGLO 👆👆👆
     });
     
-    console.log("✅ Puntos recalculados y Header actualizado.");
+    console.log("✅ Puntos recalculados (Partidos + Bonus de Grupo).");
+}
+
+/* =========================================================
+   CALCULADORA DE BONUS DE GRUPOS (Lógica Matemática) 🧮
+   Retorna los puntos extra totales que ganó el usuario en grupos
+   ========================================================= */
+function calculateGroupBonuses(userPreds) {
+    if (!officialRes || !userPreds) return 0;
+    
+    let totalBonus = 0;
+
+    // Reglas (Asegúrese que coincidan con las de renderGroups)
+    let rExact = (typeof rules !== 'undefined' && rules.groupExact) ? rules.groupExact : 10;
+    let rSwap  = (typeof rules !== 'undefined' && rules.groupSwap)  ? rules.groupSwap : 5;
+    let rOne   = (typeof rules !== 'undefined' && rules.groupOne)   ? rules.groupOne : 2;
+
+    for (let g in GROUPS_CONFIG) {
+        const data = GROUPS_CONFIG[g];
+        
+        // 1. Calcular Tabla Usuario
+        let uStats = data.teams.map(t => ({ name: t, pts: 0, dif: 0, gf: 0 }));
+        
+        data.matches.forEach((m, idx) => {
+            let id = `${g}-${idx}`;
+            let h = userPreds[`h-${id}`];
+            let a = userPreds[`a-${id}`];
+            if (h && a) {
+                h = parseInt(h); a = parseInt(a);
+                uStats[m.t1].gf += h; uStats[m.t1].dif += (h - a);
+                uStats[m.t2].gf += a; uStats[m.t2].dif += (a - h);
+                if (h > a) uStats[m.t1].pts += 3;
+                else if (a > h) uStats[m.t2].pts += 3;
+                else { uStats[m.t1].pts += 1; uStats[m.t2].pts += 1; }
+            }
+        });
+        
+        // Ordenar Usuario
+        uStats.sort((a, b) => {
+            if (b.pts !== a.pts) return b.pts - a.pts;
+            if (b.dif !== a.dif) return b.dif - a.dif;
+            return b.gf - a.gf;
+        });
+
+        // 2. Calcular Tabla Oficial
+        let oStats = data.teams.map(t => ({ name: t, pts: 0, dif: 0, gf: 0 }));
+        let groupFinished = true;
+
+        data.matches.forEach((m, idx) => {
+            let id = `${g}-${idx}`;
+            let h = officialRes[`h-${id}`];
+            let a = officialRes[`a-${id}`];
+            
+            if (h === undefined || a === undefined || h === '' || a === '') {
+                groupFinished = false; 
+            } else {
+                h = parseInt(h); a = parseInt(a);
+                oStats[m.t1].gf += h; oStats[m.t1].dif += (h - a);
+                oStats[m.t2].gf += a; oStats[m.t2].dif += (a - h);
+                if (h > a) oStats[m.t1].pts += 3;
+                else if (a > h) oStats[m.t2].pts += 3;
+                else { oStats[m.t1].pts += 1; oStats[m.t2].pts += 1; }
+            }
+        });
+
+        // 3. Comparar (Solo si terminó el grupo)
+        if (groupFinished) {
+            oStats.sort((a, b) => {
+                if (b.pts !== a.pts) return b.pts - a.pts;
+                if (b.dif !== a.dif) return b.dif - a.dif;
+                return b.gf - a.gf;
+            });
+
+            let u1 = uStats[0].name; let u2 = uStats[1].name;
+            let o1 = oStats[0].name; let o2 = oStats[1].name;
+
+            if (u1 === o1 && u2 === o2) totalBonus += rExact;
+            else if (u1 === o2 && u2 === o1) totalBonus += rSwap;
+            else if ((u1 === o1 || u1 === o2) || (u2 === o1 || u2 === o2)) totalBonus += rOne;
+        }
+    }
+
+    return totalBonus;
 }
